@@ -1,0 +1,14 @@
+# IntelliJ project files
+.idea/
+
+# Library files
+node_modules/
+
+# Batch files
+*.sh
+
+# Compiled files
+dist/
+
+# Miscellaneous
+.wakatime-project
