@@ -4,6 +4,7 @@
 [![back-site-status]][back-site]
 [![back-ci]][back-ci-link]
 [![back-cq-badge]][back-cq-link]
+[![back-coverage-badge]][back-cq-link]
 [![back-lgtm-alert-badge]][back-lgtm-alert-link]
 [![back-lgtm-quality-badge]][back-lgtm-quality-link]
 [![back-time-badge]][back-time-link]
@@ -33,6 +34,8 @@ TEST | Optional | Specify this to `1` for CI test-specific behavior.
 [back-cq-link]: https://www.codacy.com/gh/RaenonX-DL/dragalia-site-back-2/dashboard
 
 [back-cq-badge]: https://app.codacy.com/project/badge/Grade/a0849e3eb6704b29b1672f26c00ca763
+
+[back-coverage-badge]: https://app.codacy.com/project/badge/Coverage/a0849e3eb6704b29b1672f26c00ca763
 
 [back-ci]: https://github.com/RaenonX-DL/dragalia-site-back-2/workflows/Node%20CI/badge.svg
 
