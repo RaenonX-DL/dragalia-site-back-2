@@ -34,5 +34,11 @@ jobs:
       - name: npm run test
         run: npm run test
 
+      - name: Send Coverage report
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: clover.xml
+
       - name: npm run build
         run: npm run build
