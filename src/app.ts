@@ -5,7 +5,7 @@ import {default as compression} from 'compression';
 import express, {Application, NextFunction, Request, Response} from 'express';
 import {default as helmet} from 'helmet';
 
-import {handleResponse, handlerLookup} from './endpoints/lookup';
+import {handleResponse, handlerLookupGet, handlerLookupPost} from './endpoints/lookup';
 import {handleNotExists} from './statuses/notExists/handler';
 import {handleInternalError} from './statuses/internalError/handler';
 
@@ -17,10 +17,17 @@ export const runServer = (port = 0): Server => {
   app.use(helmet());
 
   // Add routes to the app
-  Object.entries(handlerLookup).forEach(([endpoint, responseFunction]) => {
-    app.get(endpoint, ((req: Request, res: Response) => {
-      handleResponse(req, res, responseFunction);
-    }));
+  // - GET
+  Object.entries(handlerLookupGet).forEach(([endpoint, responseFunction]) => {
+    app.get(endpoint, (req: Request, res: Response, next: NextFunction) => {
+      handleResponse(req, res, responseFunction, next);
+    });
+  });
+  // - POST
+  Object.entries(handlerLookupPost).forEach(([endpoint, responseFunction]) => {
+    app.post(endpoint, (req: Request, res: Response, next: NextFunction) => {
+      handleResponse(req, res, responseFunction, next);
+    });
   });
 
   // Handle non-existing routes

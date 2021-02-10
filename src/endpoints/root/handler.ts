@@ -1,6 +1,5 @@
-import {ResponseBase} from '../../base/response';
 import {RootResponse} from './response';
 
-export const handleRoot = (): ResponseBase => {
+export const handleRoot = async (): Promise<RootResponse> => {
   return new RootResponse();
 };

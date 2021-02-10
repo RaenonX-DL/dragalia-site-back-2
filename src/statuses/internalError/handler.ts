@@ -1,6 +1,5 @@
-import {ResponseBase} from '../../base/response';
 import {InternalErrorResponse} from './response';
 
-export const handleInternalError = (error: Error) => (): ResponseBase => {
+export const handleInternalError = (error: Error) => async (): Promise<InternalErrorResponse> => {
   return new InternalErrorResponse(error);
 };

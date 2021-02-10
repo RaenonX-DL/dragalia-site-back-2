@@ -1,6 +1,5 @@
-import {ResponseBase} from '../../base/response';
 import {NotExistsResponse} from './response';
 
-export const handleNotExists = (): ResponseBase => {
+export const handleNotExists = async (): Promise<NotExistsResponse> => {
   return new NotExistsResponse();
 };

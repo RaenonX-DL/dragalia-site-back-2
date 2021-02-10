@@ -1,8 +1,7 @@
 import {Server} from 'http';
 import {default as request} from 'supertest';
-import {ApiEndPoints, ApiResponseCode} from '../../api-def/api';
+import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {runServer} from '../../app';
-import {RootResponse} from './response';
 
 describe(`GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
   let server: Server;
@@ -19,7 +18,7 @@ describe(`GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
     const result = await request(server).get(ApiEndPoints.ROOT);
     expect(result.status).toBe(200);
 
-    const json: RootResponse = result.body as RootResponse;
+    const json: BaseResponse = result.body as BaseResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
   });
