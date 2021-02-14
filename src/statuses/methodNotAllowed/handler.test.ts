@@ -2,7 +2,7 @@ import {default as request} from 'supertest';
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 
-describe(`[Server] GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
+describe(`[Server] POST ${ApiEndPoints.ROOT} - root endpoint in undefined method`, () => {
   let app: Application;
 
   beforeAll(async () => {
@@ -13,12 +13,12 @@ describe(`[Server] GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
     await app.close();
   });
 
-  it('should return a response with successful code 100', async () => {
-    const result = await request(app.express).get(ApiEndPoints.ROOT);
-    expect(result.status).toBe(200);
+  it('should return 405', async () => {
+    const result = await request(app.express).post(ApiEndPoints.ROOT);
+    expect(result.status).toBe(405);
 
     const json: BaseResponse = result.body as BaseResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
+    expect(json.code).toBe(ApiResponseCode.FAILED_METHOD_NOT_ALLOWED);
+    expect(json.success).toBe(false);
   });
 });

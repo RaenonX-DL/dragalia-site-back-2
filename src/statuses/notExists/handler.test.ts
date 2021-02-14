@@ -1,21 +1,20 @@
-import {Server} from 'http';
 import {default as request} from 'supertest';
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
-import {runServer} from '../../app';
+import {Application, createApp} from '../../app';
 
-describe(`GET ${ApiEndPoints.NOT_EXISTS} - not-existed endpoint`, () => {
-  let server: Server;
+describe(`[Server] GET ${ApiEndPoints.NOT_EXISTS} - not-existed endpoint`, () => {
+  let app: Application;
 
-  beforeEach(() => {
-    server = runServer();
+  beforeAll(async () => {
+    app = await createApp();
   });
 
-  afterEach((done) => {
-    server.close(done);
+  afterAll(async () => {
+    await app.close();
   });
 
   it('should return 404', async () => {
-    const result = await request(server).get(ApiEndPoints.NOT_EXISTS);
+    const result = await request(app.express).get(ApiEndPoints.NOT_EXISTS);
     expect(result.status).toBe(404);
 
     const json: BaseResponse = result.body as BaseResponse;

@@ -1,33 +1,15 @@
-import {Request} from 'express';
+import {Request, Response} from 'express';
+import {MongoClient} from 'mongodb';
 import {UserLoginPayload} from '../../../api-def/api';
+import {GoogleUserController} from '../controller';
 import {UserLoginResponse} from './response';
-import {UserCollection} from '../model';
 
-export const handleUserLogin = async (req: Request): Promise<UserLoginResponse> => {
+export const handleUserLogin = async (
+  req: Request, res: Response, mongoClient: MongoClient,
+): Promise<UserLoginResponse> => {
   const payload = req.query as unknown as UserLoginPayload;
 
-  const updateResult = await UserCollection.findOneAndUpdate(
-    {
-      uid: payload.googleUid,
-      em: payload.googleEmail,
-    },
-    {
-      $set: {
-        lr: new Date(),
-      },
-      $inc: {
-        lc: 1,
-      },
-    },
-    {
-      upsert: true,
-      setDefaultsOnInsert: true,
-      useFindAndModify: false,
-    });
-
-  if (updateResult) {
-    return new UserLoginResponse(false);
-  }
-
-  return new UserLoginResponse(true);
+  return new UserLoginResponse(
+    await GoogleUserController.userLogin(mongoClient, payload.googleUid, payload.googleEmail),
+  );
 };

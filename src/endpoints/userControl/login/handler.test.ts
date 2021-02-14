@@ -1,38 +1,31 @@
-import {Server} from 'http';
 import {default as request} from 'supertest';
-import MongoMemoryServer from 'mongodb-memory-server-core';
 import {ApiEndPoints, ApiResponseCode, UserLoginPayload, UserLoginResponse} from '../../../api-def/api';
-import {runServer} from '../../../app';
-import {clearServer, createServer, destroyServer} from '../../../../test/mongodbMem';
+import {Application, createApp} from '../../../app';
+import {GoogleUser, GoogleUserDocument} from '../model';
 
-describe(`GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, () => {
-  let server: Server;
-  let mongoServer: MongoMemoryServer;
+describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, () => {
+  let app: Application;
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  beforeEach(async () => {
+    await app.reset();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
 
   const userPayload1: UserLoginPayload = {
     googleEmail: 'fake@gmail.com',
     googleUid: '101524038922984790357',
   };
 
-  beforeAll(async () => {
-    mongoServer = await createServer();
-  });
-
-  beforeEach(() => {
-    server = runServer();
-  });
-
-  afterEach((done) => {
-    server.close(done);
-    clearServer();
-  });
-
-  afterAll(async () => {
-    await destroyServer(mongoServer);
-  });
 
   it('should register a new user', async () => {
-    const result = await request(server).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
     expect(result.status).toBe(200);
 
     const json: UserLoginResponse = result.body as UserLoginResponse;
@@ -41,14 +34,30 @@ describe(`GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, () => {
   });
 
   it('should know an user has registered', async () => {
-    // Initial call
-    await request(server).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    const supertestApp = request(app.express);
 
-    const result = await request(server).get(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    // Initial call
+    await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+
+    const result = await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+
     expect(result.status).toBe(200);
 
     const json: UserLoginResponse = result.body as UserLoginResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
+  });
+
+  it('checks if the data is stored in the database', async () => {
+    await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+
+    const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
+      {uid: userPayload1.googleUid, em: userPayload1.googleEmail},
+    );
+    const doc = GoogleUser.fromObject(docQuery as GoogleUserDocument);
+    expect(doc).not.toBeFalsy();
+    expect(doc.loginCount).toEqual(1);
+    expect(doc.lastLogin.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
+    expect(doc.isAdmin).toEqual(false);
   });
 });

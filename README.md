@@ -18,8 +18,7 @@ This one is using [express.js][express] while the previous one is using Flask.
 Name | Required/Optional | Description
 :---: | :---: | :---:
 MONGO_URL | Required | Connection string of MongoDB database.
-MONGO_DB | Optional | Database to use. If specified, all data will be manipulated in the given database only.
-TEST | Optional | Specify this to `1` for CI test-specific behavior.
+CI | Optional | Specify this to `true` for CI-specific behavior.
 
 [site]: https://dl.raenonx.cc
 
