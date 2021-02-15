@@ -1,12 +1,12 @@
-import {ResponseBase} from '../../base/response';
 import {ApiResponseCode} from '../../api-def/api';
+import {ApiResponse} from '../../base/response';
 
 /**
  * API response class for the root endpoint.
  *
- * This response does not contain anything. The response code will be {@linkcode ApiResponseCode.SUCCESS}.
+ * The response does not contain anything. The response code will be {@linkcode ApiResponseCode.SUCCESS}.
  */
-export class RootResponse extends ResponseBase {
+export class RootResponse extends ApiResponse {
   /**
    * Construct a root endpoint API response.
    */

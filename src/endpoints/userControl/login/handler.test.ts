@@ -23,7 +23,6 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     googleUid: '101524038922984790357',
   };
 
-
   it('should register a new user', async () => {
     const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
     expect(result.status).toBe(200);
@@ -54,7 +53,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
       {uid: userPayload1.googleUid, em: userPayload1.googleEmail},
     );
-    const doc = GoogleUser.fromObject(docQuery as GoogleUserDocument);
+    const doc = GoogleUser.fromDocument(docQuery as GoogleUserDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.loginCount).toEqual(1);
     expect(doc.lastLogin.valueOf() - Date.now()).toBeLessThanOrEqual(1000);

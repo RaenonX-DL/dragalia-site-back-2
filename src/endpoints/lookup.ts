@@ -2,15 +2,16 @@ import {NextFunction, Request, Response} from 'express';
 import {MongoClient} from 'mongodb';
 
 import {ApiEndPoints} from '../api-def/api';
-import {ResponseBase} from '../base/response';
+import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handlePublishQuestPost} from './post/quest/publish/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleUserLogin} from './userControl/login/handler';
 
 type Methods = 'GET' | 'POST';
 
-type HandlerFunction = (req: Request, res: Response, mongoClient: MongoClient) => Promise<ResponseBase>;
+type HandlerFunction = (req: Request, res: Response, mongoClient: MongoClient) => Promise<ApiResponse>;
 
 type EndpointHandlers = {
   GET?: HandlerFunction,
@@ -21,6 +22,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.USER_LOGIN]: {POST: handleUserLogin},
+  [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
 };
 
 export const handleResponse = async (
@@ -36,6 +38,7 @@ export const handleResponse = async (
     res.status(response.httpCode).json(response.toJson());
   } catch (err) {
     console.error(`${method} ${req.path} - ERROR: ${err.message}`);
+    console.error(err);
     if (nextFunction) {
       nextFunction(err);
     }

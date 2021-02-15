@@ -3,7 +3,7 @@ import {ApiResponseCode, ApiResponseCodeUtil, BaseResponse} from '../api-def/api
 /**
  * Base API response class.
  */
-export class ResponseBase {
+export class ApiResponse {
   code: number;
   success: boolean;
   httpCode: number;

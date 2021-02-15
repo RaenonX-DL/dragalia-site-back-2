@@ -1,12 +1,12 @@
-import {ResponseBase} from '../../base/response';
 import {ApiResponseCode, InternalErrorResponse as InternalErrorApiResponse} from '../../api-def/api';
+import {ApiResponse} from '../../base/response';
 
 /**
  * API response class for an internal error.
  *
- * This response contains the error stack. The response code will be {@linkcode ApiResponseCode.FAILED_INTERNAL_ERROR}.
+ * The response contains the error stack. The response code will be {@linkcode ApiResponseCode.FAILED_INTERNAL_ERROR}.
  */
-export class InternalErrorResponse extends ResponseBase {
+export class InternalErrorResponse extends ApiResponse {
   error: Error;
 
   /**

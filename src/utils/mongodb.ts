@@ -2,13 +2,24 @@ import {Collection, Db, MongoClient} from 'mongodb';
 import {CollectionInfo} from '../base/model';
 
 const dbPool: Record<string, Db> = {};
+const colIndicesInit: Set<CollectionInfo> = new Set<CollectionInfo>();
 
-export const getCollection = (mongoClient: MongoClient, dbInfo: CollectionInfo): Collection => {
+export type IndexInitFunction = (collection: Collection) => void;
+
+export const getCollection = (
+  mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunction?: IndexInitFunction,
+): Collection => {
   if (!(dbInfo.dbName in dbPool)) {
     dbPool[dbInfo.dbName] = mongoClient.db(dbInfo.dbName);
   }
 
-  return dbPool[dbInfo.dbName].collection(dbInfo.collectionName);
+  const collection = dbPool[dbInfo.dbName].collection(dbInfo.collectionName);
+
+  if (!colIndicesInit.has(dbInfo) && indexInitFunction) {
+    indexInitFunction(collection);
+  }
+
+  return collection;
 };
 
 

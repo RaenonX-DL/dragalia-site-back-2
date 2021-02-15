@@ -48,19 +48,32 @@ export class GoogleUser extends Document {
   }
 
   /**
-   * Convert obj from object to a {@linkcode GoogleUser}.
-   *
-   * @param {DocumentBase} obj object to be converted
-   * @return {Document} converted Google user document
+   * @inheritDoc
    */
-  static fromObject(obj: GoogleUserDocument): GoogleUser {
-    return new GoogleUser(obj.em, obj.uid, obj.a, obj._id, obj.lc, obj.lr);
+  static fromDocument(doc: GoogleUserDocument): GoogleUser {
+    return new GoogleUser(doc.em, doc.uid, doc.a, doc._id, doc.lc, doc.lr);
   }
 
   /**
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+      collection.createIndex('uid', {unique: true});
+    }));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  toObject(): GoogleUserDocument {
+    return {
+      _id: this.id,
+      em: this.googleEmail,
+      uid: this.googleUid,
+      a: this.isAdmin,
+      lc: this.loginCount,
+      lr: this.lastLogin,
+    };
   }
 }
