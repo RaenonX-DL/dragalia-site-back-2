@@ -22,11 +22,11 @@ export class GoogleUserController {
     const updateResult = await GoogleUser.getCollection(mongoClient).findOneAndUpdate(
       {
         uid: googleUid,
-        em: googleEmail,
       },
       {
         $set: {
           lr: new Date(),
+          em: googleEmail,
         },
         $inc: {
           lc: 1,
