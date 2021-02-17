@@ -1,32 +1,43 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
-
-import {CollectionInfo, Document, DocumentBase} from '../../../base/model';
-import {ModifyNote, ModifyNoteDocument, Post} from '../base/model';
+import {CollectionInfo} from '../../../base/controller/info';
+import {Document, DocumentBase, DocumentBaseKey} from '../../../base/model/base';
+import {ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
+import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../base/model/seq';
+import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {Post, PostDocumentBase, PostDocumentKey} from '../base/model';
 
 export const dbInfo: CollectionInfo = {
   dbName: 'post',
   collectionName: 'quest',
 };
 
-export type QuestPositionDocument = DocumentBase & {
-  p: string,
-  b: string,
-  r: string,
-  t: string,
+enum QuestPositionDocumentKey {
+  position = 'p',
+  builds = 'b',
+  rotations = 'r',
+  tips = 't',
 }
 
-export type QuestPostDocument = DocumentBase & {
-  _seq: number,
-  _lang: string,
-  t: string,
-  g: string,
-  v: string,
-  i: Array<QuestPositionDocument>,
-  a: string,
-  _dtMn: Array<ModifyNoteDocument>,
-  _dtMod: Date,
-  _dtPub: Date,
-  _vc: number,
+export type QuestPositionDocument = DocumentBase & {
+  [QuestPositionDocumentKey.position]: string,
+  [QuestPositionDocumentKey.builds]: string,
+  [QuestPositionDocumentKey.rotations]: string,
+  [QuestPositionDocumentKey.tips]: string,
+}
+
+export enum QuestPostDocumentKey {
+  generalInfo = 'g',
+  video = 'v',
+  positionInfo = 'i',
+  addendum = 'a',
+}
+
+export type QuestPostDocument = PostDocumentBase & {
+  [QuestPostDocumentKey.generalInfo]: string,
+  [QuestPostDocumentKey.video]: string,
+  [QuestPostDocumentKey.positionInfo]: Array<QuestPositionDocument>,
+  [QuestPostDocumentKey.addendum]: string,
 }
 
 /**
@@ -143,18 +154,18 @@ export class QuestPost extends Post {
    */
   toObject(): QuestPostDocument {
     return {
-      _id: this.id,
-      _seq: this.seqId,
-      _lang: this.language,
-      t: this.title,
-      g: this.generalInfo,
-      v: this.video,
-      i: this.positionInfo.map((doc) => doc.toObject()),
-      a: this.addendum,
-      _dtMod: this.dateModified,
-      _dtPub: this.datePublished,
-      _dtMn: this.modificationNotes.map((doc) => doc.toObject()),
-      _vc: this.viewCount,
+      [DocumentBaseKey.id]: this.id,
+      [SequentialDocumentKey.sequenceId]: this.seqId,
+      [MultiLingualDocumentKey.language]: this.language,
+      [PostDocumentKey.title]: this.title,
+      [QuestPostDocumentKey.generalInfo]: this.generalInfo,
+      [QuestPostDocumentKey.video]: this.video,
+      [QuestPostDocumentKey.positionInfo]: this.positionInfo.map((doc) => doc.toObject()),
+      [QuestPostDocumentKey.addendum]: this.addendum,
+      [ModifiableDocumentKey.dateModified]: this.dateModified,
+      [ModifiableDocumentKey.datePublished]: this.datePublished,
+      [ModifiableDocumentKey.modificationNotes]: this.modificationNotes.map((doc) => doc.toObject()),
+      [ViewCountableDocumentKey.viewCount]: this.viewCount,
     };
   }
 }

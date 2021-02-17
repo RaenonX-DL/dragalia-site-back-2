@@ -1,7 +1,7 @@
 import {default as request} from 'supertest';
 import {ApiEndPoints, ApiResponseCode, UserLoginPayload, UserLoginResponse} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
-import {GoogleUser, GoogleUserDocument} from '../model';
+import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from '../model';
 
 describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, () => {
   let app: Application;
@@ -51,7 +51,10 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
-      {uid: userPayload1.googleUid, em: userPayload1.googleEmail},
+      {
+        [GoogleUserDocumentKey.userId]: userPayload1.googleUid,
+        [GoogleUserDocumentKey.email]: userPayload1.googleEmail,
+      },
     );
     const doc = GoogleUser.fromDocument(docQuery as GoogleUserDocument);
     expect(doc).not.toBeFalsy();

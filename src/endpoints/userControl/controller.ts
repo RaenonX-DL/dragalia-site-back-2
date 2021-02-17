@@ -1,5 +1,5 @@
 import {MongoClient} from 'mongodb';
-import {GoogleUser, GoogleUserDocument} from './model';
+import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from './model';
 
 /**
  * Google user data controller.
@@ -21,18 +21,18 @@ export class GoogleUserController {
   ): Promise<boolean> {
     const updateResult = await GoogleUser.getCollection(mongoClient).findOneAndUpdate(
       {
-        uid: googleUid,
+        [GoogleUserDocumentKey.userId]: googleUid,
       },
       {
         $set: {
-          lr: new Date(),
-          em: googleEmail,
+          [GoogleUserDocumentKey.lastLogin]: new Date(),
+          [GoogleUserDocumentKey.email]: googleEmail,
         },
         $inc: {
-          lc: 1,
+          [GoogleUserDocumentKey.loginCount]: 1,
         },
         $setOnInsert: {
-          a: isAdmin,
+          [GoogleUserDocumentKey.isAdmin]: isAdmin,
         },
       },
       {
@@ -50,7 +50,9 @@ export class GoogleUserController {
    * @return {Promise<boolean>} if the user is an admin
    */
   static async isAdmin(mongoClient: MongoClient, googleUid: string): Promise<boolean> {
-    const userData = await GoogleUser.getCollection(mongoClient).findOne({uid: googleUid});
+    const userData = await GoogleUser.getCollection(mongoClient).findOne({
+      [GoogleUserDocumentKey.userId]: googleUid,
+    });
 
     return userData && GoogleUser.fromDocument(userData as GoogleUserDocument).isAdmin;
   }

@@ -1,18 +1,26 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
-
-import {CollectionInfo, Document, DocumentBase} from '../../base/model';
+import {CollectionInfo} from '../../base/controller/info';
+import {Document, DocumentBase, DocumentBaseKey} from '../../base/model/base';
 
 export const dbInfo: CollectionInfo = {
   dbName: 'user',
   collectionName: 'google',
 };
 
+export enum GoogleUserDocumentKey {
+  email = 'em',
+  userId = 'uid',
+  isAdmin = 'a',
+  loginCount = 'lc',
+  lastLogin = 'lr',
+}
+
 export type GoogleUserDocument = DocumentBase & {
-  em: string,
-  uid: string,
-  a: boolean,
-  lc: number,
-  lr: Date
+  [GoogleUserDocumentKey.email]: string,
+  [GoogleUserDocumentKey.userId]: string,
+  [GoogleUserDocumentKey.isAdmin]: boolean,
+  [GoogleUserDocumentKey.loginCount]: number,
+  [GoogleUserDocumentKey.lastLogin]: Date
 }
 
 /**
@@ -68,12 +76,12 @@ export class GoogleUser extends Document {
    */
   toObject(): GoogleUserDocument {
     return {
-      _id: this.id,
-      em: this.googleEmail,
-      uid: this.googleUid,
-      a: this.isAdmin,
-      lc: this.loginCount,
-      lr: this.lastLogin,
+      [DocumentBaseKey.id]: this.id,
+      [GoogleUserDocumentKey.email]: this.googleEmail,
+      [GoogleUserDocumentKey.userId]: this.googleUid,
+      [GoogleUserDocumentKey.isAdmin]: this.isAdmin,
+      [GoogleUserDocumentKey.loginCount]: this.loginCount,
+      [GoogleUserDocumentKey.lastLogin]: this.lastLogin,
     };
   }
 }

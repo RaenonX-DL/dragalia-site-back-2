@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 import {QuestPostPublishPayload} from '../../../api-def/api';
-import {SequencedController} from '../../../base/controller';
+import {SequencedController} from '../../../base/controller/seq';
 import {SeqIdSkippingError} from '../error';
 import {dbInfo, QuestPosition, QuestPost} from './model';
 

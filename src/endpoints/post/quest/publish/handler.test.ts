@@ -7,7 +7,10 @@ import {
   QuestPostPublishSuccessResponse,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
+import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {GoogleUserController} from '../../../userControl/controller';
+import {PostDocumentKey} from '../../base/model';
 import {QuestPosition, QuestPost, QuestPostDocument} from '../model';
 
 describe(`[Server] GET ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endpoint`, () => {
@@ -168,9 +171,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endp
   it('should publish a new quest post and check if it exists in the database', async () => {
     await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
 
-    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne(
-      {_seq: 1, _lang: questPayload2.lang},
-    );
+    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: 1,
+      [MultiLingualDocumentKey.language]: questPayload2.lang,
+    });
     const doc = QuestPost.fromDocument(docQuery as QuestPostDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
@@ -194,9 +198,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endp
     // Normal & change title (expect to fail)
     await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload6);
 
-    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne(
-      {_seq: 1, _lang: questPayload2.lang, t: questPayload2.title},
-    );
+    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: 1,
+      [MultiLingualDocumentKey.language]: questPayload2.lang,
+      [PostDocumentKey.title]: questPayload2.title,
+    });
     const doc = QuestPost.fromDocument(docQuery as QuestPostDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);

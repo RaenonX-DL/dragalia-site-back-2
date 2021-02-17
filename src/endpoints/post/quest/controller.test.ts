@@ -1,6 +1,8 @@
 import {MongoError} from 'mongodb';
 import {QuestPostPublishPayload} from '../../../api-def/api/post/quest/payload';
 import {Application, createApp} from '../../../app';
+import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../base/model/seq';
 import {SeqIdSkippingError} from '../error';
 import {QuestPostController} from './controller';
 import {QuestPost, QuestPostDocument} from './model';
@@ -94,7 +96,10 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     expect(newSeqId).toBe(1);
 
-    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({_seq: 1, _lang: 'cht'});
+    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: 1,
+      [MultiLingualDocumentKey.language]: 'cht',
+    });
     const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
 
     expect(post.seqId).toBe(1);
@@ -116,7 +121,10 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     await QuestPostController.publishPost(app.mongoClient, {...payload2, seqId: newSeqId});
 
-    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({_seq: 1, _lang: 'en'});
+    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: 1,
+      [MultiLingualDocumentKey.language]: 'en',
+    });
     const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
 
     expect(post.seqId).toBe(1);
@@ -139,7 +147,10 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
       .rejects
       .toThrow(MongoError);
 
-    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({_seq: 1, _lang: 'cht'});
+    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: 1,
+      [MultiLingualDocumentKey.language]: 'cht',
+    });
     const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
 
     // Checks if the content is unchanged

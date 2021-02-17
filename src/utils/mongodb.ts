@@ -1,5 +1,5 @@
 import {Collection, Db, MongoClient} from 'mongodb';
-import {CollectionInfo} from '../base/model';
+import {CollectionInfo} from '../base/controller/info';
 
 const dbPool: Record<string, Db> = {};
 const colIndicesInit: Set<CollectionInfo> = new Set<CollectionInfo>();

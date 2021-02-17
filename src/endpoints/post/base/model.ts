@@ -1,56 +1,24 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
-import {CollectionInfo, Document, DocumentBase, SequentialDocument} from '../../../base/model';
+import {CollectionInfo} from '../../../base/controller/info';
+import {ModifiableDocumentBase, ModifyNote} from '../../../base/model/modifiable';
+import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {SequentialDocument, SequentialDocumentBase, SequentialDocumentKey} from '../../../base/model/seq';
+import {ViewCountableDocumentBase} from '../../../base/model/viewCount';
 import {IndexInitFunction} from '../../../utils/mongodb';
-import {dbInfo} from '../quest/model';
 
-export type ModifyNoteDocument = DocumentBase & {
-  dt: Date,
-  n: string,
+
+export enum PostDocumentKey {
+  title = 't',
 }
 
-/**
- * Post modification note data class.
- */
-export class ModifyNote extends Document {
-  date: Date;
-  note: string;
 
-  /**
-   * Construct a post modification note document data.
-   *
-   * @param {Date} date post modification date
-   * @param {string} note post modification note
-   */
-  constructor(date: Date, note: string) {
-    super();
-
-    this.date = date;
-    this.note = note;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  static fromDocument(obj: ModifyNoteDocument): ModifyNote {
-    return new ModifyNote(obj.dt, obj.n);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  toObject(): ModifyNoteDocument {
-    return {
-      dt: this.date,
-      n: this.note,
-    };
-  }
+export type PostDocumentBase =
+  MultiLingualDocumentBase
+  & SequentialDocumentBase
+  & ModifiableDocumentBase
+  & ViewCountableDocumentBase
+  & {
+  [PostDocumentKey.title]: string,
 }
 
 
@@ -106,7 +74,13 @@ export abstract class Post extends SequentialDocument {
       if (indexInitFunc) {
         indexInitFunc(collection);
       }
-      collection.createIndex([{_seq: -1}, {_lang: 1}], {unique: true});
+      collection.createIndex(
+        [
+          {[SequentialDocumentKey.sequenceId]: -1},
+          {[MultiLingualDocumentKey.language]: 1},
+        ],
+        {unique: true},
+      );
     }));
   }
 }
