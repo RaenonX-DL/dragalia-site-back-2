@@ -1,5 +1,5 @@
-import {ApiResponseCode, PostPublishSuccessResponse as PostPublishSuccessResponseApi} from '../../../api-def/api';
-import {ApiResponse} from '../../../base/response';
+import {ApiResponseCode, PostPublishSuccessResponse as PostPublishSuccessResponseApi} from '../../../../../api-def/api';
+import {ApiResponse} from '../../../../../base/response';
 
 
 /**

@@ -1,4 +1,4 @@
-import {PostPublishSuccessResponse} from '../../base/response';
+import {PostPublishSuccessResponse} from '../../base/response/post/publish';
 
 
 /**

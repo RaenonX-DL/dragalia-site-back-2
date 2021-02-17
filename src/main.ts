@@ -3,7 +3,7 @@ import {Server} from 'http';
 import {AddressInfo} from 'net';
 import {createApp} from './app';
 
-const PORT = parseInt(process.env.PORT || '8787');
+const PORT = Number(process.env.PORT) || 8787;
 
 (async () => {
   const app: Application = (await createApp(process.env.MONGO_URL || '')).express;

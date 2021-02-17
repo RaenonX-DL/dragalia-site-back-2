@@ -13,29 +13,11 @@ import {GoogleUserController} from '../../../userControl/controller';
 import {PostDocumentKey} from '../../base/model';
 import {QuestPosition, QuestPost, QuestPostDocument} from '../model';
 
-describe(`[Server] GET ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endpoint`, () => {
+describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endpoint`, () => {
   let app: Application;
 
   const uidNormal = '87878787877';
   const uidAdmin = '78787878887';
-
-  beforeAll(async () => {
-    app = await createApp();
-  });
-
-  beforeEach(async () => {
-    await app.reset();
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
 
   const questPayload1: QuestPostPublishPayload = {
     seqId: 1,
@@ -102,6 +84,24 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endp
     ...questPayload2,
     seqId: 1,
   };
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  beforeEach(async () => {
+    await app.reset();
+    await GoogleUserController.userLogin(
+      app.mongoClient, uidNormal, 'normal@email.com',
+    );
+    await GoogleUserController.userLogin(
+      app.mongoClient, uidAdmin, 'admin@email.com', true,
+    );
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
 
   it('should be able to publish a new quest post', async () => {
     const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);

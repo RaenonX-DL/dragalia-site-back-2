@@ -4,6 +4,7 @@ import {ApiResponseCode, QuestPostPublishPayload} from '../../../../api-def/api'
 import {ApiResponse} from '../../../../base/response';
 import {GoogleUserController} from '../../../userControl/controller';
 import {processSinglePostPayload} from '../../base/payload';
+import {ApiFailedResponse} from '../../base/response/failed';
 import {SeqIdSkippingError} from '../../error';
 import {QuestPostController} from '../controller';
 import {QuestPostPublishSuccessResponse} from './response';
@@ -29,7 +30,7 @@ export const handlePublishQuestPost = async (
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {
-    return new ApiResponse(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_NOT_ADMIN);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_NOT_ADMIN);
   }
 
   // Publish the post to the database
@@ -39,10 +40,10 @@ export const handlePublishQuestPost = async (
   } catch (e) {
     // https://stackoverflow.com/a/1433608/11571888
     if (e instanceof SeqIdSkippingError) {
-      return new ApiResponse(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
+      return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
     } else if (e instanceof MongoError && e.code === 11000) {
       // E11000 for duplicated key
-      return new ApiResponse(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
+      return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
     } else {
       throw e; // let others bubble up
     }

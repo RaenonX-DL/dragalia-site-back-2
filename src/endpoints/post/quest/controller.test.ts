@@ -173,4 +173,60 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
       .rejects
       .toThrow(SeqIdSkippingError);
   });
+
+  it('checks if the posts are correctly sorted when getting the post list', async () => {
+    for (let i = 0; i < 7; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 0, 25);
+
+    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
+  });
+
+  it('checks if the posts are correctly sorted when getting the post list even if paginated', async () => {
+    for (let i = 0; i < 7; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 2, 2);
+
+    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
+  });
+
+  it('checks if getting the post list without any existing post will not yield any error', async () => {
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 2, 2);
+
+    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
+  });
+
+  it('checks if getting the post list without any valid return will not yield any error', async () => {
+    for (let i = 0; i < 7; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'en', 0, 25);
+
+    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
+  });
+
+  it('checks if the available post count given is correct', async () => {
+    for (let i = 0; i < 7; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 0, 25);
+
+    expect(postListResult.totalAvailableCount).toBe(7);
+  });
+
+  it('checks if the available post count given is correct after pagination', async () => {
+    for (let i = 0; i < 30; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 0, 25);
+
+    expect(postListResult.totalAvailableCount).toBe(30);
+  });
 });

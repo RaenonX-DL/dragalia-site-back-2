@@ -3,7 +3,7 @@ import {ApiResponseCode, ApiResponseCodeUtil, BaseResponse} from '../api-def/api
 /**
  * Base API response class.
  */
-export class ApiResponse {
+export abstract class ApiResponse {
   code: number;
   success: boolean;
   httpCode: number;
@@ -14,7 +14,7 @@ export class ApiResponse {
    * @param {ApiResponseCode} responseCode API response code
    * @param {number} httpCode http status code of the response
    */
-  constructor(responseCode: ApiResponseCode, httpCode = 200) {
+  protected constructor(responseCode: ApiResponseCode, httpCode = 200) {
     this.code = responseCode.valueOf();
     this.success = ApiResponseCodeUtil.isSuccess(responseCode);
     this.httpCode = httpCode;
