@@ -13,9 +13,15 @@ export type ModifiableDocumentBase = DocumentBase & {
 };
 
 
+export enum ModifyNoteDocumentKey {
+  datetime = 'dt',
+  note = 'n',
+}
+
+
 export type ModifyNoteDocument = DocumentBase & {
-  dt: Date,
-  n: string,
+  [ModifyNoteDocumentKey.datetime]: Date,
+  [ModifyNoteDocumentKey.note]: string,
 }
 
 

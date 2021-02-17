@@ -12,6 +12,6 @@ export class SeqIdSkippingError extends CustomError {
    */
   constructor(requestedSeqId: number, nextSeqId: number) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
-    super(`Requested sequential ID ${requestedSeqId} is not available (next available: ${nextSeqId}`);
+    super(`Requested sequential ID ${requestedSeqId} is not available (next available: ${nextSeqId})`);
   }
 }

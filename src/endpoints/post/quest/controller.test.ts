@@ -3,6 +3,7 @@ import {QuestPostPublishPayload} from '../../../api-def/api/post/quest/payload';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
+import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {SeqIdSkippingError} from '../error';
 import {QuestPostController} from './controller';
 import {QuestPost, QuestPostDocument} from './model';
@@ -69,26 +70,26 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
   };
 
   it('checks if `nextSeqId` increments per request', async () => {
-    expect(await QuestPostController.getNextSeqId(app.mongoClient)).toBe(1);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient)).toBe(2);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(1);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(2);
   });
 
   it('checks if `nextSeqId` increments after request', async () => {
-    expect(await QuestPostController.getNextSeqId(app.mongoClient)).toBe(1);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(1);
   });
 
   it('checks if `nextSeqId` does not increment if specified', async () => {
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, false)).toBe(0);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, false)).toBe(0);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
   });
 
   it('checks if `nextSeqId` working as expected', async () => {
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, false)).toBe(0);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, false)).toBe(0);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, true)).toBe(1);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, false)).toBe(1);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, true)).toBe(2);
-    expect(await QuestPostController.getNextSeqId(app.mongoClient, true)).toBe(3);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(1);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(1);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(2);
+    expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
   });
 
   it('checks if a new post can be successfully stored', async () => {
@@ -174,6 +175,50 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
       .toThrow(SeqIdSkippingError);
   });
 
+  it('checks if adding posts in different language, they will have different ID assigned', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'cht'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'jp'});
+
+    let postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'en',
+    });
+    let post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(1);
+    postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'cht',
+    });
+    post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(2);
+    postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'jp',
+    });
+    post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(3);
+  });
+
+  it('checks if adding posts in different language and spread ID can be done', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: 'cht'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 3, lang: 'jp'});
+
+    let postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'en',
+    });
+    let post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(1);
+    postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'cht',
+    });
+    post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(2);
+    postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [MultiLingualDocumentKey.language]: 'jp',
+    });
+    post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+    expect(post.seqId).toBe(3);
+  });
+
   it('checks if the posts are correctly sorted when getting the post list', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
@@ -228,5 +273,102 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 0, 25);
 
     expect(postListResult.totalAvailableCount).toBe(30);
+  });
+
+  it('checks if getting a post will increase its view count', async () => {
+    await QuestPostController.publishPost(app.mongoClient, payload);
+
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(4);
+  });
+
+  it('checks if getting a post will not increase its view count if specified', async () => {
+    await QuestPostController.publishPost(app.mongoClient, payload);
+
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
+  });
+
+  it('checks if getting a post with alt language only will return the alt one', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
+
+    const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(getResult?.isAltLang).toBe(true);
+    expect(getResult?.post[MultiLingualDocumentKey.language]).toBe('en');
+    expect(getResult?.post[SequentialDocumentKey.sequenceId]).toBe(1);
+  });
+
+  it('checks if getting a non-existent post will return an empty response', async () => {
+    const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(getResult).toBeNull();
+  });
+
+  it('checks if getting a post will return all available languages', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
+
+    const postListResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(postListResult?.isAltLang).toBe(false);
+    expect(postListResult?.otherLangs).toStrictEqual(['en', 'jp']);
+  });
+
+  it('checks if getting a post without increasing the view count will not check for available languages', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
+
+    const postListResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+
+    expect(postListResult?.isAltLang).toBe(false);
+    expect(postListResult?.otherLangs).toStrictEqual([]);
+  });
+
+  it('checks if view count behaves correctly according to the specified `incCount`', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
+
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'en');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'en');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'jp');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'jp');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'jp', false);
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'jp', false);
+
+    let getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'en', false);
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
+    getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(1);
+    getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'jp', false);
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
+  });
+
+  it('checks if view count behaves correctly when returning the alternative version', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
+
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+    const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
+
+    expect(getResult?.isAltLang).toBe(true);
+    expect(getResult?.post[MultiLingualDocumentKey.language]).toBe('en');
+    expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
 });

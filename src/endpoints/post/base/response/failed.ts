@@ -12,10 +12,11 @@ export class ApiFailedResponse extends ApiResponse {
    * Construct a failed API response.
    *
    * @param {ApiResponseCode} responseCode API response code for the failed request
+   * @param {number} httpCode http code for the response
    * @param {string} message message about the failure
    */
-  constructor(responseCode: ApiResponseCode, message?: string) {
-    super(responseCode);
+  constructor(responseCode: ApiResponseCode, httpCode?: number, message?: string) {
+    super(responseCode, httpCode);
 
     this.message = message;
   }

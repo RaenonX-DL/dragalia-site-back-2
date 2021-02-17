@@ -30,7 +30,7 @@ export const handlePublishQuestPost = async (
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_NOT_ADMIN);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 
   // Publish the post to the database

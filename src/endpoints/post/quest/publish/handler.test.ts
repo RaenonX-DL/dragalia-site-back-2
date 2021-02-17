@@ -140,7 +140,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(result.status).toBe(200);
 
     const json: BaseResponse = result.body as BaseResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_NOT_ADMIN);
+    expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
     expect(json.success).toBe(false);
   });
 

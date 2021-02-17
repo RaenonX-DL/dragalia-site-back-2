@@ -12,7 +12,7 @@ export const dbInfo: CollectionInfo = {
   collectionName: 'quest',
 };
 
-enum QuestPositionDocumentKey {
+export enum QuestPositionDocumentKey {
   position = 'p',
   builds = 'b',
   rotations = 'r',

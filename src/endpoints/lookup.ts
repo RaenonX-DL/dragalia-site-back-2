@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleListQuestPost} from './post/quest/list/handler';
 import {handlePublishQuestPost} from './post/quest/publish/handler';
 import {handleRoot} from './root/handler';
@@ -25,6 +26,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.USER_LOGIN]: {POST: handleUserLogin},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
+  [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
 };
 
 export const handleResponse = async (

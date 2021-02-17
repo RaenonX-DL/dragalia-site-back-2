@@ -15,3 +15,9 @@ export const processPostListPayload = (payload: PostListPayload): PostListPayloa
 
   return payload;
 };
+
+export const processPostGetPayload = (payload: SinglePostPayload): SinglePostPayload => {
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
