@@ -103,7 +103,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     await app.close();
   });
 
-  it('should be able to publish a new quest post', async () => {
+  it('publishes a new quest post', async () => {
     const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
     expect(result.status).toBe(200);
 
@@ -113,7 +113,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(json.seqId).toBe(1);
   });
 
-  it('should be able to publish a new quest post even if a post in different language exists', async () => {
+  it('publishes a new quest post given an alternative language', async () => {
     const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload5);
     expect(result.status).toBe(200);
 
@@ -123,7 +123,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(json.seqId).toBe(1);
   });
 
-  it('should be able to publish a new quest post given a valid unused sequential ID', async () => {
+  it('publishes a new quest post given a valid unused sequential ID', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_PUBLISH)
       .query({...questPayload1, googleUid: uidAdmin});
@@ -135,7 +135,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(json.seqId).toBe(1);
   });
 
-  it('should not be able to publish a quest post because the permission is insufficient', async () => {
+  it('blocks publishing a quest post with insufficient permission', async () => {
     const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload3);
     expect(result.status).toBe(200);
 
@@ -145,7 +145,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   });
 
   it(
-    'should not be able to publish a quest post because the post is new and the sequential ID jumps',
+    'blocks publishing a quest post with skipping sequential ID',
     async () => {
       const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload4);
       expect(result.status).toBe(200);
@@ -156,7 +156,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     });
 
   it(
-    'should not be able to publish a quest post because the post with the same ID and language exists',
+    'blocks publishing a quest post with duplicated ID and language',
     async () => {
       await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload7);
 
@@ -168,7 +168,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       expect(json.success).toBe(false);
     });
 
-  it('should publish a new quest post and check if it exists in the database', async () => {
+  test('if the published quest post exists in the database', async () => {
     await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
 
     const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
@@ -192,7 +192,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(doc.viewCount).toEqual(0);
   });
 
-  it('should send a failed request and check if the existing data has been modified', async () => {
+  test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
     await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
     // Normal & change title (expect to fail)

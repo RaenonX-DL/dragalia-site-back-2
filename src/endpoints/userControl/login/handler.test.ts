@@ -23,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     googleUid: '101524038922984790357',
   };
 
-  it('should register a new user', async () => {
+  it('registers a new user', async () => {
     const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
     expect(result.status).toBe(200);
 
@@ -32,7 +32,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     expect(json.success).toBe(true);
   });
 
-  it('should know an user has registered', async () => {
+  it('knows an user has registered', async () => {
     const supertestApp = request(app.express);
 
     // Initial call
@@ -47,7 +47,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     expect(json.success).toBe(true);
   });
 
-  it('checks if the data is stored in the database', async () => {
+  it('stores the user data', async () => {
     await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(

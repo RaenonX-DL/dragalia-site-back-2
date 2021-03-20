@@ -13,7 +13,7 @@ describe(`[Server] GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
     await app.close();
   });
 
-  it('should return a response with successful code 100', async () => {
+  it('returns with successful code 100', async () => {
     const result = await request(app.express).get(ApiEndPoints.ROOT);
     expect(result.status).toBe(200);
 

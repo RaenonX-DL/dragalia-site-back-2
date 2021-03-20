@@ -80,7 +80,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     await app.close();
   });
 
-  it('should return posts in a correctly sorted manner', async () => {
+  it('returns correctly sorted posts', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
@@ -95,7 +95,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it('should return posts in a correctly sorted manner after pagination', async () => {
+  it('returns correctly sorted posts after pagination', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
@@ -110,7 +110,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
   });
 
-  it('should return an empty result if no post exists yet', async () => {
+  it('returns an empty result if no post exists yet', async () => {
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_LIST).query(payloadList1);
     expect(result.status).toBe(200);
 
@@ -121,7 +121,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
-  it('should return an empty result if the no post matches the querying parameters', async () => {
+  it('returns an empty result if no post matches the querying parameters', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
@@ -138,7 +138,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
-  it('should return nothing if a non-existent language code is used to query', async () => {
+  it('returns nothing if a non-existent language code is used', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
@@ -155,7 +155,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
-  it('should return that the user is an admin', async () => {
+  it('returns that the user is an admin', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
@@ -172,7 +172,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.isAdmin).toBe(true);
   });
 
-  it('should return that the registered user without ads-free configured should have ads shown', async () => {
+  it('returns that the non-ads-free user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express)
@@ -187,7 +187,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.showAds).toBe(true);
   });
 
-  it('should return that the registered user with ads-free configured should not have ads shown', async () => {
+  it('returns that the ads-free user should not have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express)
@@ -202,7 +202,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.showAds).toBe(false);
   });
 
-  it('should return that unregistered user should have ads shown', async () => {
+  it('returns that unregistered user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express)

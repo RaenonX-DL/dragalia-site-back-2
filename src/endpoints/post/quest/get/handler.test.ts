@@ -72,7 +72,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     await app.close();
   });
 
-  it('should get a post which has the version of the given language and the sequential ID', async () => {
+  it('gets an existed post given language and the sequential ID', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 1});
@@ -86,7 +86,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.lang).toBe('cht');
   });
 
-  it('should get a post which only has an alt version for the given sequential ID', async () => {
+  it('gets an existed post which has an alt version only given sequential ID', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: 'en'});
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 1});
@@ -100,7 +100,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.lang).toBe('en');
   });
 
-  it('should return all available languages except the current one for a post', async () => {
+  it('returns all available languages except the current one', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'jp'});
@@ -117,7 +117,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.otherLangs).toStrictEqual(['en', 'jp']);
   });
 
-  it('should return nothing as available languages because they are spread', async () => {
+  it('returns nothing as available languages if ID is spread', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: 'jp'});
@@ -134,7 +134,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.otherLangs).toStrictEqual([]);
   });
 
-  it('should return failure response because the post does not exist', async () => {
+  it('returns failure for non-existing post', async () => {
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 1});
     expect(result.status).toBe(404);
 
@@ -143,7 +143,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.success).toBe(false);
   });
 
-  it('should return failure response because the sequence ID was not specified', async () => {
+  it('returns failure if sequence ID is not specified', async () => {
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     expect(result.status).toBe(400);
 
@@ -152,7 +152,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.success).toBe(false);
   });
 
-  it('should indicate that the user should have ads shown', async () => {
+  it('indicates that the user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
@@ -166,7 +166,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.showAds).toBe(true);
   });
 
-  it('should indicate that the user has the admin privilege', async () => {
+  it('indicates that the user has the admin privilege', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
@@ -180,7 +180,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.isAdmin).toBe(true);
   });
 
-  it('should indicate that the user has ads-free enabled', async () => {
+  it('indicates that the user is ads-free', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
@@ -194,7 +194,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.showAds).toBe(false);
   });
 
-  it('checks that view count goes up per request', async () => {
+  it('increments view count per request', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 1});
@@ -210,7 +210,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specif
     expect(json.viewCount).toBe(4);
   });
 
-  it('checks that view count goes up per request on alternative version', async () => {
+  it('increments view count per request on alternative version', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: 'en'});
 
     await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 1});

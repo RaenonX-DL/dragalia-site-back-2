@@ -69,21 +69,21 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     addendum: 'addendum-en',
   };
 
-  it('checks if `nextSeqId` increments per request', async () => {
+  it('increments `nextSeqId` per request', async () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(1);
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(2);
   });
 
-  it('checks if `nextSeqId` increments after request', async () => {
+  it('increments `nextSeqId` after request', async () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {})).toBe(1);
   });
 
-  it('checks if `nextSeqId` does not increment if specified', async () => {
+  it('does not increment `nextSeqId` if specified', async () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
   });
 
-  it('checks if `nextSeqId` working as expected', async () => {
+  test('if `nextSeqId` is working as expected', async () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(1);
@@ -92,7 +92,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
   });
 
-  it('checks if a new post can be successfully stored', async () => {
+  it('publishes a new post successfully', async () => {
     const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
 
     expect(newSeqId).toBe(1);
@@ -115,7 +115,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum');
   });
 
-  it('checks if a new post with same ID but different language can be published', async () => {
+  it('publishes a new post in the same ID but different language', async () => {
     const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
 
     expect(newSeqId).toBe(1);
@@ -140,7 +140,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum-en');
   });
 
-  it('checks if a duplicated post publish is blocked and the content is not changed', async () => {
+  it('blocks duplicated post publishing and the content should not change', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1});
     await expect(
       QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, title: 'duplicated'}),
@@ -167,7 +167,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum');
   });
 
-  it('checks if a ID-skipping post publish is blocked', async () => {
+  it('blocks ID-skipping post publishing', async () => {
     await expect(
       QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 7}),
     )
@@ -175,7 +175,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
       .toThrow(SeqIdSkippingError);
   });
 
-  it('checks if adding posts in different language, they will have different ID assigned', async () => {
+  it('assigns different ID for posts in different language', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'jp'});
@@ -197,7 +197,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.seqId).toBe(3);
   });
 
-  it('checks if adding posts in different language and spread ID can be done', async () => {
+  it('publishes posts in different languages and IDs', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 3, lang: 'jp'});
@@ -219,7 +219,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.seqId).toBe(3);
   });
 
-  it('checks if the posts are correctly sorted when getting the post list', async () => {
+  it('returns a list correctly-sorted posts', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
     }
@@ -229,7 +229,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it('checks if the posts are correctly sorted when getting the post list even if paginated', async () => {
+  it('returns a list correctly-sorted posts even if paginated', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
     }
@@ -239,13 +239,13 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
   });
 
-  it('checks if getting the post list without any existing post will not yield any error', async () => {
+  it('returns without any error if no posts available yet', async () => {
     const postListResult = await QuestPostController.getPostList(app.mongoClient, 'cht', 2, 2);
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
-  it('checks if getting the post list without any valid return will not yield any error', async () => {
+  it('returns without any error if no posts matching the language criteria', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
     }
@@ -255,7 +255,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
-  it('checks if the available post count given is correct', async () => {
+  it('returns correct post count', async () => {
     for (let i = 0; i < 7; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
     }
@@ -265,7 +265,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult.totalAvailableCount).toBe(7);
   });
 
-  it('checks if the available post count given is correct after pagination', async () => {
+  it('returns correct post count after pagination', async () => {
     for (let i = 0; i < 30; i++) {
       await QuestPostController.publishPost(app.mongoClient, payload);
     }
@@ -275,7 +275,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult.totalAvailableCount).toBe(30);
   });
 
-  it('checks if getting a post will increase its view count', async () => {
+  it('increases the view count of a post after getting it', async () => {
     await QuestPostController.publishPost(app.mongoClient, payload);
 
     await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
@@ -287,7 +287,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(4);
   });
 
-  it('checks if getting a post will not increase its view count if specified', async () => {
+  it('does not increase the view count of a post if specified', async () => {
     await QuestPostController.publishPost(app.mongoClient, payload);
 
     await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht', false);
@@ -299,7 +299,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
 
-  it('checks if getting a post with alt language only will return the alt one', async () => {
+  it('returns the post in an alternative language if main is not available', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
 
     const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
@@ -309,13 +309,13 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(getResult?.post[SequentialDocumentKey.sequenceId]).toBe(1);
   });
 
-  it('checks if getting a non-existent post will return an empty response', async () => {
+  it('returns an empty response if the post does not exist', async () => {
     const getResult = await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
 
     expect(getResult).toBeNull();
   });
 
-  it('checks if getting a post will return all available languages', async () => {
+  it('returns all available languages of a post', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
@@ -326,7 +326,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult?.otherLangs).toStrictEqual(['en', 'jp']);
   });
 
-  it('checks if getting a post without increasing the view count will not check for available languages', async () => {
+  it('does not check for the available languages if view count does not increase', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
@@ -337,7 +337,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(postListResult?.otherLangs).toStrictEqual([]);
   });
 
-  it('checks if view count behaves correctly according to the specified `incCount`', async () => {
+  test('if view count behaves correctly according to the specified `incCount`', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'en'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'cht'});
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: 'jp'});
@@ -360,7 +360,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
 
-  it('checks if view count behaves correctly when returning the alternative version', async () => {
+  test('if view count behaves correctly when returning the alternative version', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, lang: 'en'});
 
     await QuestPostController.getQuestPost(app.mongoClient, 1, 'cht');
