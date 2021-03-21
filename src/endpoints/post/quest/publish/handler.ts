@@ -3,7 +3,7 @@ import {MongoClient, MongoError} from 'mongodb';
 import {ApiResponseCode, QuestPostPublishPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 import {GoogleUserController} from '../../../userControl/controller';
-import {processPostPublishPayload} from '../../base/payload';
+import {processQuestPostPublishPayload} from '../../base/payload';
 import {ApiFailedResponse} from '../../base/response/failed';
 import {SeqIdSkippingError} from '../../error';
 import {QuestPostController} from '../controller';
@@ -12,7 +12,7 @@ import {QuestPostPublishSuccessResponse} from './response';
 export const handlePublishQuestPost = async (
   req: Request, res: Response, mongoClient: MongoClient,
 ): Promise<ApiResponse> => {
-  const payload = processPostPublishPayload(req.query as unknown as QuestPostPublishPayload);
+  const payload = processQuestPostPublishPayload(req.query as unknown as QuestPostPublishPayload);
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {

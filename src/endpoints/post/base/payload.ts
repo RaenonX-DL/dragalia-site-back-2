@@ -31,26 +31,32 @@ const processQuestPostPayload = <T extends QuestPostPayload>(payload: T): T => {
   return payload;
 };
 
-export const processPostListPayload = (payload: PostListPayload): PostListPayload => {
+export const processPostListPayload = <T extends PostListPayload>(payload: T): T => {
   payload.start = +payload.start || 0;
   payload.limit = +payload.limit || 0;
 
   return payload;
 };
 
-export const processPostPublishPayload = (payload: QuestPostPublishPayload): QuestPostPublishPayload => {
-  payload = processQuestPostPayload(payload);
-
-  return payload;
-};
-
-export const processPostGetPayload = (payload: SinglePostPayload): SinglePostPayload => {
+export const processPostGetPayload = <T extends SinglePostPayload>(payload: T): T => {
   payload = processSinglePostPayload(payload);
 
   return payload;
 };
 
-export const processPostEditPayload = (payload: QuestPostEditPayload): QuestPostEditPayload => {
+export const processPostIdCheckPayload = <T extends SinglePostPayload>(payload: T): T => {
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
+export const processQuestPostPublishPayload = (payload: QuestPostPublishPayload): QuestPostPublishPayload => {
+  payload = processQuestPostPayload(payload);
+
+  return payload;
+};
+
+export const processQuestPostEditPayload = (payload: QuestPostEditPayload): QuestPostEditPayload => {
   payload = processQuestPostPayload(payload);
 
   return payload;
