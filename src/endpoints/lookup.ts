@@ -6,13 +6,14 @@ import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
+import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
 import {handleListQuestPost} from './post/quest/list/handler';
 import {handlePublishQuestPost} from './post/quest/publish/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleUserLogin} from './userControl/login/handler';
 
-type Methods = 'GET' | 'POST';
+type HttpMethods = 'GET' | 'POST';
 
 type HandlerFunction = (req: Request, res: Response, mongoClient: MongoClient) => Promise<ApiResponse>;
 
@@ -29,13 +30,14 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
   [ApiEndPoints.POST_QUEST_EDIT]: {POST: handleEditQuestPost},
+  [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
 };
 
 export const handleResponse = async (
   req: Request, res: Response, mongoClient: MongoClient,
   handler: HandlerFunction, nextFunction?: NextFunction,
 ): Promise<void> => {
-  const method: Methods = req.method.toUpperCase() as Methods;
+  const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
   console.info(`${method} ${req.path}`);
 
@@ -55,7 +57,7 @@ export const handleEndpoint = async (
   req: Request, res: Response, mongoClient: MongoClient,
   handlers: EndpointHandlers, nextFunction?: NextFunction,
 ): Promise<void> => {
-  const method: Methods = req.method.toUpperCase() as Methods;
+  const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
   if (!handlers[method]) {
     await handleResponse(req, res, mongoClient, handleMethodNotAllowed(Object.keys(handlers)), nextFunction);

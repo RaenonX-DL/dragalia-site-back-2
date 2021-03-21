@@ -30,10 +30,11 @@ export abstract class SequentialDocument extends Document {
   /**
    * Get the next available sequential ID.
    *
-   * If seqId is specified, this method will return it and update it instead, if the number is valid.
+   * If seqId is specified, this method will return it and update the sequence counter to it, if the number is valid.
    *
    * ``increase`` defaults to true.
-   * If increase, the counter will be increased and updated. The return will be the updated sequential ID.
+   * If ``increase``, the counter will be increased and updated. The return will be the updated sequential ID.
+   * Otherwise, the current counter status will be returned instead.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {CollectionInfo} dbInfo database info of the document
@@ -49,7 +50,7 @@ export abstract class SequentialDocument extends Document {
       increase = true;
     }
 
-    // Initialize the collection connection, if not yet set up
+    // Initialize the collection, if not yet set up
     if (!this.seqCollection) {
       await this.init(mongoClient, dbInfo);
     }

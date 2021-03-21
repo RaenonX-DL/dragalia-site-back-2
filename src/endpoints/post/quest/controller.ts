@@ -66,26 +66,18 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument, QuestPostGetSu
  */
 export class QuestPostController extends PostController {
   /**
-   * Get the next available sequential ID.
-   *
-   * If ``seqId`` is specified, this method will return it and update it instead, if the number is valid.
-   *
-   * ``increase`` defaults to true.
-   * If ``increase``, the counter will be increased and updated. The return will be the updated sequential ID.
+   * Same as {@link QuestPost.getNextSeqId}.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {number?} seqId post desired sequential ID to use, if any
+   * @param {CollectionInfo} dbInfo database info of the document
+   * @param {number?} seqId desired post sequential ID to use
    * @param {boolean} increase increase the counter or not
-   * @return {Promise<number>} next available sequential ID
+   * @return {number} next available sequential ID
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
     mongoClient: MongoClient, {seqId, increase}: NextSeqIdArgs,
   ): Promise<number> {
-    if (increase == null) { // Check for both `null` and `undefined`
-      increase = true;
-    }
-
     return await QuestPost.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
   }
 
@@ -179,5 +171,33 @@ export class QuestPostController extends PostController {
       QuestPost.getCollection(mongoClient), seqId, langCode, incCount,
       ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
     );
+  }
+
+  /**
+   * Check if the given post ID is available.
+   *
+   * If ``seqId`` is omitted, returns ``true``.
+   * (a new ID will be automatically generated and used when publishing a post without specifying it)
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} langCode post language code to be checked
+   * @param {number} seqId post sequential ID to be checked
+   * @return {Promise<boolean>} promise containing the availability of the ID
+   */
+  static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
+    if (!seqId) {
+      return true;
+    }
+
+    const nextSeqId = await QuestPostController.getNextSeqId(mongoClient, {increase: false});
+    if (seqId > nextSeqId + 1) {
+      return false;
+    }
+
+    return !await QuestPost.getCollection(mongoClient)
+      .findOne({
+        [SequentialDocumentKey.sequenceId]: seqId,
+        [MultiLingualDocumentKey.language]: langCode,
+      });
   }
 }

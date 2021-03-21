@@ -115,7 +115,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum');
   });
 
-  it('publishes a new post in the same ID but different language', async () => {
+  it('publishes a new post in an used ID but different language', async () => {
     const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
 
     expect(newSeqId).toBe(1);
@@ -403,5 +403,53 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     );
 
     expect(editResult).toBe('NOT_FOUND');
+  });
+
+  it('returns available for the next unused ID in the same language', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId + 1);
+
+    expect(availability).toBe(true);
+  });
+
+  it('returns available if ID is not given', async () => {
+    await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang);
+
+    expect(availability).toBe(true);
+  });
+
+  it('returns available for an unused language in the same ID', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, 'en', newSeqId);
+
+    expect(availability).toBe(true);
+  });
+
+  it('returns available for an unused language in the next unused ID', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, 'en', newSeqId + 1);
+
+    expect(availability).toBe(true);
+  });
+
+  it('returns unavailable for a skipping ID', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId + 2);
+
+    expect(availability).toBe(false);
+  });
+
+  it('returns unavailable for an existing ID', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId);
+
+    expect(availability).toBe(false);
   });
 });
