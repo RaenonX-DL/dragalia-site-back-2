@@ -14,14 +14,17 @@ export type SequentialDocumentBase = DocumentBase & {
   [SequentialDocumentKey.sequenceId]: number,
 };
 
+const counterCollectionName = '_seq_counter';
+
+enum SequenceCounterKeys {
+  collection = '_col',
+  counter = '_seq',
+}
+
 /**
  * Sequential document class.
  */
 export abstract class SequentialDocument extends Document {
-  static readonly counterCollectionName = '_seq_counter';
-  static readonly counterCollectionField = '_col';
-  static readonly counterSequenceField = '_seq';
-
   protected static seqCollection: Collection;
 
   /**
@@ -29,11 +32,12 @@ export abstract class SequentialDocument extends Document {
    *
    * If seqId is specified, this method will return it and update it instead, if the number is valid.
    *
+   * ``increase`` defaults to true.
    * If increase, the counter will be increased and updated. The return will be the updated sequential ID.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {CollectionInfo} dbInfo database info of the document
-   * @param {number?} seqId post desired sequential ID to use, if any
+   * @param {number?} seqId desired post sequential ID to use
    * @param {boolean} increase increase the counter or not
    * @return {number} next available sequential ID
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
@@ -41,24 +45,28 @@ export abstract class SequentialDocument extends Document {
   static async getNextSeqId(
     mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase}: NextSeqIdArgs,
   ): Promise<number> {
+    if (increase == null) { // `==` to check for both `null` and `undefined`
+      increase = true;
+    }
+
     // Initialize the collection connection, if not yet set up
     if (!this.seqCollection) {
       await this.init(mongoClient, dbInfo);
     }
 
-    const filter = {[this.counterCollectionField]: dbInfo.collectionName};
+    const filter = {[SequenceCounterKeys.collection]: dbInfo.collectionName};
 
     let updateOps;
     if (seqId) {
-      const latestSeqId = (await this.seqCollection.findOne(filter))?.[this.counterSequenceField] ?? 0;
+      const latestSeqId = (await this.seqCollection.findOne(filter))?.[SequenceCounterKeys.counter] ?? 0;
 
       if (seqId > latestSeqId + 1) {
         throw new SeqIdSkippingError(seqId, latestSeqId + 1);
       }
 
-      updateOps = {$set: {[this.counterSequenceField]: seqId}};
+      updateOps = {$set: {[SequenceCounterKeys.counter]: seqId}};
     } else {
-      updateOps = {$inc: {[this.counterSequenceField]: increase ? 1 : 0}};
+      updateOps = {$inc: {[SequenceCounterKeys.counter]: increase ? 1 : 0}};
     }
 
     return (await this.seqCollection.findOneAndUpdate(
@@ -68,7 +76,7 @@ export abstract class SequentialDocument extends Document {
         upsert: true,
         returnOriginal: false,
       },
-    )).value[this.counterSequenceField];
+    )).value[SequenceCounterKeys.counter];
   }
 
   /**
@@ -79,12 +87,12 @@ export abstract class SequentialDocument extends Document {
    * @private
    */
   private static async init(mongoClient: MongoClient, dbInfo: CollectionInfo): Promise<void> {
-    this.seqCollection = getCollection(mongoClient, {...dbInfo, collectionName: this.counterCollectionName});
+    this.seqCollection = getCollection(mongoClient, {...dbInfo, collectionName: counterCollectionName});
 
     // Initialize the counter field, if not yet available
     await this.seqCollection.updateOne(
-      {[this.counterCollectionField]: dbInfo.collectionName},
-      {$inc: {[this.counterSequenceField]: 0}},
+      {[SequenceCounterKeys.collection]: dbInfo.collectionName},
+      {$inc: {[SequenceCounterKeys.counter]: 0}},
       {
         upsert: true,
       },
