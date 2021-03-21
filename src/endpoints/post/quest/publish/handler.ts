@@ -3,30 +3,16 @@ import {MongoClient, MongoError} from 'mongodb';
 import {ApiResponseCode, QuestPostPublishPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 import {GoogleUserController} from '../../../userControl/controller';
-import {processSinglePostPayload} from '../../base/payload';
+import {processPostPublishPayload} from '../../base/payload';
 import {ApiFailedResponse} from '../../base/response/failed';
 import {SeqIdSkippingError} from '../../error';
 import {QuestPostController} from '../controller';
 import {QuestPostPublishSuccessResponse} from './response';
 
-const processPayload = (payload: QuestPostPublishPayload): QuestPostPublishPayload => {
-  // When only one positional info is provided,
-  // `payload.positional` will be an object instead of a list of the objects.
-  // https://stackoverflow.com/q/56210870/11571888
-  // noinspection JSDeprecatedSymbols
-  if (!Array.isArray(payload.positional)) {
-    payload.positional = [payload.positional];
-  }
-
-  payload = processSinglePostPayload(payload);
-
-  return payload;
-};
-
 export const handlePublishQuestPost = async (
   req: Request, res: Response, mongoClient: MongoClient,
 ): Promise<ApiResponse> => {
-  const payload = processPayload(req.query as unknown as QuestPostPublishPayload);
+  const payload = processPostPublishPayload(req.query as unknown as QuestPostPublishPayload);
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {

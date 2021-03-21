@@ -12,7 +12,7 @@ import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser, GoogleUserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
 
-describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - endpoint to get a specific quest post`, () => {
+describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest post`, () => {
   let app: Application;
 
   const uidAdmin = '78787878887';

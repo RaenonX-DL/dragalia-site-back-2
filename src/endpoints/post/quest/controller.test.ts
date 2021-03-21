@@ -371,4 +371,37 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(getResult?.post[MultiLingualDocumentKey.language]).toBe('en');
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
+
+  it('edits a post', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const editResult = await QuestPostController.editQuestPost(
+      app.mongoClient,
+      {...payload, video: 'videoEdit', seqId: newSeqId, modifyNote: 'mod'},
+    );
+
+    expect(editResult).toBe('UPDATED');
+  });
+
+  it('edits a post even if no changes were made', async () => {
+    const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const editResult = await QuestPostController.editQuestPost(
+      app.mongoClient,
+      {...payload, seqId: newSeqId, modifyNote: 'mod'},
+    );
+
+    expect(editResult).toBe('NO_CHANGE');
+  });
+
+  it('returns `NOT_FOUND` if the post to be edited is not found', async () => {
+    await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const editResult = await QuestPostController.editQuestPost(
+      app.mongoClient,
+      {...payload, video: 'videoEdit', seqId: 8, modifyNote: 'mod'},
+    );
+
+    expect(editResult).toBe('NOT_FOUND');
+  });
 });

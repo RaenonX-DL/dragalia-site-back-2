@@ -1,7 +1,9 @@
 import {Collection, Document} from 'mongodb';
 import {PostListEntry} from '../../../api-def/api/post/base/response';
 import {SequencedController} from '../../../base/controller/seq';
-import {ModifiableDocumentKey} from '../../../base/model/modifiable';
+import {UpdateResult} from '../../../base/enum/updateResult';
+import {DocumentBaseKey} from '../../../base/model/base';
+import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/modifiable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
@@ -123,7 +125,7 @@ export abstract class PostController extends SequencedController {
    * @return {Promise<T>} result of getting a post
    * @protected
    */
-  static async getPost<D extends PostDocumentBase,
+  protected static async getPost<D extends PostDocumentBase,
     R extends PostGetSuccessResponseParam,
     T extends PostGetResult<D, R>>(
     collection: Collection, seqId: number, langCode = 'cht', incCount = true,
@@ -164,5 +166,97 @@ export abstract class PostController extends SequencedController {
     }
 
     return resultConstructFunction(post.value as D, isAltLang, otherLangs);
+  }
+
+  /**
+   * Edit a post.
+   *
+   * If any of ``seqId`` or ``langCode`` is ``undefined``,
+   * ``NOT_FOUND`` will be returned.
+   *
+   * Note that several document fields will not be updated, and no messages will be emitted.
+   *
+   * This includes:
+   *
+   * - Document ID
+   * - Sequential ID
+   * - Language
+   * - Modification notes
+   * - Last Modified timestamp
+   * - Publish timestamp
+   * - View count
+   *
+   * @param {Collection} collection mongo collection containing the post to be edited
+   * @param {number | undefined} seqId sequential ID of the post to be edited
+   * @param {string | undefined} langCode language code of the post to be edited
+   * @param {D} update document used to replace the old post
+   * @param {string} modifyNote post modification note
+   * @param {D} additionalFilter additional filtering conditions
+   * @return {Promise<UpdateResult>} promise of the update result
+   * @protected
+   */
+  protected static async editPost<D extends PostDocumentBase>(
+    collection: Collection,
+    seqId: number | undefined,
+    langCode: string | undefined,
+    update: D,
+    modifyNote: string,
+    additionalFilter?: D,
+  ): Promise<UpdateResult> {
+    // Returns `NOT_FOUND` if `seqId` or `langCode` is falsy - which post to update?
+    if (!seqId || !langCode) {
+      return 'NOT_FOUND';
+    }
+
+    const now = new Date();
+
+    // Create filter (condition for updating the post)
+    let filter = {
+      [SequentialDocumentKey.sequenceId]: seqId,
+      [MultiLingualDocumentKey.language]: langCode,
+    };
+    if (additionalFilter) {
+      filter = {
+        ...filter,
+        ...additionalFilter,
+      };
+    }
+
+    // Remove the document keys to **not** to update
+    const omitKeys = [
+      DocumentBaseKey.id, // Document ID should be immutable
+      SequentialDocumentKey.sequenceId, // Sequential ID should be immutable
+      MultiLingualDocumentKey.language, // Language should be immutable
+      ModifiableDocumentKey.modificationNotes, // Modification notes should not be updated
+      ModifiableDocumentKey.dateModified, // Last modified timestamp should be updated later
+      ModifiableDocumentKey.datePublished, // Publish timestamp should not be updated
+      ViewCountableDocumentKey.viewCount, // Post view count should not be changed
+    ];
+    omitKeys.forEach((key) => delete update[key]);
+
+    const updateResult = await collection.updateOne(filter, {$set: update});
+
+    // Check if there is any document that matches the criteria
+    if (!updateResult.matchedCount) {
+      return 'NOT_FOUND';
+    }
+
+    // Check if there is any document changed
+    if (!updateResult.modifiedCount) {
+      return 'NO_CHANGE';
+    }
+
+    // Add modification note and update the last modified timestamp
+    await collection.updateOne(filter, {
+      $set: {[ModifiableDocumentKey.dateModified]: now},
+      $push: {
+        [ModifiableDocumentKey.modificationNotes]: {
+          [ModifyNoteDocumentKey.datetime]: now,
+          [ModifyNoteDocumentKey.note]: modifyNote,
+        },
+      },
+    });
+
+    return 'UPDATED';
   }
 }

@@ -1,4 +1,5 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
+import {QuestPostPayload} from '../../../api-def/api/post/quest/payload';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentBase, DocumentBaseKey} from '../../../base/model/base';
 import {ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
@@ -139,6 +140,27 @@ export class QuestPost extends Post {
     return new QuestPost(
       doc._seq, doc._lang, doc.t, doc.g, doc.v, doc.i.map((doc) => QuestPosition.fromDocument(doc)), doc.a,
       doc._dtMod, doc._dtPub, doc._id, doc._dtMn.map((doc) => ModifyNote.fromDocument(doc)), doc._vc,
+    );
+  }
+
+  /**
+   * Convert `payload` to a `QuestPost`.
+   *
+   * @param {T} payload payload to be converted
+   * @return {QuestPost} converted quest post instance.
+   */
+  static fromPayload<T extends QuestPostPayload>(payload: T): QuestPost {
+    if (!payload.seqId) {
+      throw new Error('`seqId` must be provided in `payload`.');
+    }
+
+    return new QuestPost(
+      payload.seqId, payload.lang,
+      payload.title, payload.general, payload.video,
+      payload.positional?.map(
+        (posInfo) => new QuestPosition(posInfo.position, posInfo.builds, posInfo.rotations, posInfo.tips),
+      ),
+      payload.addendum,
     );
   }
 

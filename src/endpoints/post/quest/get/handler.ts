@@ -18,9 +18,9 @@ export const handleGetQuestPost = async (
     return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, 400);
   }
 
-  // Get a list of posts
+  // Get a post
   const postGetResult = await QuestPostController.getQuestPost(
-    mongoClient, payload.seqId as number, payload.lang, true,
+    mongoClient, payload.seqId, payload.lang, true,
   );
   if (!postGetResult) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, 404);

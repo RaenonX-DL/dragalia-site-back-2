@@ -1,6 +1,7 @@
 import {MongoClient} from 'mongodb';
-import {QuestPostPublishPayload} from '../../../api-def/api';
+import {QuestPostEditPayload, QuestPostPublishPayload} from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
+import {UpdateResult} from '../../../base/enum/updateResult';
 import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/modifiable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
@@ -8,14 +9,7 @@ import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {PostController, PostGetResult, PostListResult} from '../base/controller';
 import {PostDocumentKey} from '../base/model';
 import {QuestPostGetSuccessResponseParam} from './get/response';
-import {
-  dbInfo,
-  QuestPosition,
-  QuestPositionDocumentKey,
-  QuestPost,
-  QuestPostDocument,
-  QuestPostDocumentKey,
-} from './model';
+import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
 
 
 /**
@@ -103,17 +97,30 @@ export class QuestPostController extends PostController {
    * @return {Promise<number>} post sequential ID
    */
   static async publishPost(mongoClient: MongoClient, postPayload: QuestPostPublishPayload): Promise<number> {
-    const post: QuestPost = new QuestPost(
-      await this.getNextSeqId(mongoClient, {seqId: postPayload.seqId}), postPayload.lang,
-      postPayload.title, postPayload.general, postPayload.video,
-      postPayload.positional.map(
-        (posInfo) => new QuestPosition(posInfo.position, posInfo.builds, posInfo.rotations, posInfo.tips),
-      ), postPayload.addendum,
-    );
+    postPayload = {...postPayload, seqId: await this.getNextSeqId(mongoClient, {seqId: postPayload.seqId})};
+
+    const post: QuestPost = QuestPost.fromPayload(postPayload);
 
     await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
 
     return post.seqId;
+  }
+
+  /**
+   * Edit a quest post.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {QuestPostEditPayload} editPayload payload to edit a quest post
+   * @return {Promise<UpdateResult>} result of editing a quest post
+   */
+  static async editQuestPost(mongoClient: MongoClient, editPayload: QuestPostEditPayload): Promise<UpdateResult> {
+    const post: QuestPost = QuestPost.fromPayload(editPayload);
+
+    return await this.editPost(
+      QuestPost.getCollection(mongoClient),
+      editPayload.seqId, editPayload.lang,
+      post.toObject(), editPayload.modifyNote,
+    );
   }
 
   /**

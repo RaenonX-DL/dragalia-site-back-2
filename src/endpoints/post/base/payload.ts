@@ -1,23 +1,57 @@
-import {PostListPayload, SinglePostPayload} from '../../../api-def/api/base/payload';
+import {
+  PostListPayload,
+  QuestPostEditPayload,
+  QuestPostPayload,
+  QuestPostPublishPayload,
+  SinglePostPayload,
+} from '../../../api-def/api';
 
-export const processSinglePostPayload = <T extends SinglePostPayload>(payload: T): T => {
+const processSinglePostPayload = <T extends SinglePostPayload>(payload: T): T => {
   // `seqId` is string if given as a payload
   if (payload.seqId && !Number.isInteger(payload.seqId)) {
-    payload.seqId = Number(payload.seqId);
+    payload.seqId = +payload.seqId;
   }
 
   return payload;
 };
 
+const processQuestPostPayload = <T extends QuestPostPayload>(payload: T): T => {
+  if (!payload.positional) {
+    // If `positional` field does not exist in the payload, and an empty array to it.
+    payload.positional = [];
+  } else if (!Array.isArray(payload.positional)) {
+    // When only one positional info is provided,
+    // `payload.positional` will be an object instead of a list of the objects.
+    // https://stackoverflow.com/q/56210870/11571888
+    payload.positional = [payload.positional];
+  }
+
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
 export const processPostListPayload = (payload: PostListPayload): PostListPayload => {
-  payload.start = Number(payload.start) || 0;
-  payload.limit = Number(payload.limit) || 0;
+  payload.start = +payload.start || 0;
+  payload.limit = +payload.limit || 0;
+
+  return payload;
+};
+
+export const processPostPublishPayload = (payload: QuestPostPublishPayload): QuestPostPublishPayload => {
+  payload = processQuestPostPayload(payload);
 
   return payload;
 };
 
 export const processPostGetPayload = (payload: SinglePostPayload): SinglePostPayload => {
   payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
+export const processPostEditPayload = (payload: QuestPostEditPayload): QuestPostEditPayload => {
+  payload = processQuestPostPayload(payload);
 
   return payload;
 };

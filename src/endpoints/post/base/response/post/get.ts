@@ -44,7 +44,7 @@ export abstract class PostGetSuccessResponse extends ApiResponse {
     this.isAdmin = isAdmin;
     this.showAds = showAds;
 
-    this.seqId = Number(params.seqId);
+    this.seqId = +params.seqId;
     this.lang = params.lang;
     this.modified = params.modified;
     this.published = params.published;
