@@ -19,8 +19,8 @@ export const handleEditQuestPost = async (
   }
 
   // Check user privilege
-  const userData = await GoogleUserController.getUserData(mongoClient, payload.googleUid);
-  if (!userData?.isAdmin) {
+  const isAdmin = await GoogleUserController.isAdmin(mongoClient, payload.googleUid);
+  if (!isAdmin) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, 401);
   }
 

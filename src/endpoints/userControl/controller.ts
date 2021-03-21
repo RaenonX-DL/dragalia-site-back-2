@@ -76,10 +76,8 @@ export class GoogleUserController {
    * @return {Promise<boolean>} if the user is an admin
    */
   static async isAdmin(mongoClient: MongoClient, googleUid: string): Promise<boolean> {
-    const userData = await GoogleUser.getCollection(mongoClient).findOne({
-      [GoogleUserDocumentKey.userId]: googleUid,
-    });
+    const userData = await GoogleUserController.getUserData(mongoClient, googleUid);
 
-    return userData && GoogleUser.fromDocument(userData as GoogleUserDocument).isAdmin;
+    return userData?.isAdmin || false;
   }
 }
