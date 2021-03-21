@@ -7,6 +7,7 @@ import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {Post, PostDocumentBase, PostDocumentKey} from '../base/model';
+import {SeqIdMissingError} from '../error';
 
 export const dbInfo: CollectionInfo = {
   dbName: 'post',
@@ -151,7 +152,7 @@ export class QuestPost extends Post {
    */
   static fromPayload<T extends QuestPostPayload>(payload: T): QuestPost {
     if (!payload.seqId) {
-      throw new Error('`seqId` must be provided in `payload`.');
+      throw new SeqIdMissingError();
     }
 
     return new QuestPost(

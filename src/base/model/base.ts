@@ -1,6 +1,7 @@
 import {Collection, Document as MongoDocument, MongoClient, ObjectId} from 'mongodb';
 import {getCollection, IndexInitFunction} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
+import {NotImplementedError} from '../error';
 
 export enum DocumentBaseKey {
   id = '_id'
@@ -31,7 +32,7 @@ export abstract class Document {
    * @param {DocumentBase} doc document to be converted
    */
   static fromDocument(doc: DocumentBase): Document { // eslint-disable-line @typescript-eslint/no-unused-vars
-    throw new Error('`fromDocument()` must be overridden');
+    throw new NotImplementedError('`fromDocument()` must be overridden');
   }
 
   /**
@@ -40,7 +41,7 @@ export abstract class Document {
    * @param {MongoClient} mongoClient mongo client instance
    */
   static getCollection(mongoClient: MongoClient): Collection { // eslint-disable-line @typescript-eslint/no-unused-vars
-    throw new Error('`getCollection()` must be overridden');
+    throw new NotImplementedError('`getCollection()` must be overridden');
   }
 
   /**
