@@ -11,6 +11,10 @@ export type DocumentBase = MongoDocument & {
   [DocumentBaseKey.id]?: ObjectId,
 };
 
+export type DocumentConstructParams = {
+  id?: ObjectId,
+}
+
 /**
  * Base mongodb document class.
  */
@@ -20,10 +24,10 @@ export abstract class Document {
   /**
    * Construct a mongodb document.
    *
-   * @param {ObjectId} id object ID of the document
+   * @param {DocumentConstructParams} params object ID of the document
    */
-  protected constructor(id?: ObjectId) {
-    this.id = id;
+  protected constructor(params?: DocumentConstructParams) {
+    this.id = params?.id;
   }
 
   /**
@@ -63,5 +67,9 @@ export abstract class Document {
    *
    * @return {DocumentBase} document as object
    */
-  abstract toObject(): DocumentBase;
+  toObject(): DocumentBase {
+    return {
+      [DocumentBaseKey.id]: this.id,
+    };
+  }
 }

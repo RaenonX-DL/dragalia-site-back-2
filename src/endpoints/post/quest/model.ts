@@ -1,12 +1,12 @@
-import {Collection, MongoClient, ObjectId} from 'mongodb';
+import {Collection, MongoClient} from 'mongodb';
 import {QuestPostPayload} from '../../../api-def/api/post/quest/payload';
 import {CollectionInfo} from '../../../base/controller/info';
-import {Document, DocumentBase, DocumentBaseKey} from '../../../base/model/base';
+import {Document, DocumentBaseKey} from '../../../base/model/base';
 import {ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
-import {Post, PostDocumentBase, PostDocumentKey} from '../base/model';
+import {Post, PostConstructParams, PostDocumentBase, PostDocumentKey} from '../base/model';
 import {SeqIdMissingError} from '../error';
 
 export const dbInfo: CollectionInfo = {
@@ -21,7 +21,7 @@ export enum QuestPositionDocumentKey {
   tips = 't',
 }
 
-export type QuestPositionDocument = DocumentBase & {
+export type QuestPositionDocument = {
   [QuestPositionDocumentKey.position]: string,
   [QuestPositionDocumentKey.builds]: string,
   [QuestPositionDocumentKey.rotations]: string,
@@ -52,7 +52,7 @@ export class QuestPosition extends Document {
   tips: string;
 
   /**
-   * Construct a quest position data
+   * Construct a quest position data.
    *
    * @param {string} position position name
    * @param {string} builds position build
@@ -72,7 +72,12 @@ export class QuestPosition extends Document {
    * @inheritDoc
    */
   static fromDocument(obj: QuestPositionDocument): QuestPosition {
-    return new QuestPosition(obj.p, obj.b, obj.r, obj.t);
+    return new QuestPosition(
+      obj[QuestPositionDocumentKey.position],
+      obj[QuestPositionDocumentKey.builds],
+      obj[QuestPositionDocumentKey.rotations],
+      obj[QuestPositionDocumentKey.tips],
+    );
   }
 
   /**
@@ -87,12 +92,19 @@ export class QuestPosition extends Document {
    */
   toObject(): QuestPositionDocument {
     return {
-      p: this.position,
-      b: this.builds,
-      r: this.rotations,
-      t: this.tips,
+      [QuestPositionDocumentKey.position]: this.position,
+      [QuestPositionDocumentKey.builds]: this.builds,
+      [QuestPositionDocumentKey.rotations]: this.rotations,
+      [QuestPositionDocumentKey.tips]: this.tips,
     };
   }
+}
+
+export type QuestPostConstructParams = PostConstructParams & {
+  generalInfo: string,
+  video: string,
+  positionInfo: Array<QuestPosition>,
+  addendum: string,
 }
 
 /**
@@ -107,26 +119,25 @@ export class QuestPost extends Post {
   /**
    * Construct a quest post data.
    *
-   * @param {number} seqId post sequential ID
-   * @param {string} language post language
-   * @param {string} title post title
-   * @param {string} generalInfo quest general info
-   * @param {string} video quest video
-   * @param {string} positionInfo quest positional info
-   * @param {string} addendum quest guide addendum
-   * @param {Date} dateModified last modification date of the post
-   * @param {Date} datePublished post publish data
-   * @param {ObjectId} id object ID of the post
-   * @param {Array<ModifyNote>} modificationNotes post modification notes
-   * @param {number} viewCount post view count
+   * @param {QuestPostConstructParams} params parameters to construct a quest post data
    */
-  constructor(
-    seqId: number, language: string, title: string,
-    generalInfo: string, video: string, positionInfo: Array<QuestPosition>, addendum: string,
-    dateModified?: Date, datePublished?: Date, id?: ObjectId,
-    modificationNotes?: Array<ModifyNote>, viewCount?: number,
-  ) {
-    super(seqId, language, title, dateModified, datePublished, id, modificationNotes, viewCount);
+  constructor(params: QuestPostConstructParams) {
+    const {
+      seqId,
+      language,
+      title,
+      generalInfo,
+      video,
+      positionInfo,
+      addendum,
+      dateModified,
+      datePublished,
+      id,
+      modificationNotes,
+      viewCount,
+    } = params;
+
+    super({seqId, language, title, dateModified, datePublished, id, modificationNotes, viewCount});
 
     this.generalInfo = generalInfo;
     this.video = video;
@@ -138,31 +149,44 @@ export class QuestPost extends Post {
    * @inheritDoc
    */
   static fromDocument(doc: QuestPostDocument): QuestPost {
-    return new QuestPost(
-      doc._seq, doc._lang, doc.t, doc.g, doc.v, doc.i.map((doc) => QuestPosition.fromDocument(doc)), doc.a,
-      doc._dtMod, doc._dtPub, doc._id, doc._dtMn.map((doc) => ModifyNote.fromDocument(doc)), doc._vc,
-    );
+    return new QuestPost({
+      seqId: doc[SequentialDocumentKey.sequenceId],
+      language: doc[MultiLingualDocumentKey.language],
+      title: doc[PostDocumentKey.title],
+      generalInfo: doc[QuestPostDocumentKey.generalInfo],
+      video: doc[QuestPostDocumentKey.video],
+      positionInfo: doc[QuestPostDocumentKey.positionInfo].map((doc) => QuestPosition.fromDocument(doc)),
+      addendum: doc[QuestPostDocumentKey.addendum],
+      dateModified: doc[ModifiableDocumentKey.dateModified],
+      datePublished: doc[ModifiableDocumentKey.datePublished],
+      id: doc[DocumentBaseKey.id],
+      modificationNotes: doc[ModifiableDocumentKey.modificationNotes].map((doc) => ModifyNote.fromDocument(doc)),
+      viewCount: doc[ViewCountableDocumentKey.viewCount],
+    });
   }
 
   /**
    * Convert `payload` to a `QuestPost`.
    *
    * @param {T} payload payload to be converted
-   * @return {QuestPost} converted quest post instance.
+   * @return {QuestPost} converted quest post instance
    */
   static fromPayload<T extends QuestPostPayload>(payload: T): QuestPost {
     if (!payload.seqId) {
       throw new SeqIdMissingError();
     }
 
-    return new QuestPost(
-      payload.seqId, payload.lang,
-      payload.title, payload.general, payload.video,
-      payload.positional?.map(
+    return new QuestPost({
+      seqId: payload.seqId,
+      language: payload.lang,
+      title: payload.title,
+      generalInfo: payload.general,
+      video: payload.video,
+      positionInfo: payload.positional?.map(
         (posInfo) => new QuestPosition(posInfo.position, posInfo.builds, posInfo.rotations, posInfo.tips),
       ),
-      payload.addendum,
-    );
+      addendum: payload.addendum,
+    });
   }
 
   /**

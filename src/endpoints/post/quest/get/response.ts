@@ -13,11 +13,7 @@ export type QuestPostGetSuccessResponseParam = PostGetSuccessResponseParam & {
  * API response class for getting a single quest post.
  */
 export class QuestPostGetSuccessResponse extends PostGetSuccessResponse {
-  title: string;
-  general: string;
-  video: string;
-  info: Array<PositionalInfo>;
-  addendum: string;
+  body: QuestPostGetSuccessResponseParam;
 
   /**
    * Construct a successful single quest post get API response.
@@ -29,11 +25,7 @@ export class QuestPostGetSuccessResponse extends PostGetSuccessResponse {
   constructor(isAdmin: boolean, showAds: boolean, params: QuestPostGetSuccessResponseParam) {
     super(isAdmin, showAds, params);
 
-    this.title = params.title;
-    this.general = params.general;
-    this.video = params.video;
-    this.info = params.info;
-    this.addendum = params.addendum;
+    this.body = params;
   }
 
   /**
@@ -42,11 +34,7 @@ export class QuestPostGetSuccessResponse extends PostGetSuccessResponse {
   toJson(): QuestPostGetSuccessResponseApi {
     return {
       ...super.toJson(),
-      title: this.title,
-      general: this.general,
-      video: this.video,
-      info: this.info,
-      addendum: this.addendum,
+      ...this.body,
     };
   }
 }

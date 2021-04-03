@@ -69,10 +69,8 @@ export class QuestPostController extends PostController {
    * Same as {@link QuestPost.getNextSeqId}.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {CollectionInfo} dbInfo database info of the document
    * @param {number?} seqId desired post sequential ID to use
    * @param {boolean} increase increase the counter or not
-   * @return {number} next available sequential ID
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
@@ -85,13 +83,13 @@ export class QuestPostController extends PostController {
    * Publish a new post and get its sequential ID.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {QuestPostPublishPayload} postPayload quest post publishing payload for creating a post
+   * @param {QuestPostPublishPayload} payload payload for creating a quest post
    * @return {Promise<number>} post sequential ID
    */
-  static async publishPost(mongoClient: MongoClient, postPayload: QuestPostPublishPayload): Promise<number> {
-    postPayload = {...postPayload, seqId: await this.getNextSeqId(mongoClient, {seqId: postPayload.seqId})};
+  static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
+    payload = {...payload, seqId: await this.getNextSeqId(mongoClient, {seqId: payload.seqId})};
 
-    const post: QuestPost = QuestPost.fromPayload(postPayload);
+    const post: QuestPost = QuestPost.fromPayload(payload);
 
     await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
 

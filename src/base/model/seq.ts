@@ -3,7 +3,7 @@ import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
 import {NextSeqIdArgs} from '../controller/seq';
-import {Document, DocumentBase} from './base';
+import {Document, DocumentBase, DocumentConstructParams} from './base';
 
 
 export enum SequentialDocumentKey {
@@ -21,11 +21,28 @@ enum SequenceCounterKeys {
   counter = '_seq',
 }
 
+export type SequentialDocumentConstructParams = DocumentConstructParams & {
+  seqId: number,
+}
+
 /**
  * Sequential document class.
  */
 export abstract class SequentialDocument extends Document {
   protected static seqCollection: Collection;
+
+  seqId: number;
+
+  /**
+   * Construct a sequential document.
+   *
+   * @param {SequentialDocumentConstructParams} _ parameters to construct a sequential document
+   */
+  protected constructor({id, seqId}: SequentialDocumentConstructParams) {
+    super({id});
+
+    this.seqId = seqId;
+  }
 
   /**
    * Get the next available sequential ID.
@@ -98,5 +115,14 @@ export abstract class SequentialDocument extends Document {
         upsert: true,
       },
     );
+  }
+
+  /**
+   * @inheritDoc
+   */
+  toObject(): SequentialDocumentBase {
+    return {
+      [SequentialDocumentKey.sequenceId]: this.seqId,
+    };
   }
 }

@@ -1,16 +1,14 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 import {CollectionInfo} from '../../../base/controller/info';
-import {ModifiableDocumentBase, ModifyNote} from '../../../base/model/modifiable';
+import {ModifiableDocumentBase, ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocument, SequentialDocumentBase, SequentialDocumentKey} from '../../../base/model/seq';
-import {ViewCountableDocumentBase} from '../../../base/model/viewCount';
+import {ViewCountableDocumentBase, ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {IndexInitFunction} from '../../../utils/mongodb';
-
 
 export enum PostDocumentKey {
   title = 't',
 }
-
 
 export type PostDocumentBase =
   MultiLingualDocumentBase
@@ -21,12 +19,21 @@ export type PostDocumentBase =
   [PostDocumentKey.title]: string,
 }
 
+export type PostConstructParams = {
+  seqId: number,
+  language: string,
+  title: string,
+  dateModified?: Date,
+  datePublished?: Date,
+  id?: ObjectId,
+  modificationNotes?: Array<ModifyNote>,
+  viewCount?: number,
+}
 
 /**
  * Post data class.
  */
 export abstract class Post extends SequentialDocument {
-  seqId: number;
   language: string;
   title: string;
   dateModified: Date;
@@ -37,31 +44,19 @@ export abstract class Post extends SequentialDocument {
   /**
    * Construct a post data.
    *
-   * @param {number} seqId post sequential ID
-   * @param {string} language post language
-   * @param {string} title post title
-   * @param {Date} dateModified last modification date of the post
-   * @param {Date} datePublished post publish data
-   * @param {ObjectId} id object ID of the post
-   * @param {Array<ModifyNote>} modificationNotes post modification notes
-   * @param {number} viewCount post view count
+   * @param {PostConstructParams} params parameters to construct a post data
    */
-  protected constructor(
-    seqId: number, language: string, title: string,
-    dateModified?: Date, datePublished?: Date, id?: ObjectId,
-    modificationNotes?: Array<ModifyNote>, viewCount?: number,
-  ) {
-    super(id);
+  protected constructor(params: PostConstructParams) {
+    super(params);
 
     const now = new Date();
 
-    this.seqId = seqId;
-    this.language = language;
-    this.title = title;
-    this.dateModified = dateModified || now;
-    this.datePublished = dateModified || now;
-    this.modificationNotes = modificationNotes || [];
-    this.viewCount = viewCount || 0;
+    this.language = params.language;
+    this.title = params.title;
+    this.dateModified = params.dateModified || now;
+    this.datePublished = params.dateModified || now;
+    this.modificationNotes = params.modificationNotes || [];
+    this.viewCount = params.viewCount || 0;
   }
 
   /**
@@ -82,5 +77,20 @@ export abstract class Post extends SequentialDocument {
         {unique: true},
       );
     }));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  toObject(): PostDocumentBase {
+    return {
+      ...super.toObject(),
+      [MultiLingualDocumentKey.language]: this.language,
+      [PostDocumentKey.title]: this.title,
+      [ModifiableDocumentKey.modificationNotes]: this.modificationNotes.map((doc) => doc.toObject()),
+      [ModifiableDocumentKey.dateModified]: this.dateModified,
+      [ModifiableDocumentKey.datePublished]: this.datePublished,
+      [ViewCountableDocumentKey.viewCount]: this.viewCount,
+    };
   }
 }

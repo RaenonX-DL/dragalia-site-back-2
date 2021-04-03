@@ -53,7 +53,7 @@ export class GoogleUser extends Document {
     googleEmail: string, googleUid: string, isAdmin: boolean, adsFreeExpiry?: Date,
     id?: ObjectId, loginCount?: number, lastLogin?: Date,
   ) {
-    super(id);
+    super({id});
 
     this.googleEmail = googleEmail;
     this.googleUid = googleUid;

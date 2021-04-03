@@ -87,7 +87,7 @@ export abstract class PostController extends SequencedController {
    * @param {Document} projection projection to use for returning the posts
    * @param {number} start starting point of the post list
    * @param {number} limit maximum count of the posts to return
-   * @param {PostListDocumentTransformFunction} docTransformFunction
+   * @param {PostListDocumentTransformFunction} docTransformFunction function to transform the returned documents
    * @return {Promise<PostListResult>} result of getting the post list function to transform the document into an entry
    * @protected
    */
