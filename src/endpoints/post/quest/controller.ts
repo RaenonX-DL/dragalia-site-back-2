@@ -150,9 +150,10 @@ export class QuestPostController extends PostController {
    *
    * If this is called for post displaying purpose, incCount should be ``true``. Otherwise, it should be ``false``.
    *
-   * Returns the post in the alternative language if the given sequential ID
-   * does not have the post in the specified language is not available,
-   * but has the post in the other language available.
+   * Returns the alternative language version
+   * if the analysis of the given sequential ID
+   * in the specified language is not available,
+   * but the version in the other language is available.
    *
    * Returns ``null`` if the post with the given sequential ID is not found.
    *

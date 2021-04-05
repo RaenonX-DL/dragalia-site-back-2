@@ -1,13 +1,10 @@
-import {PositionalInfo, QuestPostGetSuccessResponse as QuestPostGetSuccessResponseApi} from '../../../../api-def/api';
+import {
+  QuestPostGetContent,
+  QuestPostGetSuccessResponse as QuestPostGetSuccessResponseApi,
+} from '../../../../api-def/api';
 import {PostGetSuccessResponse, PostGetSuccessResponseParam} from '../../base/response/post/get';
 
-export type QuestPostGetSuccessResponseParam = PostGetSuccessResponseParam & {
-  title: string,
-  general: string,
-  video: string,
-  info: Array<PositionalInfo>,
-  addendum: string,
-}
+export type QuestPostGetSuccessResponseParam = PostGetSuccessResponseParam & QuestPostGetContent
 
 /**
  * API response class for getting a single quest post.
