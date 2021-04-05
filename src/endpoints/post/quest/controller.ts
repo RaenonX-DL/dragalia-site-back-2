@@ -184,19 +184,6 @@ export class QuestPostController extends PostController {
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
   static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
-    if (!seqId) {
-      return true;
-    }
-
-    const nextSeqId = await QuestPostController.getNextSeqId(mongoClient, {increase: false});
-    if (seqId > nextSeqId + 1) {
-      return false;
-    }
-
-    return !await QuestPost.getCollection(mongoClient)
-      .findOne({
-        [SequentialDocumentKey.sequenceId]: seqId,
-        [MultiLingualDocumentKey.language]: langCode,
-      });
+    return super.isIdAvailable(mongoClient, QuestPost.getCollection(mongoClient), langCode, seqId);
   }
 }
