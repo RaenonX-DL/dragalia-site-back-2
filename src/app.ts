@@ -2,7 +2,7 @@ import {default as compression} from 'compression';
 import express, {Application as ExpressApp, NextFunction, Request, Response} from 'express';
 import {default as helmet} from 'helmet';
 import {MongoClient, MongoClientOptions} from 'mongodb';
-import MongoMemoryServer from 'mongodb-memory-server-core';
+import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
 import {handleInternalError} from './statuses/internalError/handler';

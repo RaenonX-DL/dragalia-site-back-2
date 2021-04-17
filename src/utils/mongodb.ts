@@ -1,4 +1,5 @@
 import {Collection, Db, MongoClient} from 'mongodb';
+
 import {CollectionInfo} from '../base/controller/info';
 
 const dbPool: Record<string, Db> = {};

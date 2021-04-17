@@ -1,4 +1,5 @@
 import {Request, Response} from 'express';
+
 import {NotExistsResponse} from './response';
 
 export const handleMethodNotAllowed = (allowedMethods: Array<string>) =>

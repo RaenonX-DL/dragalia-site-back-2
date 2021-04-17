@@ -1,21 +1,18 @@
 import {MongoClient} from 'mongodb';
+
 import {QuestPostEditPayload, QuestPostPublishPayload} from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
-import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/modifiable';
-import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../base/model/seq';
-import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {PostController, PostGetResult, PostListResult} from '../base/controller';
 import {PostDocumentKey} from '../base/model';
-import {QuestPostGetSuccessResponseParam} from './get/response';
+import {QuestGetResponse} from './get/response';
 import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
 
 
 /**
  * Result object of getting a quest post.
  */
-class QuestPostGetResult extends PostGetResult<QuestPostDocument, QuestPostGetSuccessResponseParam> {
+class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
   /**
    * Construct a quest post get result object.
    *
@@ -30,10 +27,9 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument, QuestPostGetSu
   /**
    * @inheritDoc
    */
-  toResponseReady(): QuestPostGetSuccessResponseParam {
+  toResponseReady(): QuestGetResponse {
     return {
-      seqId: this.post[SequentialDocumentKey.sequenceId],
-      lang: this.post[MultiLingualDocumentKey.language],
+      ...super.toResponseReady(),
       title: this.post[PostDocumentKey.title],
       general: this.post[QuestPostDocumentKey.generalInfo],
       video: this.post[QuestPostDocumentKey.video],
@@ -46,17 +42,6 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument, QuestPostGetSu
         };
       }),
       addendum: this.post[QuestPostDocumentKey.addendum],
-      modifyNotes: this.post[ModifiableDocumentKey.modificationNotes].map((doc) => {
-        return {
-          timestamp: doc[ModifyNoteDocumentKey.datetime],
-          note: doc[ModifyNoteDocumentKey.note],
-        };
-      }),
-      isAltLang: this.isAltLang,
-      otherLangs: this.otherLangs,
-      viewCount: this.post[ViewCountableDocumentKey.viewCount],
-      modified: this.post[ModifiableDocumentKey.dateModified],
-      published: this.post[ModifiableDocumentKey.datePublished],
     };
   }
 }
@@ -87,7 +72,10 @@ export class QuestPostController extends PostController {
    * @return {Promise<number>} post sequential ID
    */
   static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
-    payload = {...payload, seqId: await this.getNextSeqId(mongoClient, {seqId: payload.seqId})};
+    payload = {
+      ...payload,
+      seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
+    };
 
     const post: QuestPost = QuestPost.fromPayload(payload);
 
@@ -125,24 +113,7 @@ export class QuestPostController extends PostController {
   static async getPostList(
     mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
   ): Promise<PostListResult> {
-    const projection = {
-      [SequentialDocumentKey.sequenceId]: 1,
-      [MultiLingualDocumentKey.language]: 1,
-      [PostDocumentKey.title]: 1,
-      [ModifiableDocumentKey.dateModified]: 1,
-      [ModifiableDocumentKey.datePublished]: 1,
-      [ViewCountableDocumentKey.viewCount]: 1,
-    };
-
-    return this.listPosts(QuestPost.getCollection(mongoClient), langCode, projection, start, limit, (post) => {
-      return {
-        seqId: post[SequentialDocumentKey.sequenceId],
-        lang: post[MultiLingualDocumentKey.language],
-        viewCount: post[ViewCountableDocumentKey.viewCount],
-        modified: post[ModifiableDocumentKey.dateModified],
-        published: post[ModifiableDocumentKey.datePublished],
-      };
-    });
+    return this.listPosts(QuestPost.getCollection(mongoClient), langCode, {start, limit});
   }
 
   /**
@@ -161,12 +132,12 @@ export class QuestPostController extends PostController {
    * @param {number} seqId sequential ID of the post
    * @param {string} langCode language code of the post
    * @param {boolean} incCount if to increase the view count of the post or not
-   * @return {Promise<PostGetResult<QuestPostDocument>>} result of getting a quest post
+   * @return {Promise} result of getting a quest post
    */
   static async getQuestPost(
     mongoClient: MongoClient, seqId: number, langCode = 'cht', incCount = true,
   ): Promise<QuestPostGetResult | null> {
-    return super.getPost<QuestPostDocument, QuestPostGetSuccessResponseParam, QuestPostGetResult>(
+    return super.getPost<QuestPostDocument, QuestPostGetResult>(
       QuestPost.getCollection(mongoClient), seqId, langCode, incCount,
       ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
     );

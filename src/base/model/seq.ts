@@ -1,4 +1,5 @@
 import {Collection, MongoClient} from 'mongodb';
+
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';

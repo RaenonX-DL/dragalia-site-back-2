@@ -1,4 +1,5 @@
 import {MongoError} from 'mongodb';
+
 import {CharaAnalysisPublishPayload, DragonAnalysisPublishPayload} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';

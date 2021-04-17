@@ -1,4 +1,5 @@
 import {default as request} from 'supertest';
+
 import {
   AnalysisGetPayload,
   ApiEndPoints,
@@ -21,6 +22,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   const uidAdsFree = '789123456';
 
   const payloadGet: AnalysisGetPayload = {
+    seqId: 1,
     incCount: true,
     googleUid: uidNormal,
     lang: 'cht',
@@ -136,7 +138,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   });
 
   it('returns failure for non-existing analysis', async () => {
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -145,7 +147,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   });
 
   it('returns failure if sequence ID is not specified', async () => {
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    const {seqId, ...payload} = payloadGet;
+
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payload);
     expect(result.status).toBe(400);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -185,7 +189,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, googleUid: uidAdsFree, seqId: 1},
+      {...payloadGet, googleUid: uidAdsFree},
     );
     expect(result.status).toBe(200);
 
@@ -214,11 +218,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('increments view count per request on alternative version', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: 'en'});
 
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(200);
 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;

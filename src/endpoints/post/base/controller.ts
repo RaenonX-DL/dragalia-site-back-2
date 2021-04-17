@@ -1,4 +1,5 @@
 import {Collection, Document, MongoClient} from 'mongodb';
+
 import {PostListEntry} from '../../../api-def/api/post/base/response';
 import {SequencedController} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
@@ -7,7 +8,7 @@ import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
-import {PostDocumentBase} from './model';
+import {PostDocumentBase, PostDocumentKey} from './model';
 import {PostGetSuccessResponseParam} from './response/post/get';
 
 type PostListDocumentTransformFunction = (post: Document) => PostListEntry;
@@ -41,7 +42,7 @@ export class PostListResult {
  * Base object of a post getting result.
  * @template T, R
  */
-export abstract class PostGetResult<T extends PostDocumentBase, R> {
+export abstract class PostGetResult<T extends PostDocumentBase> {
   post: T;
   isAltLang: boolean;
   otherLangs: Array<string>;
@@ -65,14 +66,37 @@ export abstract class PostGetResult<T extends PostDocumentBase, R> {
    *
    * @return {R} object ready to be used by the response object
    */
-  abstract toResponseReady(): R;
+  protected toResponseReady(): PostGetSuccessResponseParam {
+    return {
+      seqId: this.post[SequentialDocumentKey.sequenceId],
+      lang: this.post[MultiLingualDocumentKey.language],
+      isAltLang: this.isAltLang,
+      otherLangs: this.otherLangs,
+      viewCount: this.post[ViewCountableDocumentKey.viewCount],
+      modifyNotes: this.post[ModifiableDocumentKey.modificationNotes].map((doc) => {
+        return {
+          timestamp: doc[ModifyNoteDocumentKey.datetime],
+          note: doc[ModifyNoteDocumentKey.note],
+        };
+      }),
+      modified: this.post[ModifiableDocumentKey.dateModified],
+      published: this.post[ModifiableDocumentKey.datePublished],
+    };
+  }
 }
 
 
 type ResultConstructFunction<D extends PostDocumentBase,
-  R extends PostGetSuccessResponseParam,
-  T extends PostGetResult<D, R>> =
+  T extends PostGetResult<D>> =
   (post: D, isAltLang: boolean, otherLangs: Array<string>) => T;
+
+
+type PostControllerListPostOptions = {
+  start?: number,
+  limit?: number,
+  additionalProjection?: Document,
+  docTransformFunction?: PostListDocumentTransformFunction,
+}
 
 
 /**
@@ -84,23 +108,46 @@ export abstract class PostController extends SequencedController {
    *
    * @param {Collection} collection collection to perform the post listing
    * @param {string} langCode language of the posts
-   * @param {Document} projection projection to use for returning the posts
-   * @param {number} start starting point of the post list
-   * @param {number} limit maximum count of the posts to return
-   * @param {PostListDocumentTransformFunction} docTransformFunction function to transform the returned documents
+   * @param {PostControllerListPostOptions} options additional options for listing the posts
    * @return {Promise<PostListResult>} result of getting the post list function to transform the document into an entry
    * @protected
    */
   protected static async listPosts(
-    collection: Collection, langCode: string, projection: Document, start = 0, limit = 0,
-    docTransformFunction: PostListDocumentTransformFunction,
+    collection: Collection, langCode: string, options: PostControllerListPostOptions = {},
   ): Promise<PostListResult> {
+    let {
+      start = 0,
+      limit = 0,
+      additionalProjection = {},
+      docTransformFunction,
+    } = options;
+
+    if (!docTransformFunction) {
+      docTransformFunction = (post) => {
+        return {
+          seqId: post[SequentialDocumentKey.sequenceId],
+          lang: post[MultiLingualDocumentKey.language],
+          viewCount: post[ViewCountableDocumentKey.viewCount],
+          modified: post[ModifiableDocumentKey.dateModified],
+          published: post[ModifiableDocumentKey.datePublished],
+        };
+      };
+    }
+
     const query = {[MultiLingualDocumentKey.language]: langCode};
 
     const posts = await collection.find(
       query,
       {
-        projection,
+        projection: {
+          ...additionalProjection,
+          [SequentialDocumentKey.sequenceId]: 1,
+          [MultiLingualDocumentKey.language]: 1,
+          [PostDocumentKey.title]: 1,
+          [ModifiableDocumentKey.dateModified]: 1,
+          [ModifiableDocumentKey.datePublished]: 1,
+          [ViewCountableDocumentKey.viewCount]: 1,
+        },
         sort: {[ModifiableDocumentKey.dateModified]: 'desc'},
       })
       .skip(start)
@@ -126,10 +173,9 @@ export abstract class PostController extends SequencedController {
    * @protected
    */
   protected static async getPost<D extends PostDocumentBase,
-    R extends PostGetSuccessResponseParam,
-    T extends PostGetResult<D, R>>(
+    T extends PostGetResult<D>>(
     collection: Collection, seqId: number, langCode = 'cht', incCount = true,
-    resultConstructFunction: ResultConstructFunction<D, R, T>,
+    resultConstructFunction: ResultConstructFunction<D, T>,
   ): Promise<T | null> {
     // Get the code of other available languages
     let otherLangs = [];

@@ -1,4 +1,5 @@
 import {MongoClient} from 'mongodb';
+
 import {
   AnalysisGetContent,
   AnalysisType,
@@ -9,16 +10,11 @@ import {
 } from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
-import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/modifiable';
-import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../base/model/seq';
-import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {PostController, PostGetResult, PostListResult} from '../base/controller';
 import {PostDocumentKey} from '../base/model';
 import {PostGetSuccessResponseParam} from '../base/response/post/get';
 import {AnalysisResponse} from './base/response';
 import {UnhandledAnalysisTypeError} from './error';
-
 import {
   CharaAnalysis,
   CharaAnalysisDocumentKey,
@@ -34,7 +30,7 @@ import {AnalysisDocument} from './model/type';
 /**
  * Result object of getting an analysis.
  */
-class AnalysisGetResult extends PostGetResult<AnalysisDocument, AnalysisResponse> {
+class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
   /**
    * Construct an analysis get result object.
    *
@@ -51,8 +47,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument, AnalysisResponse
    */
   toResponseReady(): AnalysisResponse {
     const base: PostGetSuccessResponseParam & AnalysisGetContent = {
-      seqId: this.post[SequentialDocumentKey.sequenceId],
-      lang: this.post[MultiLingualDocumentKey.language],
+      ...super.toResponseReady(),
       type: this.post[UnitAnalysisDocumentKey.type],
       name: this.post[PostDocumentKey.title],
       summary: this.post[UnitAnalysisDocumentKey.summary],
@@ -62,17 +57,6 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument, AnalysisResponse
       videos: this.post[UnitAnalysisDocumentKey.videos],
       story: this.post[UnitAnalysisDocumentKey.story],
       keywords: this.post[UnitAnalysisDocumentKey.keywords],
-      isAltLang: this.isAltLang,
-      otherLangs: this.otherLangs,
-      viewCount: this.post[ViewCountableDocumentKey.viewCount],
-      modified: this.post[ModifiableDocumentKey.dateModified],
-      published: this.post[ModifiableDocumentKey.datePublished],
-      modifyNotes: this.post[ModifiableDocumentKey.modificationNotes].map((doc) => {
-        return {
-          timestamp: doc[ModifyNoteDocumentKey.datetime],
-          note: doc[ModifyNoteDocumentKey.note],
-        };
-      }),
     };
 
     if (base.type === AnalysisType.CHARACTER) {
@@ -125,7 +109,10 @@ export class AnalysisController extends PostController {
   static async publishCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisPublishPayload,
   ): Promise<number> {
-    payload = {...payload, seqId: await this.getNextSeqId(mongoClient, {seqId: payload.seqId})};
+    payload = {
+      ...payload,
+      seqId: await AnalysisController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
+    };
 
     const post: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
@@ -203,25 +190,15 @@ export class AnalysisController extends PostController {
   static async getAnalysisList(
     mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
   ): Promise<PostListResult> {
-    const projection = {
-      [SequentialDocumentKey.sequenceId]: 1,
-      [MultiLingualDocumentKey.language]: 1,
-      [UnitAnalysisDocumentKey.type]: 1,
-      [PostDocumentKey.title]: 1,
-      [ModifiableDocumentKey.dateModified]: 1,
-      [ModifiableDocumentKey.datePublished]: 1,
-      [ViewCountableDocumentKey.viewCount]: 1,
+    const options = {
+      start,
+      limit,
+      additionalProjection: {
+        [UnitAnalysisDocumentKey.type]: 1,
+      },
     };
 
-    return this.listPosts(UnitAnalysis.getCollection(mongoClient), langCode, projection, start, limit, (post) => {
-      return {
-        seqId: post[SequentialDocumentKey.sequenceId],
-        lang: post[MultiLingualDocumentKey.language],
-        viewCount: post[ViewCountableDocumentKey.viewCount],
-        modified: post[ModifiableDocumentKey.dateModified],
-        published: post[ModifiableDocumentKey.datePublished],
-      };
-    });
+    return this.listPosts(UnitAnalysis.getCollection(mongoClient), langCode, options);
   }
 
   /**
@@ -246,7 +223,7 @@ export class AnalysisController extends PostController {
   static async getAnalysis(
     mongoClient: MongoClient, seqId: number, langCode = 'cht', incCount = true,
   ): Promise<AnalysisGetResult | null> {
-    return super.getPost<AnalysisDocument, AnalysisResponse, AnalysisGetResult>(
+    return super.getPost<AnalysisDocument, AnalysisGetResult>(
       UnitAnalysis.getCollection(mongoClient), seqId, langCode, incCount,
       ((post, isAltLang, otherLangs) => new AnalysisGetResult(post, isAltLang, otherLangs)),
     );

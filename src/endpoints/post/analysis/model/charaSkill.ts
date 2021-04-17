@@ -1,4 +1,5 @@
 import {Collection, MongoClient} from 'mongodb';
+
 import {Document} from '../../../../base/model/base';
 import {dbInfo} from './config';
 

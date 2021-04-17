@@ -1,5 +1,8 @@
 import {Collection, MongoClient} from 'mongodb';
+
 import {AnalysisPayload, AnalysisType} from '../../../../api-def/api';
+import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {Post, PostConstructParams, PostDocumentBase, PostDocumentKey} from '../../base/model';
 import {SeqIdMissingError} from '../../error';
 import {dbInfo} from './config';
@@ -96,6 +99,32 @@ export abstract class UnitAnalysis extends Post {
       videos: payload.videos,
       story: payload.story,
       keywords: payload.keywords,
+    };
+  }
+
+  /**
+   * Convert `obj` to an instance to an instance of construct params.
+   *
+   * @param {T} obj object to be converted
+   * @param {AnalysisType} type type of the unit analysis
+   * @return {UnitAnalysisConstructParams} converted construct params
+   * @protected
+   */
+  protected static fromDocumentToConstructParams<T extends UnitAnalysisDocument>(
+    obj: T, type: AnalysisType,
+  ): UnitAnalysisConstructParams {
+    return {
+      type,
+      seqId: obj[SequentialDocumentKey.sequenceId],
+      language: obj[MultiLingualDocumentKey.language],
+      title: obj[PostDocumentKey.title],
+      summary: obj[UnitAnalysisDocumentKey.summary],
+      summonResult: obj[UnitAnalysisDocumentKey.summonResult],
+      passives: obj[UnitAnalysisDocumentKey.passives],
+      normalAttacks: obj[UnitAnalysisDocumentKey.normalAttacks],
+      videos: obj[UnitAnalysisDocumentKey.videos],
+      story: obj[UnitAnalysisDocumentKey.story],
+      keywords: obj[UnitAnalysisDocumentKey.keywords],
     };
   }
 

@@ -1,6 +1,8 @@
-import {Application} from 'express';
 import {Server} from 'http';
 import {AddressInfo} from 'net';
+
+import {Application} from 'express';
+
 import {createApp} from './app';
 
 const PORT = Number(process.env.PORT) || 8787;

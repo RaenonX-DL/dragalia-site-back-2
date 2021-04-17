@@ -1,4 +1,5 @@
 import {Collection, Document as MongoDocument, MongoClient, ObjectId} from 'mongodb';
+
 import {getCollection, IndexInitFunction} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
 import {NotImplementedError} from '../error';

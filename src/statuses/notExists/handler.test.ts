@@ -1,4 +1,5 @@
 import {default as request} from 'supertest';
+
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 

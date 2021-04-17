@@ -1,4 +1,5 @@
 import {default as request} from 'supertest';
+
 import {
   ApiEndPoints,
   CharaAnalysisPublishPayload,

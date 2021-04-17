@@ -1,4 +1,5 @@
 import {Collection, MongoClient} from 'mongodb';
+
 import {QuestPostPayload} from '../../../api-def/api/post/quest/payload';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentBaseKey} from '../../../base/model/base';

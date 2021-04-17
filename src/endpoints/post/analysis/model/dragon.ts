@@ -1,16 +1,6 @@
-import {Collection, MongoClient} from 'mongodb';
 import {AnalysisType, DragonAnalysisPayload} from '../../../../api-def/api';
-import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
-import {PostDocumentKey} from '../../base/model';
 import {SeqIdMissingError} from '../../error';
-import {dbInfo} from './config';
-import {
-  UnitAnalysis,
-  UnitAnalysisConstructParams,
-  UnitAnalysisDocument,
-  UnitAnalysisDocumentKey,
-} from './unitAnalysis';
+import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
 
 export enum DragonAnalysisDocumentKey {
   ultimate = 'ult',
@@ -79,28 +69,12 @@ export class DragonAnalysis extends UnitAnalysis {
   static fromDocument(obj: DragonAnalysisDocument): DragonAnalysis {
     return new DragonAnalysis(
       {
-        seqId: obj[SequentialDocumentKey.sequenceId],
-        language: obj[MultiLingualDocumentKey.language],
-        title: obj[PostDocumentKey.title],
-        summary: obj[UnitAnalysisDocumentKey.summary],
-        summonResult: obj[UnitAnalysisDocumentKey.summonResult],
-        passives: obj[UnitAnalysisDocumentKey.passives],
-        normalAttacks: obj[UnitAnalysisDocumentKey.normalAttacks],
+        ...super.fromDocumentToConstructParams(obj, AnalysisType.DRAGON),
         ultimate: obj[DragonAnalysisDocumentKey.ultimate],
         notes: obj[DragonAnalysisDocumentKey.notes],
         suitableCharacters: obj[DragonAnalysisDocumentKey.suitableCharacters],
-        videos: obj[UnitAnalysisDocumentKey.videos],
-        story: obj[UnitAnalysisDocumentKey.story],
-        keywords: obj[UnitAnalysisDocumentKey.keywords],
       },
     );
-  }
-
-  /**
-   * @inheritDoc
-   */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
   }
 
   /**

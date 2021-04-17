@@ -1,4 +1,5 @@
 import {MongoClient} from 'mongodb';
+
 import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from './model';
 
 /**

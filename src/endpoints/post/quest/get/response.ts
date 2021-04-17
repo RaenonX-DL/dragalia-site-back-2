@@ -4,22 +4,22 @@ import {
 } from '../../../../api-def/api';
 import {PostGetSuccessResponse, PostGetSuccessResponseParam} from '../../base/response/post/get';
 
-export type QuestPostGetSuccessResponseParam = PostGetSuccessResponseParam & QuestPostGetContent
+export type QuestGetResponse = PostGetSuccessResponseParam & QuestPostGetContent
 
 /**
  * API response class for getting a single quest post.
  */
 export class QuestPostGetSuccessResponse extends PostGetSuccessResponse {
-  body: QuestPostGetSuccessResponseParam;
+  body: QuestGetResponse;
 
   /**
    * Construct a successful single quest post get API response.
    *
    * @param {boolean} isAdmin if the user is an admin
    * @param {boolean} showAds if the user should have ads shown
-   * @param {QuestPostGetSuccessResponseParam} params params for constructing a quest post get response
+   * @param {QuestGetResponse} params params for constructing a quest post get response
    */
-  constructor(isAdmin: boolean, showAds: boolean, params: QuestPostGetSuccessResponseParam) {
+  constructor(isAdmin: boolean, showAds: boolean, params: QuestGetResponse) {
     super(isAdmin, showAds, params);
 
     this.body = params;
