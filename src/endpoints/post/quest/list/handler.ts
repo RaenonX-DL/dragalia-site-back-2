@@ -2,14 +2,14 @@ import {Request, Response} from 'express';
 import {MongoClient} from 'mongodb';
 import {QuestPostListPayload} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
-import {processPostListPayload} from '../../base/payload';
+import {processQuestListPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostListSuccessResponse} from './response';
 
 export const handleListQuestPost = async (
   req: Request, res: Response, mongoClient: MongoClient,
 ): Promise<QuestPostListSuccessResponse> => {
-  const payload = processPostListPayload(req.query as unknown as QuestPostListPayload);
+  const payload = processQuestListPayload(req.query as unknown as QuestPostListPayload);
 
   // Get a list of posts
   const {postListEntries, totalAvailableCount} = await QuestPostController.getPostList(

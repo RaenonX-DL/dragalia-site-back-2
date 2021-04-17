@@ -2,14 +2,14 @@ import {Request, Response} from 'express';
 import {MongoClient} from 'mongodb';
 import {QuestPostIdCheckPayload} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
-import {processPostIdCheckPayload} from '../../base/payload';
+import {processQuestIdCheckPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostIdCheckResponse} from './response';
 
 export const handleQuestPostIdCheck = async (
   req: Request, res: Response, mongoClient: MongoClient,
 ): Promise<QuestPostIdCheckResponse> => {
-  const payload = processPostIdCheckPayload(req.query as unknown as QuestPostIdCheckPayload);
+  const payload = processQuestIdCheckPayload(req.query as unknown as QuestPostIdCheckPayload);
 
   // Check the user privilege
   const isAdmin = await GoogleUserController.isAdmin(mongoClient, payload.googleUid);

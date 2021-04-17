@@ -5,6 +5,7 @@ import {ApiEndPoints} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
+import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
@@ -33,6 +34,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_EDIT]: {POST: handleEditQuestPost},
   [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
 };
 
 export const handleResponse = async (

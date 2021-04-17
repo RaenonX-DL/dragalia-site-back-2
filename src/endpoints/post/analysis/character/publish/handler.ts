@@ -3,9 +3,9 @@ import {MongoClient, MongoError} from 'mongodb';
 import {ApiResponseCode, CharaAnalysisPublishPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 import {GoogleUserController} from '../../../../userControl/controller';
-import {processCharaAnalysisPublishPayload} from '../../../base/payload';
 import {ApiFailedResponse} from '../../../base/response/failed';
 import {SeqIdSkippingError} from '../../../error';
+import {processCharaAnalysisPublishPayload} from '../../../utils/payload';
 import {AnalysisController} from '../../controller';
 import {CharaAnalysisPublishedResponse} from './response';
 
