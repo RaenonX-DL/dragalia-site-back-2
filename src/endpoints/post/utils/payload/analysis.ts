@@ -1,24 +1,14 @@
 import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
-  AnalysisListPayload,
+  AnalysisListPayload, CharaAnalysisEditPayload, CharaAnalysisPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisPublishPayload,
 } from '../../../../api-def/api/post/analysis/payload';
 import {processPostListPayload, processSinglePostPayload} from './shared';
 
 
-export const processDragonAnalysisPublishPayload = (
-  payload: DragonAnalysisPublishPayload,
-): DragonAnalysisPublishPayload => {
-  payload = processSinglePostPayload(payload);
-
-  return payload;
-};
-
-export const processCharaAnalysisPublishPayload = (
-  payload: CharaAnalysisPublishPayload,
-): CharaAnalysisPublishPayload => {
+const processCharaAnalysisPayload = <T extends CharaAnalysisPayload>(payload: T): T => {
   if (!payload.skills) {
     // If `skills` field does not exist in the payload, and an empty array to it.
     payload.skills = [];
@@ -34,6 +24,22 @@ export const processCharaAnalysisPublishPayload = (
   return payload;
 };
 
+export const processCharaAnalysisPublishPayload = (
+  payload: CharaAnalysisPublishPayload,
+): CharaAnalysisPublishPayload => {
+  payload = processCharaAnalysisPayload(payload);
+
+  return payload;
+};
+
+export const processDragonAnalysisPublishPayload = (
+  payload: DragonAnalysisPublishPayload,
+): DragonAnalysisPublishPayload => {
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
   payload = processSinglePostPayload(payload);
 
@@ -42,6 +48,12 @@ export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload:
 
 export const processListAnalysisPayload = <T extends AnalysisListPayload>(payload: T): T => {
   payload = processPostListPayload(payload);
+
+  return payload;
+};
+
+export const processEditCharaAnalysisPayload = <T extends CharaAnalysisEditPayload>(payload: T): T => {
+  payload = processCharaAnalysisPayload(payload);
 
   return payload;
 };

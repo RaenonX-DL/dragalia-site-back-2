@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
@@ -38,8 +39,9 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
-  [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_LIST]: {GET: handleListAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
 };
 

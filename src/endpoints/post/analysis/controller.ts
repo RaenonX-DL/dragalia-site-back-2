@@ -155,7 +155,7 @@ export class AnalysisController extends PostController {
   ): Promise<UpdateResult> {
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
-    return await this.editPost(
+    return await AnalysisController.editPost(
       CharaAnalysis.getCollection(mongoClient),
       payload.seqId, payload.lang,
       analysis.toObject(), payload.modifyNote,
@@ -174,7 +174,7 @@ export class AnalysisController extends PostController {
   ): Promise<UpdateResult> {
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
-    return await this.editPost(
+    return await AnalysisController.editPost(
       DragonAnalysis.getCollection(mongoClient),
       payload.seqId, payload.lang,
       analysis.toObject(), payload.modifyNote,

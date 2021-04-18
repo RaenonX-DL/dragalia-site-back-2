@@ -7,7 +7,7 @@ import {PostGetSuccessResponse, PostGetSuccessResponseParam} from '../../base/re
 export type QuestGetResponse = PostGetSuccessResponseParam & QuestPostGetContent
 
 /**
- * API response class for getting a single quest post.
+ * API response class for getting a quest post.
  */
 export class QuestPostGetSuccessResponse extends PostGetSuccessResponse {
   body: QuestGetResponse;

@@ -17,7 +17,7 @@ export abstract class PostEditSuccessResponse extends ApiResponse {
    * @param {PostEditSuccessResponseParam} params parameters for constructing a successful post editing response
    * @protected
    */
-  protected constructor(params: PostEditSuccessResponseParam) {
+  constructor(params: PostEditSuccessResponseParam) {
     super(ApiResponseCode.SUCCESS);
 
     this.seqId = +params.seqId;

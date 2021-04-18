@@ -1,7 +1,7 @@
 import {PostEditSuccessResponse} from '../../base/response/post/edit';
 
 /**
- * API response class for editing a single quest post.
+ * API response class for editing a quest post.
  */
 export class QuestPostEditSuccessResponse extends PostEditSuccessResponse {
   /**

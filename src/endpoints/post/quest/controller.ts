@@ -94,7 +94,7 @@ export class QuestPostController extends PostController {
   static async editQuestPost(mongoClient: MongoClient, editPayload: QuestPostEditPayload): Promise<UpdateResult> {
     const post: QuestPost = QuestPost.fromPayload(editPayload);
 
-    return await this.editPost(
+    return await QuestPostController.editPost(
       QuestPost.getCollection(mongoClient),
       editPayload.seqId, editPayload.lang,
       post.toObject(), editPayload.modifyNote,
