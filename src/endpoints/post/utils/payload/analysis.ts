@@ -1,6 +1,18 @@
-import {AnalysisGetPayload, CharaAnalysisPublishPayload} from '../../../../api-def/api/post/analysis/payload';
+import {
+  AnalysisGetPayload,
+  CharaAnalysisPublishPayload,
+  DragonAnalysisPublishPayload,
+} from '../../../../api-def/api/post/analysis/payload';
 import {processSinglePostPayload} from './shared';
 
+
+export const processDragonAnalysisPublishPayload = (
+  payload: DragonAnalysisPublishPayload,
+): DragonAnalysisPublishPayload => {
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
 
 export const processCharaAnalysisPublishPayload = (
   payload: CharaAnalysisPublishPayload,

@@ -131,7 +131,10 @@ export class AnalysisController extends PostController {
   static async publishDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisPublishPayload,
   ): Promise<number> {
-    payload = {...payload, seqId: await this.getNextSeqId(mongoClient, {seqId: payload.seqId})};
+    payload = {
+      ...payload,
+      seqId: await AnalysisController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
+    };
 
     const post: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
