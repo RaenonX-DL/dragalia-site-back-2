@@ -6,6 +6,7 @@ import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
+import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
@@ -42,6 +43,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_LIST]: {GET: handleListAnalysis},
   [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
 };
 

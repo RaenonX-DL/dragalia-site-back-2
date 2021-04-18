@@ -2,11 +2,11 @@ import {default as request} from 'supertest';
 
 import {
   ApiEndPoints,
+  ApiResponseCode,
   CharaAnalysisPublishPayload,
   CharaAnalysisPublishSuccessResponse,
   FailedResponse,
 } from '../../../../../api-def/api';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../../base/model/seq';

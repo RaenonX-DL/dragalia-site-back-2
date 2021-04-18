@@ -2,7 +2,7 @@ import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
   AnalysisListPayload, CharaAnalysisEditPayload, CharaAnalysisPayload,
-  CharaAnalysisPublishPayload,
+  CharaAnalysisPublishPayload, DragonAnalysisEditPayload, DragonAnalysisPayload,
   DragonAnalysisPublishPayload,
 } from '../../../../api-def/api/post/analysis/payload';
 import {processPostListPayload, processSinglePostPayload} from './shared';
@@ -24,6 +24,12 @@ const processCharaAnalysisPayload = <T extends CharaAnalysisPayload>(payload: T)
   return payload;
 };
 
+const processDragonAnalysisPayload = <T extends DragonAnalysisPayload>(payload: T): T => {
+  payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
 export const processCharaAnalysisPublishPayload = (
   payload: CharaAnalysisPublishPayload,
 ): CharaAnalysisPublishPayload => {
@@ -35,7 +41,7 @@ export const processCharaAnalysisPublishPayload = (
 export const processDragonAnalysisPublishPayload = (
   payload: DragonAnalysisPublishPayload,
 ): DragonAnalysisPublishPayload => {
-  payload = processSinglePostPayload(payload);
+  payload = processDragonAnalysisPayload(payload);
 
   return payload;
 };
@@ -54,6 +60,12 @@ export const processListAnalysisPayload = <T extends AnalysisListPayload>(payloa
 
 export const processEditCharaAnalysisPayload = <T extends CharaAnalysisEditPayload>(payload: T): T => {
   payload = processCharaAnalysisPayload(payload);
+
+  return payload;
+};
+
+export const processEditDragonAnalysisPayload = <T extends DragonAnalysisEditPayload>(payload: T): T => {
+  payload = processDragonAnalysisPayload(payload);
 
   return payload;
 };

@@ -2,11 +2,11 @@ import {default as request} from 'supertest';
 
 import {
   ApiEndPoints,
+  ApiResponseCode,
   DragonAnalysisPublishSuccessResponse,
   DragonAnalysisPublishPayload,
   FailedResponse,
 } from '../../../../../api-def/api';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../../base/model/seq';
@@ -22,7 +22,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   const uidAdmin = '78787878887';
 
   const payload1: DragonAnalysisPublishPayload = {
-    googleUid: uidAdmin,
+    googleUid: uidNormal,
     lang: 'cht',
     name: 'dragon',
     summary: 'dragonSummary',
@@ -111,9 +111,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(
-      {...payload1, googleUid: uidNormal},
-    );
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload1);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
