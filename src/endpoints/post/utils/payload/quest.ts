@@ -1,7 +1,6 @@
 import {
-  PostListPayload,
   QuestPostEditPayload,
-  QuestPostGetPayload,
+  QuestPostGetPayload, QuestPostListPayload,
   QuestPostPayload,
   QuestPostPublishPayload,
   SinglePostPayload,
@@ -48,7 +47,7 @@ export const processQuestIdCheckPayload = <T extends SinglePostPayload>(payload:
   return payload;
 };
 
-export const processQuestListPayload = <T extends PostListPayload>(payload: T): T => {
+export const processQuestListPayload = <T extends QuestPostListPayload>(payload: T): T => {
   payload = processPostListPayload(payload);
 
   return payload;

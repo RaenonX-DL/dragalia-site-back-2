@@ -201,7 +201,7 @@ export class AnalysisController extends PostController {
       },
     };
 
-    return this.listPosts(UnitAnalysis.getCollection(mongoClient), langCode, options);
+    return AnalysisController.listPosts(UnitAnalysis.getCollection(mongoClient), langCode, options);
   }
 
   /**

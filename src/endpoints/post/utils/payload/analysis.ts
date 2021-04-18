@@ -1,9 +1,10 @@
 import {
   AnalysisGetPayload,
+  AnalysisListPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisPublishPayload,
 } from '../../../../api-def/api/post/analysis/payload';
-import {processSinglePostPayload} from './shared';
+import {processPostListPayload, processSinglePostPayload} from './shared';
 
 
 export const processDragonAnalysisPublishPayload = (
@@ -34,6 +35,12 @@ export const processCharaAnalysisPublishPayload = (
 
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
   payload = processSinglePostPayload(payload);
+
+  return payload;
+};
+
+export const processListAnalysisPayload = <T extends AnalysisListPayload>(payload: T): T => {
+  payload = processPostListPayload(payload);
 
   return payload;
 };

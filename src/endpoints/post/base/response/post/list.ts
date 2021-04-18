@@ -25,7 +25,7 @@ export abstract class PostListSuccessResponse extends ApiResponse {
    * @param {number} postCount total count of the posts available
    * @protected
    */
-  protected constructor(
+  constructor(
     isAdmin: boolean, showAds: boolean, posts: Array<PostListEntry>, startIdx: number, postCount: number,
   ) {
     super(ApiResponseCode.SUCCESS);

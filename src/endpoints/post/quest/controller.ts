@@ -113,7 +113,7 @@ export class QuestPostController extends PostController {
   static async getPostList(
     mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
   ): Promise<PostListResult> {
-    return this.listPosts(QuestPost.getCollection(mongoClient), langCode, {start, limit});
+    return QuestPostController.listPosts(QuestPost.getCollection(mongoClient), langCode, {start, limit});
   }
 
   /**
