@@ -20,7 +20,7 @@ export abstract class PostIdCheckResponse extends ApiResponse {
    * @param {boolean} isAvailable if the post identity (Sequential ID & language) is available
    * @protected
    */
-  protected constructor(isAdmin: boolean, isAvailable: boolean) {
+  constructor(isAdmin: boolean, isAvailable: boolean) {
     super(ApiResponseCode.SUCCESS);
 
     this.isAdmin = isAdmin;

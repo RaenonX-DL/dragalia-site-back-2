@@ -7,6 +7,7 @@ import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
+import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
 import {handleListAnalysis} from './post/analysis/shared/list/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
@@ -39,6 +40,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_LIST]: {GET: handleListAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
 };
 
 export const handleResponse = async (

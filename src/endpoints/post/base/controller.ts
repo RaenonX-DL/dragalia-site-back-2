@@ -312,20 +312,21 @@ export abstract class PostController extends SequencedController {
    * If ``seqId`` is omitted, returns ``true``.
    * (a new ID will be automatically generated and used when publishing a post without specifying it)
    *
+   * @param {T} controller class of the controller
    * @param {MongoClient} mongoClient mongo client
    * @param {Collection} collection mongo collection to check
    * @param {string} langCode post language code to be checked
    * @param {number} seqId post sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  protected static async isIdAvailable(
-    mongoClient: MongoClient, collection: Collection, langCode: string, seqId?: number,
+  protected static async isIdAvailable<T extends typeof PostController>(
+    controller: T, mongoClient: MongoClient, collection: Collection, langCode: string, seqId?: number,
   ): Promise<boolean> {
     if (!seqId) {
       return true;
     }
 
-    const nextSeqId = await this.getNextSeqId(mongoClient, {increase: false});
+    const nextSeqId = await controller.getNextSeqId(mongoClient, {increase: false});
     if (seqId > nextSeqId + 1) {
       return false;
     }

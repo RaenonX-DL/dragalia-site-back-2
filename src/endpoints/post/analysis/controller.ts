@@ -243,7 +243,13 @@ export class AnalysisController extends PostController {
    * @param {number} seqId analysis sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
-    return super.isIdAvailable(mongoClient, UnitAnalysis.getCollection(mongoClient), langCode, seqId);
+  static async isAnalysisIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
+    return super.isIdAvailable(
+      AnalysisController,
+      mongoClient,
+      UnitAnalysis.getCollection(mongoClient),
+      langCode,
+      seqId,
+    );
   }
 }

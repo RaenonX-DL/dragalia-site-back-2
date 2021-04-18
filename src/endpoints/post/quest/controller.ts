@@ -155,6 +155,12 @@ export class QuestPostController extends PostController {
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
   static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
-    return super.isIdAvailable(mongoClient, QuestPost.getCollection(mongoClient), langCode, seqId);
+    return super.isIdAvailable(
+      QuestPostController,
+      mongoClient,
+      QuestPost.getCollection(mongoClient),
+      langCode,
+      seqId,
+    );
   }
 }

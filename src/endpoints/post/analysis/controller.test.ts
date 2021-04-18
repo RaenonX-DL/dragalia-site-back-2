@@ -247,7 +247,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns available for the next unused ID in the same language', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, payloadChara.lang, newSeqId + 1);
+      const availability = await AnalysisController.isAnalysisIdAvailable(
+        app.mongoClient,
+        payloadChara.lang,
+        newSeqId + 1,
+      );
 
       expect(availability).toBe(true);
     });
@@ -255,7 +259,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns available if ID is not given', async () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, payloadChara.lang);
+      const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, payloadChara.lang);
 
       expect(availability).toBe(true);
     });
@@ -263,7 +267,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns available for an unused language in the same ID', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, 'en', newSeqId);
+      const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, 'en', newSeqId);
 
       expect(availability).toBe(true);
     });
@@ -271,7 +275,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns available for an unused language in the next unused ID', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, 'en', newSeqId + 1);
+      const availability = await AnalysisController.isAnalysisIdAvailable(
+        app.mongoClient,
+        'en',
+        newSeqId + 1,
+      );
 
       expect(availability).toBe(true);
     });
@@ -279,7 +287,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns unavailable for a skipping ID', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, payloadChara.lang, newSeqId + 2);
+      const availability = await AnalysisController.isAnalysisIdAvailable(
+        app.mongoClient,
+        payloadChara.lang,
+        newSeqId + 2,
+      );
 
       expect(availability).toBe(false);
     });
@@ -287,7 +299,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns unavailable for an existing ID', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isPostIdAvailable(app.mongoClient, payloadChara.lang, newSeqId);
+      const availability = await AnalysisController.isAnalysisIdAvailable(
+        app.mongoClient,
+        payloadChara.lang,
+        newSeqId,
+      );
 
       expect(availability).toBe(false);
     });

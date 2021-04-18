@@ -1,5 +1,6 @@
 import {
   AnalysisGetPayload,
+  AnalysisIdCheckPayload,
   AnalysisListPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisPublishPayload,
@@ -41,6 +42,12 @@ export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload:
 
 export const processListAnalysisPayload = <T extends AnalysisListPayload>(payload: T): T => {
   payload = processPostListPayload(payload);
+
+  return payload;
+};
+
+export const processAnalysisIdCheckPayload = <T extends AnalysisIdCheckPayload>(payload: T): T => {
+  payload = processSinglePostPayload(payload);
 
   return payload;
 };
