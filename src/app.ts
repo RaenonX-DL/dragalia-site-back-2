@@ -4,6 +4,7 @@ import {default as helmet} from 'helmet';
 import {MongoClient, MongoClientOptions} from 'mongodb';
 import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
+import {corsMiddle} from './appCors';
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
 import {handleInternalError} from './statuses/internalError/handler';
 import {handleNotExists} from './statuses/notExists/handler';
@@ -58,7 +59,6 @@ export class Application {
   }
 }
 
-
 export const createApp = async (mongoUri?: string): Promise<Application> => {
   const app: ExpressApp = express();
 
@@ -78,9 +78,9 @@ export const createApp = async (mongoUri?: string): Promise<Application> => {
   // https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/deployment
   app.use(compression());
   app.use(helmet());
+  app.use(corsMiddle());
 
-  // Add routes to the app
-
+  // --- Add routes to the app
   // RFC 2616 - 405 Method Not Allowed: https://tools.ietf.org/html/rfc2616#page-66
   Object.entries(handlerLookup).forEach(([endpoint, handlers]) => {
     app.all(endpoint, (req: Request, res: Response, next: NextFunction) => {
