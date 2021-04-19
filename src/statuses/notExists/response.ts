@@ -12,6 +12,6 @@ export class NotExistsResponse extends ApiResponse {
    * Construct a non-existing endpoint API response.
    */
   constructor() {
-    super(ApiResponseCode.FAILED_ENDPOINT_NOT_EXISTS, 404);
+    super(ApiResponseCode.FAILED_ENDPOINT_NOT_EXISTS, {httpCode: 404});
   }
 }

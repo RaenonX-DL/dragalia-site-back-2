@@ -18,19 +18,19 @@ export const handleEditPost = async <P extends PostModifyPayload, R extends Post
   fnEditPost: FunctionEditPost<P>, fnConstructResponse: FunctionConstructResponse<R>,
 ): Promise<ApiResponse> => {
   if (!payload.seqId) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, 400);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, {httpCode: 400});
   }
 
   // Check user privilege
   const isAdmin = await GoogleUserController.isAdmin(mongoClient, payload.googleUid);
   if (!isAdmin) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, 401);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, {httpCode: 401});
   }
 
   // Edit post
   const postGetResult = await fnEditPost(mongoClient, payload);
   if (postGetResult === 'NOT_FOUND') {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, 404);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, {httpCode: 404});
   }
 
   return fnConstructResponse(payload.seqId);

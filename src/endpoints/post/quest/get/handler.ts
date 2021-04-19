@@ -16,7 +16,7 @@ export const handleGetQuestPost = async (
   const payload = processQuestGetPayload(req.query as unknown as QuestPostGetPayload);
 
   if (!payload.seqId) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, 400);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, {httpCode: 400});
   }
 
   return handleGetPost(

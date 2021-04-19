@@ -16,7 +16,7 @@ export const handleGetAnalysis = async (
   const payload = processGetAnalysisPayload(req.query as unknown as AnalysisGetPayload);
 
   if (!payload.seqId) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, 400);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, {httpCode: 400});
   }
 
   return handleGetPost(

@@ -30,7 +30,7 @@ export const handleGetPost = async <T extends PostDocumentBase,
     mongoClient, payload.seqId, payload.lang, true,
   );
   if (!getResult) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, 404);
+    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, {httpCode: 404});
   }
 
   // Get the data of the user who send this request

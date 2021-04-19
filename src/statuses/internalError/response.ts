@@ -15,7 +15,7 @@ export class InternalErrorResponse extends ApiResponse {
    * @param {Error} error the error that causes this internal error
    */
   constructor(error: Error) {
-    super(ApiResponseCode.FAILED_INTERNAL_ERROR, 500);
+    super(ApiResponseCode.FAILED_INTERNAL_ERROR, {httpCode: 500});
 
     this.error = error;
   }

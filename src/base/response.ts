@@ -1,4 +1,9 @@
 import {ApiResponseCode, ApiResponseCodeUtil, BaseResponse} from '../api-def/api';
+import {HttpCode} from '../utils/httpCode';
+
+export type ApiResponseOptions = {
+  httpCode?: HttpCode,
+}
 
 /**
  * Base API response class.
@@ -6,18 +11,18 @@ import {ApiResponseCode, ApiResponseCodeUtil, BaseResponse} from '../api-def/api
 export abstract class ApiResponse {
   code: number;
   success: boolean;
-  httpCode: number;
+  httpCode: HttpCode;
 
   /**
    * Construct an API response.
    *
    * @param {ApiResponseCode} responseCode API response code
-   * @param {number} httpCode http status code of the response
+   * @param {ApiResponseOptions} options options for API response
    */
-  protected constructor(responseCode: ApiResponseCode, httpCode = 200) {
+  protected constructor(responseCode: ApiResponseCode, options?: ApiResponseOptions) {
     this.code = responseCode.valueOf();
     this.success = ApiResponseCodeUtil.isSuccess(responseCode);
-    this.httpCode = httpCode;
+    this.httpCode = options?.httpCode || 200;
   }
 
   /**

@@ -11,7 +11,7 @@ import {QuestPostEditSuccessResponse} from './response';
 export const handleEditQuestPost = async (
   req: Request, res: Response, mongoClient: MongoClient,
 ): Promise<ApiResponse> => {
-  const payload = processQuestEditPayload(req.query as unknown as QuestPostEditPayload);
+  const payload = processQuestEditPayload(req.body as unknown as QuestPostEditPayload);
 
   return handleEditPost(
     mongoClient,

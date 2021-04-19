@@ -12,6 +12,6 @@ export class NotExistsResponse extends ApiResponse {
    * Construct an undefined methods API response.
    */
   constructor() {
-    super(ApiResponseCode.FAILED_METHOD_NOT_ALLOWED, 405);
+    super(ApiResponseCode.FAILED_METHOD_NOT_ALLOWED, {httpCode: 405});
   }
 }
