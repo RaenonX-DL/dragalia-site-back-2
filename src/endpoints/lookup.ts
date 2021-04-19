@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {MongoClient} from 'mongodb';
 
-import {ApiEndPoints} from '../api-def/api';
+import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
@@ -22,11 +22,18 @@ import {handleUserLogin} from './userControl/login/handler';
 
 type HttpMethods = 'GET' | 'POST';
 
-type HandlerFunction = (req: Request, res: Response, mongoClient: MongoClient) => Promise<ApiResponse>;
+export type HandlerParams<T extends RequestPayloadBase = never> = {
+  payload: T,
+  mongoClient: MongoClient,
+  request: Request,
+  response: Response,
+}
 
-type EndpointHandlers = {
-  GET?: HandlerFunction,
-  POST?: HandlerFunction,
+type HandlerFunction<T extends RequestPayloadBase> = (params: HandlerParams<T>) => Promise<ApiResponse>;
+
+type EndpointHandlers<T extends RequestPayloadBase = never> = {
+  GET?: HandlerFunction<T>,
+  POST?: HandlerFunction<T>,
 }
 
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
@@ -47,16 +54,28 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
 };
 
-export const handleResponse = async (
+export const handleResponse = async <T extends RequestPayloadBase>(
   req: Request, res: Response, mongoClient: MongoClient,
-  handler: HandlerFunction, nextFunction?: NextFunction,
+  handler: HandlerFunction<T>, nextFunction?: NextFunction,
 ): Promise<void> => {
   const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
   console.info(`${method} ${req.path}`);
 
   try {
-    const response = await handler(req, res, mongoClient);
+    let payload;
+
+    if (method == 'GET') {
+      payload = req.query;
+    } else if (method == 'POST') {
+      payload = req.body;
+    } else {
+      console.warn(`Payload unhandled for method ${method}`);
+      payload = {};
+    }
+
+    const response = await handler({request: req, response: res, payload, mongoClient});
+
     res.status(response.httpCode).json(response.toJson());
   } catch (err) {
     console.error(`${method} ${req.path} - ERROR: ${err.message}`);
@@ -67,9 +86,9 @@ export const handleResponse = async (
   }
 };
 
-export const handleEndpoint = async (
+export const handleEndpoint = async <T extends RequestPayloadBase>(
   req: Request, res: Response, mongoClient: MongoClient,
-  handlers: EndpointHandlers, nextFunction?: NextFunction,
+  handlers: EndpointHandlers<T>, nextFunction?: NextFunction,
 ): Promise<void> => {
   const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
@@ -78,5 +97,5 @@ export const handleEndpoint = async (
     return;
   }
 
-  await handleResponse(req, res, mongoClient, handlers[method] as HandlerFunction, nextFunction);
+  await handleResponse(req, res, mongoClient, handlers[method] as HandlerFunction<T>, nextFunction);
 };

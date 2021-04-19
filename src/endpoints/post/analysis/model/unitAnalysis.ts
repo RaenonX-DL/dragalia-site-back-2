@@ -91,7 +91,7 @@ export abstract class UnitAnalysis extends Post {
       type,
       seqId: payload.seqId,
       language: payload.lang,
-      title: payload.name,
+      title: payload.title,
       summary: payload.summary,
       summonResult: payload.summon,
       passives: payload.passives,

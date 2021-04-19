@@ -24,7 +24,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
     googleUid: uidAdmin,
     seqId: 1,
     lang: 'cht',
-    name: 'chara1',
+    title: 'chara1',
     summary: 'sum1',
     summon: 'smn1',
     passives: 'passive1',
@@ -44,7 +44,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
 
   const payloadEdit: CharaAnalysisEditPayload = {
     ...payloadPost,
-    name: 'edit',
+    title: 'edit',
     videos: 'videoNew',
     skills: [],
     modifyNote: 'mod',
@@ -77,7 +77,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   });
 
   it('edits', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA).query(payloadEdit);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA).send(payloadEdit);
     expect(result.status).toBe(200);
 
     const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
@@ -89,7 +89,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns success even if no change', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .query({...payloadPost, modifyNote: 'a'});
+      .send({...payloadPost, modifyNote: 'a'});
     expect(result.status).toBe(200);
 
     const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
@@ -101,7 +101,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns failure if ID is not given', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .query({...payloadEdit, seqId: undefined});
+      .send({...payloadEdit, seqId: undefined});
     expect(result.status).toBe(400);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -112,7 +112,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns failure for non-existing post ID & language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .query({...payloadEdit, seqId: 8});
+      .send({...payloadEdit, seqId: 8});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -123,7 +123,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns failure for non-existing post language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .query({...payloadEdit, lang: 'jp'});
+      .send({...payloadEdit, lang: 'jp'});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -134,7 +134,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns failure when permission insufficient', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .query({...payloadEdit, googleUid: uidNormal});
+      .send({...payloadEdit, googleUid: uidNormal});
     expect(result.status).toBe(401);
 
     const json: FailedResponse = result.body as FailedResponse;

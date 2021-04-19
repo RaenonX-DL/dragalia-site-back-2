@@ -1,6 +1,6 @@
-import {PostListPayload, SinglePostPayload} from '../../../../api-def/api';
+import {PostIdentifierPayload, PostListPayload} from '../../../../api-def/api';
 
-export const processSinglePostPayload = <T extends SinglePostPayload>(payload: T): T => {
+export const processSinglePostPayload = <T extends PostIdentifierPayload>(payload: T): T => {
   // `seqId` is string if given as a payload
   if (payload.seqId && !Number.isInteger(payload.seqId)) {
     payload.seqId = +payload.seqId;

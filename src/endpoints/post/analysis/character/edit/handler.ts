@@ -1,17 +1,15 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {CharaAnalysisEditPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {HandlerParams} from '../../../../lookup';
 import {handleEditPost} from '../../../base/handler/edit';
 import {processEditCharaAnalysisPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {CharaAnalysisEditResponse} from './response';
 
 export const handleEditCharacterAnalysis = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<CharaAnalysisEditPayload>,
 ): Promise<ApiResponse> => {
-  const payload = processEditCharaAnalysisPayload(req.query as unknown as CharaAnalysisEditPayload);
+  payload = processEditCharaAnalysisPayload(payload);
 
   return handleEditPost(
     mongoClient,

@@ -21,7 +21,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
   const payloadChara: CharaAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: 'cht',
-    name: 'name',
+    title: 'name',
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',
@@ -42,7 +42,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
   const payloadDragon: DragonAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: 'cht',
-    name: 'dragon',
+    title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -409,7 +409,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('blocks publishing duplicated analysis and the content is unchanged', async () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1});
       await expect(
-        AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, name: 'duplicated'}),
+        AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, title: 'duplicated'}),
       )
         .rejects
         .toThrow(MongoError);
@@ -704,7 +704,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('blocks publishing duplicated analysis and the content is unchanged', async () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1});
       await expect(
-        AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, name: 'duplicated'}),
+        AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, title: 'duplicated'}),
       )
         .rejects
         .toThrow(MongoError);
@@ -741,7 +741,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('blocks publishing duplicated analysis and the content is unchanged', async () => {
       await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1});
       await expect(
-        AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, name: 'duplicated'}),
+        AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, title: 'duplicated'}),
       )
         .rejects
         .toThrow(MongoError);

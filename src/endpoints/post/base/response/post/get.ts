@@ -1,7 +1,6 @@
 import {
   BaseResponse,
   PostGetSuccessResponse as PostGetSuccessResponseApi,
-  PostModifyNote,
 } from '../../../../../api-def/api';
 import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
 import {ApiResponse} from '../../../../../base/response';
@@ -21,14 +20,7 @@ export abstract class PostGetSuccessResponse extends ApiResponse {
   isAdmin: boolean;
   showAds: boolean;
 
-  seqId: number;
-  lang: string;
-  modified: Date;
-  published: Date;
-  modifyNotes: Array<PostModifyNote>;
-  viewCount: number;
-  isAltLang: boolean;
-  otherLangs: Array<string>;
+  params: PostGetSuccessResponseParam;
 
   /**
    * Construct a successful post getting API response.
@@ -44,14 +36,7 @@ export abstract class PostGetSuccessResponse extends ApiResponse {
     this.isAdmin = isAdmin;
     this.showAds = showAds;
 
-    this.seqId = +params.seqId;
-    this.lang = params.lang;
-    this.modified = params.modified;
-    this.published = params.published;
-    this.modifyNotes = params.modifyNotes;
-    this.viewCount = params.viewCount;
-    this.isAltLang = params.isAltLang;
-    this.otherLangs = params.otherLangs;
+    this.params = params;
   }
 
   /**
@@ -62,14 +47,7 @@ export abstract class PostGetSuccessResponse extends ApiResponse {
       ...super.toJson(),
       isAdmin: this.isAdmin,
       showAds: this.showAds,
-      seqId: this.seqId,
-      lang: this.lang,
-      modified: this.modified,
-      published: this.published,
-      modifyNotes: this.modifyNotes,
-      viewCount: this.viewCount,
-      isAltLang: this.isAltLang,
-      otherLangs: this.otherLangs,
+      ...this.params,
     };
   }
 }

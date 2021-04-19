@@ -1,16 +1,14 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {AnalysisListPayload} from '../../../../../api-def/api';
+import {HandlerParams} from '../../../../lookup';
 import {handleListPost} from '../../../base/handler/list';
 import {processListAnalysisPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {AnalysisListResponse} from './response';
 
 export const handleListAnalysis = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<AnalysisListPayload>,
 ): Promise<AnalysisListResponse> => {
-  const payload = processListAnalysisPayload(req.query as unknown as AnalysisListPayload);
+  payload = processListAnalysisPayload(payload);
 
   return handleListPost(
     mongoClient,

@@ -1,16 +1,14 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {QuestPostListPayload} from '../../../../api-def/api';
+import {HandlerParams} from '../../../lookup';
 import {handleListPost} from '../../base/handler/list';
 import {processQuestListPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostListResponse} from './response';
 
 export const handleListQuestPost = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<QuestPostListPayload>,
 ): Promise<QuestPostListResponse> => {
-  const payload = processQuestListPayload(req.query as unknown as QuestPostListPayload);
+  payload = processQuestListPayload(payload);
 
   return handleListPost(
     mongoClient,

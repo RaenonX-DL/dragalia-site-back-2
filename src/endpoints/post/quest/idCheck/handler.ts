@@ -1,16 +1,14 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {QuestPostIdCheckPayload} from '../../../../api-def/api';
+import {HandlerParams} from '../../../lookup';
 import {handlePostIdCheck} from '../../base/handler/idCheck';
 import {processQuestIdCheckPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostIdCheckResponse} from './response';
 
 export const handleQuestPostIdCheck = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<QuestPostIdCheckPayload>,
 ): Promise<QuestPostIdCheckResponse> => {
-  const payload = processQuestIdCheckPayload(req.query as unknown as QuestPostIdCheckPayload);
+  payload = processQuestIdCheckPayload(payload);
 
   return handlePostIdCheck(
     mongoClient,

@@ -25,7 +25,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     googleUid: uidAdmin,
     seqId: 1,
     lang: 'cht',
-    name: 'dragon',
+    title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -40,7 +40,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
 
   const payloadEdit: DragonAnalysisEditPayload = {
     ...payloadPost,
-    name: 'edit',
+    title: 'edit',
     videos: 'videoNew',
     suitableCharacters: '',
     modifyNote: 'mod',
@@ -73,7 +73,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   });
 
   it('edits', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON).query(payloadEdit);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON).send(payloadEdit);
     expect(result.status).toBe(200);
 
     const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
@@ -85,7 +85,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns success even if no change', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .query({...payloadPost, modifyNote: 'a'});
+      .send({...payloadPost, modifyNote: 'a'});
     expect(result.status).toBe(200);
 
     const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
@@ -97,7 +97,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns failure if ID is not given', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .query({...payloadEdit, seqId: undefined});
+      .send({...payloadEdit, seqId: undefined});
     expect(result.status).toBe(400);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -108,7 +108,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns failure for non-existing post ID & language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .query({...payloadEdit, seqId: 8});
+      .send({...payloadEdit, seqId: 8});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -119,7 +119,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns failure for non-existing post language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .query({...payloadEdit, lang: 'jp'});
+      .send({...payloadEdit, lang: 'jp'});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -130,7 +130,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns failure when permission insufficient', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .query({...payloadEdit, googleUid: uidNormal});
+      .send({...payloadEdit, googleUid: uidNormal});
     expect(result.status).toBe(401);
 
     const json: FailedResponse = result.body as FailedResponse;

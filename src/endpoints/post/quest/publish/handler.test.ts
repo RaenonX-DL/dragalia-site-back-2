@@ -105,7 +105,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   });
 
   it('publishes a new quest post', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
+    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
     expect(result.status).toBe(200);
 
     const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
@@ -115,7 +115,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   });
 
   it('publishes a new quest post given an alternative language', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload5);
+    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload5);
     expect(result.status).toBe(200);
 
     const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
@@ -127,7 +127,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it('publishes a new quest post given a valid unused sequential ID', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_PUBLISH)
-      .query({...questPayload1, googleUid: uidAdmin});
+      .send({...questPayload1, googleUid: uidAdmin});
     expect(result.status).toBe(200);
 
     const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
@@ -137,7 +137,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload3);
+    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload3);
     expect(result.status).toBe(200);
 
     const json: BaseResponse = result.body as BaseResponse;
@@ -148,7 +148,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it(
     'blocks publishing a quest post with skipping sequential ID',
     async () => {
-      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload4);
+      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload4);
       expect(result.status).toBe(200);
 
       const json: BaseResponse = result.body as BaseResponse;
@@ -159,9 +159,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it(
     'blocks publishing a quest post with duplicated ID and language',
     async () => {
-      await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload7);
+      await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload7);
 
-      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload7);
+      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload7);
       expect(result.status).toBe(200);
 
       const json: BaseResponse = result.body as BaseResponse;
@@ -170,7 +170,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     });
 
   test('if the published quest post exists in the database', async () => {
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
+    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
 
     const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -195,9 +195,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload2);
+    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
     // Normal & change title (expect to fail)
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).query(questPayload6);
+    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload6);
 
     const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,

@@ -1,8 +1,6 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {ApiResponseCode, DragonAnalysisPublishPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {HandlerParams} from '../../../../lookup';
 import {GoogleUserController} from '../../../../userControl/controller';
 import {handlePublishPost} from '../../../base/handler/publish';
 import {ApiFailedResponse} from '../../../base/response/failed';
@@ -11,9 +9,9 @@ import {AnalysisController} from '../../controller';
 import {DragonAnalysisPublishedResponse} from './response';
 
 export const handlePublishDragonAnalysis = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<DragonAnalysisPublishPayload>,
 ): Promise<ApiResponse> => {
-  const payload = processDragonAnalysisPublishPayload(req.query as unknown as DragonAnalysisPublishPayload);
+  payload = processDragonAnalysisPublishPayload(payload);
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {

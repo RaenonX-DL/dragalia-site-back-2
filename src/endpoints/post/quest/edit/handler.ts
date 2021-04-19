@@ -1,17 +1,15 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {QuestPostEditPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
+import {HandlerParams} from '../../../lookup';
 import {handleEditPost} from '../../base/handler/edit';
 import {processQuestEditPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostEditSuccessResponse} from './response';
 
 export const handleEditQuestPost = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<QuestPostEditPayload>,
 ): Promise<ApiResponse> => {
-  const payload = processQuestEditPayload(req.body as unknown as QuestPostEditPayload);
+  payload = processQuestEditPayload(payload);
 
   return handleEditPost(
     mongoClient,

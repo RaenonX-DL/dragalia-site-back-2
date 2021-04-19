@@ -32,7 +32,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     googleUid: uidAdmin,
     seqId: 1,
     lang: 'cht',
-    name: 'name',
+    title: 'name',
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',

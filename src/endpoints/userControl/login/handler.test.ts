@@ -30,7 +30,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   };
 
   it('registers a new user', async () => {
-    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload);
+    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).send(userPayload);
     expect(result.status).toBe(200);
 
     const json: UserLoginResponse = result.body as UserLoginResponse;
@@ -42,9 +42,9 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     const supertestApp = request(app.express);
 
     // Initial call
-    await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload);
+    await supertestApp.post(ApiEndPoints.USER_LOGIN).send(userPayload);
 
-    const result = await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload);
+    const result = await supertestApp.post(ApiEndPoints.USER_LOGIN).send(userPayload);
 
     expect(result.status).toBe(200);
 
@@ -54,7 +54,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   });
 
   it('stores the user data', async () => {
-    await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload);
+    await request(app.express).post(ApiEndPoints.USER_LOGIN).send(userPayload);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
       {
@@ -70,7 +70,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   });
 
   it('fails if the login data is malformed', async () => {
-    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayloadEmpty);
+    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).send(userPayloadEmpty);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;

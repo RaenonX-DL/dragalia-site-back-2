@@ -1,8 +1,6 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {AnalysisGetPayload, ApiResponseCode} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {HandlerParams} from '../../../../lookup';
 import {handleGetPost} from '../../../base/handler/get';
 import {ApiFailedResponse} from '../../../base/response/failed';
 import {processGetAnalysisPayload} from '../../../utils/payload';
@@ -11,9 +9,9 @@ import {AnalysisGetSuccessResponse} from './response';
 
 
 export const handleGetAnalysis = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<AnalysisGetPayload>,
 ): Promise<ApiResponse> => {
-  const payload = processGetAnalysisPayload(req.query as unknown as AnalysisGetPayload);
+  payload = processGetAnalysisPayload(payload);
 
   if (!payload.seqId) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, {httpCode: 400});

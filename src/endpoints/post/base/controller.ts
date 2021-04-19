@@ -70,6 +70,7 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
     return {
       seqId: this.post[SequentialDocumentKey.sequenceId],
       lang: this.post[MultiLingualDocumentKey.language],
+      title: this.post[PostDocumentKey.title],
       isAltLang: this.isAltLang,
       otherLangs: this.otherLangs,
       viewCount: this.post[ViewCountableDocumentKey.viewCount],
@@ -127,6 +128,7 @@ export abstract class PostController extends SequencedController {
         return {
           seqId: post[SequentialDocumentKey.sequenceId],
           lang: post[MultiLingualDocumentKey.language],
+          title: post[PostDocumentKey.title],
           viewCount: post[ViewCountableDocumentKey.viewCount],
           modified: post[ModifiableDocumentKey.dateModified],
           published: post[ModifiableDocumentKey.datePublished],

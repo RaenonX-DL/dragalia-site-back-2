@@ -62,7 +62,7 @@ export class Application {
 export const createApp = async (mongoUri?: string): Promise<Application> => {
   const app: ExpressApp = express();
 
-  // Initialize mongo connection & server
+  // --- Initialize mongo connection & server
   let mongoClient: MongoClient;
   let server: MongoMemoryServer | undefined = undefined;
   const options: MongoClientOptions = {
@@ -75,10 +75,12 @@ export const createApp = async (mongoUri?: string): Promise<Application> => {
     mongoClient = await MongoClient.connect(mongoUri, options);
   }
 
+  // --- Attach Middlewares
   // https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/deployment
   app.use(compression());
   app.use(helmet());
   app.use(corsMiddle());
+  app.use(express.json()); // for parsing application/json
 
   // --- Add routes to the app
   // RFC 2616 - 405 Method Not Allowed: https://tools.ietf.org/html/rfc2616#page-66
@@ -88,11 +90,10 @@ export const createApp = async (mongoUri?: string): Promise<Application> => {
     });
   });
 
-  // Handle erroneous behaviors
+  // --- Handle erroneous behaviors
   app.use((req: Request, res: Response, _: NextFunction) => {
     handleResponse(req, res, mongoClient, handleNotExists);
   });
-
   app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
     handleResponse(req, res, mongoClient, handleInternalError(error));
   });

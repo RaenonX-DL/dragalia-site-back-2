@@ -1,16 +1,14 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {AnalysisIdCheckPayload} from '../../../../../api-def/api';
+import {HandlerParams} from '../../../../lookup';
 import {handlePostIdCheck} from '../../../base/handler/idCheck';
 import {processAnalysisIdCheckPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {AnalysisIdCheckResponse} from './response';
 
 export const handleAnalysisIdCheck = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<AnalysisIdCheckPayload>,
 ): Promise<AnalysisIdCheckResponse> => {
-  const payload = processAnalysisIdCheckPayload(req.query as unknown as AnalysisIdCheckPayload);
+  payload = processAnalysisIdCheckPayload(payload);
 
   return handlePostIdCheck(
     mongoClient,

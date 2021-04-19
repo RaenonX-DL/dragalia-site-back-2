@@ -79,7 +79,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   });
 
   it('edits a post', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_EDIT).query(payloadEdit);
+    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_EDIT).send(payloadEdit);
     expect(result.status).toBe(200);
 
     const json: QuestPostEditSuccessResponse = result.body as QuestPostEditSuccessResponse;
@@ -91,7 +91,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns success even if no change', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .query({...payloadPost, modifyNote: 'a'});
+      .send({...payloadPost, modifyNote: 'a'});
     expect(result.status).toBe(200);
 
     const json: QuestPostEditSuccessResponse = result.body as QuestPostEditSuccessResponse;
@@ -103,7 +103,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns failure if ID is not given', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .query({...payloadEdit, seqId: undefined});
+      .send({...payloadEdit, seqId: undefined});
     expect(result.status).toBe(400);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -114,7 +114,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns failure for non-existing post ID & language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .query({...payloadEdit, seqId: 8});
+      .send({...payloadEdit, seqId: 8});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -125,7 +125,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns failure for non-existing post language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .query({...payloadEdit, lang: 'jp'});
+      .send({...payloadEdit, lang: 'jp'});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -136,7 +136,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns failure when permission insufficient', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .query({...payloadEdit, googleUid: uidNormal});
+      .send({...payloadEdit, googleUid: uidNormal});
     expect(result.status).toBe(401);
 
     const json: FailedResponse = result.body as FailedResponse;

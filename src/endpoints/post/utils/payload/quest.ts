@@ -1,9 +1,10 @@
 import {
   QuestPostEditPayload,
-  QuestPostGetPayload, QuestPostListPayload,
+  QuestPostGetPayload,
+  QuestPostListPayload,
   QuestPostPayload,
   QuestPostPublishPayload,
-  SinglePostPayload,
+  QuestPostIdCheckPayload,
 } from '../../../../api-def/api';
 import {processPostListPayload, processSinglePostPayload} from './shared';
 
@@ -41,7 +42,7 @@ export const processQuestGetPayload = <T extends QuestPostGetPayload>(payload: T
   return payload;
 };
 
-export const processQuestIdCheckPayload = <T extends SinglePostPayload>(payload: T): T => {
+export const processQuestIdCheckPayload = <T extends QuestPostIdCheckPayload>(payload: T): T => {
   payload = processSinglePostPayload(payload);
 
   return payload;

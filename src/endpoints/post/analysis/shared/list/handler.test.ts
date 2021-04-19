@@ -23,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LIST} - list analysis`, () =
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
     lang: 'cht',
-    name: 'name',
+    title: 'name',
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',

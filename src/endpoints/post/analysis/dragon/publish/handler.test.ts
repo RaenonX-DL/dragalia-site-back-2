@@ -24,7 +24,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   const payload1: DragonAnalysisPublishPayload = {
     googleUid: uidNormal,
     lang: 'cht',
-    name: 'dragon',
+    title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -54,7 +54,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   const payload5: DragonAnalysisPublishPayload = {
     ...payload1,
-    name: 'chara6',
+    title: 'chara6',
   };
 
   const payload6: DragonAnalysisPublishPayload = {
@@ -81,7 +81,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('publishes a new character analysis', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload2);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
     expect(result.status).toBe(200);
 
     const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
@@ -91,7 +91,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('publishes a new quest post given an alternative language', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload4);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload4);
     expect(result.status).toBe(200);
 
     const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
@@ -101,7 +101,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('publishes a new quest post given a valid unused sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload6);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
     expect(result.status).toBe(200);
 
     const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
@@ -111,7 +111,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload1);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload1);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -120,7 +120,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('blocks publishing a quest post with skipping sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload3);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload3);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -129,9 +129,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('blocks publishing a quest post with duplicated ID and language', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload6);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
 
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload6);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -140,7 +140,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   test('if the published quest post exists in the database', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload2);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
 
     const docQuery = await DragonAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -150,7 +150,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.name);
+    expect(doc.title).toEqual(payload2.title);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);
@@ -168,20 +168,20 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload2);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
     // Normal & change title (expect to fail)
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).query(payload5);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload5);
 
     const docQuery = await DragonAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: payload2.lang,
-      [PostDocumentKey.title]: payload2.name,
+      [PostDocumentKey.title]: payload2.title,
     });
     const doc = DragonAnalysis.fromDocument(docQuery as DragonAnalysisDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.name);
+    expect(doc.title).toEqual(payload2.title);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);

@@ -70,7 +70,15 @@ export class GoogleUser extends Document {
    * @inheritDoc
    */
   static fromDocument(doc: GoogleUserDocument): GoogleUser {
-    return new GoogleUser(doc.em, doc.uid, doc.a, doc.ad, doc._id, doc.lc, doc.lr);
+    return new GoogleUser(
+      doc[GoogleUserDocumentKey.email],
+      doc[GoogleUserDocumentKey.userId],
+      doc[GoogleUserDocumentKey.isAdmin],
+      doc[GoogleUserDocumentKey.adsFreeExpiry],
+      doc[DocumentBaseKey.id],
+      doc[GoogleUserDocumentKey.loginCount],
+      doc[GoogleUserDocumentKey.lastLogin],
+    );
   }
 
   /**

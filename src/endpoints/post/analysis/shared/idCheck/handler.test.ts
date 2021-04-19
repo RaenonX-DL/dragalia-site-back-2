@@ -2,9 +2,10 @@ import {default as request} from 'supertest';
 
 import {
   ApiEndPoints,
+  ApiResponseCode,
   AnalysisIdCheckPayload,
   CharaAnalysisPublishPayload,
-  AnalysisIdCheckResponse, ApiResponseCode,
+  AnalysisIdCheckResponse,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -22,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     googleUid: uidAdmin,
     seqId: 1,
     lang: 'cht',
-    name: 'name',
+    title: 'title',
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',

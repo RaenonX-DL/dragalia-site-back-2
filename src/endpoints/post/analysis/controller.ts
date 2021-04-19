@@ -49,7 +49,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
     const base: PostGetSuccessResponseParam & AnalysisGetContent = {
       ...super.toResponseReady(),
       type: this.post[UnitAnalysisDocumentKey.type],
-      name: this.post[PostDocumentKey.title],
+      title: this.post[PostDocumentKey.title],
       summary: this.post[UnitAnalysisDocumentKey.summary],
       summonResult: this.post[UnitAnalysisDocumentKey.summonResult],
       passives: this.post[UnitAnalysisDocumentKey.passives],

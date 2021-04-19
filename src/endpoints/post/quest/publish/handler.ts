@@ -1,8 +1,6 @@
-import {Request, Response} from 'express';
-import {MongoClient} from 'mongodb';
-
 import {ApiResponseCode, QuestPostPublishPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
+import {HandlerParams} from '../../../lookup';
 import {GoogleUserController} from '../../../userControl/controller';
 import {handlePublishPost} from '../../base/handler/publish';
 import {ApiFailedResponse} from '../../base/response/failed';
@@ -11,9 +9,9 @@ import {QuestPostController} from '../controller';
 import {QuestPostPublishSuccessResponse} from './response';
 
 export const handlePublishQuestPost = async (
-  req: Request, res: Response, mongoClient: MongoClient,
+  {payload, mongoClient}: HandlerParams<QuestPostPublishPayload>,
 ): Promise<ApiResponse> => {
-  const payload = processQuestPublishPayload(req.query as unknown as QuestPostPublishPayload);
+  payload = processQuestPublishPayload(payload);
 
   // Check if the user has the admin privilege
   if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {

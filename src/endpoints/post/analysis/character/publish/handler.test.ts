@@ -26,7 +26,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     googleUid: uidNormal,
     seqId: 1,
     lang: 'cht',
-    name: 'chara1',
+    title: 'chara1',
     summary: 'sum1',
     summon: 'smn1',
     passives: 'passive1',
@@ -61,7 +61,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   const payload5: CharaAnalysisPublishPayload = {
     ...payload1,
-    name: 'chara6',
+    title: 'chara6',
   };
 
   const payload6: CharaAnalysisPublishPayload = {
@@ -88,7 +88,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('publishes a new character analysis', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload2);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload2);
     expect(result.status).toBe(200);
 
     const json: CharaAnalysisPublishSuccessResponse = result.body as CharaAnalysisPublishSuccessResponse;
@@ -98,7 +98,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('publishes a new quest post given an alternative language', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload4);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload4);
     expect(result.status).toBe(200);
 
     const json: CharaAnalysisPublishSuccessResponse = result.body as CharaAnalysisPublishSuccessResponse;
@@ -108,7 +108,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('publishes a new quest post given a valid unused sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload6);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload6);
     expect(result.status).toBe(200);
 
     const json: CharaAnalysisPublishSuccessResponse = result.body as CharaAnalysisPublishSuccessResponse;
@@ -118,7 +118,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload1);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload1);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -127,7 +127,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('blocks publishing a quest post with skipping sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload3);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload3);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -136,9 +136,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   it('blocks publishing a quest post with duplicated ID and language', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload6);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload6);
 
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload6);
+    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload6);
     expect(result.status).toBe(200);
 
     const json: FailedResponse = result.body as FailedResponse;
@@ -147,7 +147,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   });
 
   test('if the published quest post exists in the database', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload2);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload2);
 
     const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -157,7 +157,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.name);
+    expect(doc.title).toEqual(payload2.title);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);
@@ -178,20 +178,20 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload2);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload2);
     // Normal & change title (expect to fail)
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).query(payload5);
+    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).send(payload5);
 
     const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: payload2.lang,
-      [PostDocumentKey.title]: payload2.name,
+      [PostDocumentKey.title]: payload2.title,
     });
     const doc = CharaAnalysis.fromDocument(docQuery as CharaAnalysisDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.name);
+    expect(doc.title).toEqual(payload2.title);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);
