@@ -1,6 +1,6 @@
 import {default as request} from 'supertest';
 
-import {ApiEndPoints, ApiResponseCode, UserLoginPayload, UserLoginResponse} from '../../../api-def/api';
+import {ApiEndPoints, ApiResponseCode, FailedResponse, UserLoginPayload, UserLoginResponse} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from '../model';
 
@@ -19,13 +19,18 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     await app.close();
   });
 
-  const userPayload1: UserLoginPayload = {
+  const userPayload: UserLoginPayload = {
     googleEmail: 'fake@gmail.com',
-    googleUid: '101524038922984790357',
+    googleUid: '10152403888872984790357',
+  };
+
+  const userPayloadEmpty: UserLoginPayload = {
+    googleEmail: '',
+    googleUid: '',
   };
 
   it('registers a new user', async () => {
-    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload);
     expect(result.status).toBe(200);
 
     const json: UserLoginResponse = result.body as UserLoginResponse;
@@ -37,9 +42,9 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     const supertestApp = request(app.express);
 
     // Initial call
-    await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload);
 
-    const result = await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    const result = await supertestApp.post(ApiEndPoints.USER_LOGIN).query(userPayload);
 
     expect(result.status).toBe(200);
 
@@ -49,12 +54,12 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   });
 
   it('stores the user data', async () => {
-    await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload1);
+    await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayload);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
       {
-        [GoogleUserDocumentKey.userId]: userPayload1.googleUid,
-        [GoogleUserDocumentKey.email]: userPayload1.googleEmail,
+        [GoogleUserDocumentKey.userId]: userPayload.googleUid,
+        [GoogleUserDocumentKey.email]: userPayload.googleEmail,
       },
     );
     const doc = GoogleUser.fromDocument(docQuery as GoogleUserDocument);
@@ -62,5 +67,14 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
     expect(doc.loginCount).toEqual(1);
     expect(doc.lastLogin.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.isAdmin).toEqual(false);
+  });
+
+  it('fails if the login data is malformed', async () => {
+    const result = await request(app.express).post(ApiEndPoints.USER_LOGIN).query(userPayloadEmpty);
+    expect(result.status).toBe(200);
+
+    const json: FailedResponse = result.body as FailedResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_EMPTY_LOGIN_DATA);
+    expect(json.success).toBe(false);
   });
 });
