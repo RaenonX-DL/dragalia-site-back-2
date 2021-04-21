@@ -97,7 +97,7 @@ export class QuestPostController extends PostController {
     return await QuestPostController.editPost(
       QuestPost.getCollection(mongoClient),
       editPayload.seqId, editPayload.lang,
-      post.toObject(), editPayload.modifyNote,
+      post.toObject(), editPayload.editNote,
     );
   }
 

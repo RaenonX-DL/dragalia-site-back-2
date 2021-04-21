@@ -4,7 +4,7 @@ import {PostListEntry} from '../../../api-def/api/post/base/response';
 import {SequencedController} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {DocumentBaseKey} from '../../../base/model/base';
-import {ModifiableDocumentKey, ModifyNoteDocumentKey} from '../../../base/model/modifiable';
+import {EditableDocumentKey, EditNoteDocumentKey} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
@@ -74,14 +74,14 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
       isAltLang: this.isAltLang,
       otherLangs: this.otherLangs,
       viewCount: this.post[ViewCountableDocumentKey.viewCount],
-      modifyNotes: this.post[ModifiableDocumentKey.modificationNotes].map((doc) => {
+      editNotes: this.post[EditableDocumentKey.editNotes].map((doc) => {
         return {
-          timestamp: doc[ModifyNoteDocumentKey.datetime],
-          note: doc[ModifyNoteDocumentKey.note],
+          timestamp: doc[EditNoteDocumentKey.datetime],
+          note: doc[EditNoteDocumentKey.note],
         };
       }),
-      modified: this.post[ModifiableDocumentKey.dateModified],
-      published: this.post[ModifiableDocumentKey.datePublished],
+      modified: this.post[EditableDocumentKey.dateModified],
+      published: this.post[EditableDocumentKey.datePublished],
     };
   }
 }
@@ -130,8 +130,8 @@ export abstract class PostController extends SequencedController {
           lang: post[MultiLingualDocumentKey.language],
           title: post[PostDocumentKey.title],
           viewCount: post[ViewCountableDocumentKey.viewCount],
-          modified: post[ModifiableDocumentKey.dateModified],
-          published: post[ModifiableDocumentKey.datePublished],
+          modified: post[EditableDocumentKey.dateModified],
+          published: post[EditableDocumentKey.datePublished],
         };
       };
     }
@@ -146,11 +146,11 @@ export abstract class PostController extends SequencedController {
           [SequentialDocumentKey.sequenceId]: 1,
           [MultiLingualDocumentKey.language]: 1,
           [PostDocumentKey.title]: 1,
-          [ModifiableDocumentKey.dateModified]: 1,
-          [ModifiableDocumentKey.datePublished]: 1,
+          [EditableDocumentKey.dateModified]: 1,
+          [EditableDocumentKey.datePublished]: 1,
           [ViewCountableDocumentKey.viewCount]: 1,
         },
-        sort: {[ModifiableDocumentKey.dateModified]: 'desc'},
+        sort: {[EditableDocumentKey.dateModified]: 'desc'},
       })
       .skip(start)
       .limit(limit)
@@ -229,7 +229,7 @@ export abstract class PostController extends SequencedController {
    * - Document ID
    * - Sequential ID
    * - Language
-   * - Modification notes
+   * - Edit notes
    * - Last Modified timestamp
    * - Publish timestamp
    * - View count
@@ -238,7 +238,7 @@ export abstract class PostController extends SequencedController {
    * @param {number | undefined} seqId sequential ID of the post to be edited
    * @param {string | undefined} langCode language code of the post to be edited
    * @param {D} update document used to replace the old post
-   * @param {string} modifyNote post modification note
+   * @param {string} editNote post edit note
    * @param {D} additionalFilter additional filtering conditions
    * @return {Promise<UpdateResult>} promise of the update result
    * @protected
@@ -248,7 +248,7 @@ export abstract class PostController extends SequencedController {
     seqId: number | undefined,
     langCode: string | undefined,
     update: D,
-    modifyNote: string,
+    editNote: string,
     additionalFilter?: D,
   ): Promise<UpdateResult> {
     // Returns `NOT_FOUND` if `seqId` or `langCode` is falsy - which post to update?
@@ -275,9 +275,9 @@ export abstract class PostController extends SequencedController {
       DocumentBaseKey.id, // Document ID should be immutable
       SequentialDocumentKey.sequenceId, // Sequential ID should be immutable
       MultiLingualDocumentKey.language, // Language should be immutable
-      ModifiableDocumentKey.modificationNotes, // Modification notes should not be updated
-      ModifiableDocumentKey.dateModified, // Last modified timestamp should be updated later
-      ModifiableDocumentKey.datePublished, // Publish timestamp should not be updated
+      EditableDocumentKey.editNotes, // Edit notes should not be updated
+      EditableDocumentKey.dateModified, // Last modified timestamp should be updated later
+      EditableDocumentKey.datePublished, // Publish timestamp should not be updated
       ViewCountableDocumentKey.viewCount, // Post view count should not be changed
     ];
     omitKeys.forEach((key) => delete update[key]);
@@ -294,13 +294,13 @@ export abstract class PostController extends SequencedController {
       return 'NO_CHANGE';
     }
 
-    // Add modification note and update the last modified timestamp
+    // Add edit note and update the last modified timestamp
     await collection.updateOne(filter, {
-      $set: {[ModifiableDocumentKey.dateModified]: now},
+      $set: {[EditableDocumentKey.dateModified]: now},
       $push: {
-        [ModifiableDocumentKey.modificationNotes]: {
-          [ModifyNoteDocumentKey.datetime]: now,
-          [ModifyNoteDocumentKey.note]: modifyNote,
+        [EditableDocumentKey.editNotes]: {
+          [EditNoteDocumentKey.datetime]: now,
+          [EditNoteDocumentKey.note]: editNote,
         },
       },
     });

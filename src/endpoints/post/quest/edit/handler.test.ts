@@ -49,7 +49,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     title: 'edit',
     video: 'videoNew',
     positional: [],
-    modifyNote: 'mod',
+    editNote: 'mod',
   };
 
   beforeAll(async () => {
@@ -91,7 +91,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns success even if no change', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .send({...payloadPost, modifyNote: 'a'});
+      .send({...payloadPost, editNote: 'a'});
     expect(result.status).toBe(200);
 
     const json: QuestPostEditSuccessResponse = result.body as QuestPostEditSuccessResponse;

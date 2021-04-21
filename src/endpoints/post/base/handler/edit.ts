@@ -1,19 +1,19 @@
 import {MongoClient} from 'mongodb';
 
-import {PostModifyPayload, ApiResponseCode} from '../../../../api-def/api';
+import {PostEditPayload, ApiResponseCode} from '../../../../api-def/api';
 import {UpdateResult} from '../../../../base/enum/updateResult';
 import {ApiResponse} from '../../../../base/response';
 import {GoogleUserController} from '../../../userControl/controller';
 import {ApiFailedResponse} from '../response/failed';
 import {PostEditSuccessResponse} from '../response/post/edit';
 
-type FunctionEditPost<P extends PostModifyPayload> = (
+type FunctionEditPost<P extends PostEditPayload> = (
   mongoClient: MongoClient, payload: P
 ) => Promise<UpdateResult>;
 
 type FunctionConstructResponse<R extends PostEditSuccessResponse> = (seqId: number) => R;
 
-export const handleEditPost = async <P extends PostModifyPayload, R extends PostEditSuccessResponse>(
+export const handleEditPost = async <P extends PostEditPayload, R extends PostEditSuccessResponse>(
   mongoClient: MongoClient, payload: P,
   fnEditPost: FunctionEditPost<P>, fnConstructResponse: FunctionConstructResponse<R>,
 ): Promise<ApiResponse> => {

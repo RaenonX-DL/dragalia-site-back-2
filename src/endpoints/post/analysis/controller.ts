@@ -158,7 +158,7 @@ export class AnalysisController extends PostController {
     return await AnalysisController.editPost(
       CharaAnalysis.getCollection(mongoClient),
       payload.seqId, payload.lang,
-      analysis.toObject(), payload.modifyNote,
+      analysis.toObject(), payload.editNote,
     );
   }
 
@@ -177,7 +177,7 @@ export class AnalysisController extends PostController {
     return await AnalysisController.editPost(
       DragonAnalysis.getCollection(mongoClient),
       payload.seqId, payload.lang,
-      analysis.toObject(), payload.modifyNote,
+      analysis.toObject(), payload.editNote,
     );
   }
 

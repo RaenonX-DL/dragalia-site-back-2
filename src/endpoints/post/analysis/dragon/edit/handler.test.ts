@@ -43,7 +43,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     title: 'edit',
     videos: 'videoNew',
     suitableCharacters: '',
-    modifyNote: 'mod',
+    editNote: 'mod',
   };
 
   beforeAll(async () => {
@@ -85,7 +85,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns success even if no change', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .send({...payloadPost, modifyNote: 'a'});
+      .send({...payloadPost, editNote: 'a'});
     expect(result.status).toBe(200);
 
     const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;

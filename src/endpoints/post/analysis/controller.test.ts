@@ -500,7 +500,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editCharaAnalysis(
         app.mongoClient,
-        {...payloadChara, videos: 'videoEdit', seqId: newSeqId, modifyNote: 'mod'},
+        {...payloadChara, videos: 'videoEdit', seqId: newSeqId, editNote: 'mod'},
       );
 
       expect(editResult).toBe('UPDATED');
@@ -519,7 +519,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editCharaAnalysis(
         app.mongoClient,
-        {...payloadChara, seqId: newSeqId, modifyNote: 'mod'},
+        {...payloadChara, seqId: newSeqId, editNote: 'mod'},
       );
 
       expect(editResult).toBe('NO_CHANGE');
@@ -538,7 +538,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editCharaAnalysis(
         app.mongoClient,
-        {...payloadChara, videos: 'videoEdit', seqId: 8, modifyNote: 'mod'},
+        {...payloadChara, videos: 'videoEdit', seqId: 8, editNote: 'mod'},
       );
 
       expect(editResult).toBe('NOT_FOUND');
@@ -825,7 +825,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editDragonAnalysis(
         app.mongoClient,
-        {...payloadDragon, videos: 'videoEdit', seqId: newSeqId, modifyNote: 'mod'},
+        {...payloadDragon, videos: 'videoEdit', seqId: newSeqId, editNote: 'mod'},
       );
 
       expect(editResult).toBe('UPDATED');
@@ -844,7 +844,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editDragonAnalysis(
         app.mongoClient,
-        {...payloadDragon, seqId: newSeqId, modifyNote: 'mod'},
+        {...payloadDragon, seqId: newSeqId, editNote: 'mod'},
       );
 
       expect(editResult).toBe('NO_CHANGE');
@@ -855,7 +855,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const editResult = await AnalysisController.editDragonAnalysis(
         app.mongoClient,
-        {...payloadDragon, videos: 'videoEdit', seqId: 8, modifyNote: 'mod'},
+        {...payloadDragon, videos: 'videoEdit', seqId: 8, editNote: 'mod'},
       );
 
       expect(editResult).toBe('NOT_FOUND');

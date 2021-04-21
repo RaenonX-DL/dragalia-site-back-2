@@ -3,7 +3,7 @@ import {Collection, MongoClient} from 'mongodb';
 import {QuestPostPayload} from '../../../api-def/api/post/quest/payload';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentBaseKey} from '../../../base/model/base';
-import {ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
+import {EditableDocumentKey, EditNote} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
@@ -134,11 +134,11 @@ export class QuestPost extends Post {
       dateModified,
       datePublished,
       id,
-      modificationNotes,
+      editNotes,
       viewCount,
     } = params;
 
-    super({seqId, language, title, dateModified, datePublished, id, modificationNotes, viewCount});
+    super({seqId, language, title, dateModified, datePublished, id, editNotes: editNotes, viewCount});
 
     this.generalInfo = generalInfo;
     this.video = video;
@@ -158,10 +158,10 @@ export class QuestPost extends Post {
       video: doc[QuestPostDocumentKey.video],
       positionInfo: doc[QuestPostDocumentKey.positionInfo].map((doc) => QuestPosition.fromDocument(doc)),
       addendum: doc[QuestPostDocumentKey.addendum],
-      dateModified: doc[ModifiableDocumentKey.dateModified],
-      datePublished: doc[ModifiableDocumentKey.datePublished],
+      dateModified: doc[EditableDocumentKey.dateModified],
+      datePublished: doc[EditableDocumentKey.datePublished],
       id: doc[DocumentBaseKey.id],
-      modificationNotes: doc[ModifiableDocumentKey.modificationNotes].map((doc) => ModifyNote.fromDocument(doc)),
+      editNotes: doc[EditableDocumentKey.editNotes].map((doc) => EditNote.fromDocument(doc)),
       viewCount: doc[ViewCountableDocumentKey.viewCount],
     });
   }
@@ -210,9 +210,9 @@ export class QuestPost extends Post {
       [QuestPostDocumentKey.video]: this.video,
       [QuestPostDocumentKey.positionInfo]: this.positionInfo.map((doc) => doc.toObject()),
       [QuestPostDocumentKey.addendum]: this.addendum,
-      [ModifiableDocumentKey.dateModified]: this.dateModified,
-      [ModifiableDocumentKey.datePublished]: this.datePublished,
-      [ModifiableDocumentKey.modificationNotes]: this.modificationNotes.map((doc) => doc.toObject()),
+      [EditableDocumentKey.dateModified]: this.dateModified,
+      [EditableDocumentKey.datePublished]: this.datePublished,
+      [EditableDocumentKey.editNotes]: this.editNotes.map((doc) => doc.toObject()),
       [ViewCountableDocumentKey.viewCount]: this.viewCount,
     };
   }

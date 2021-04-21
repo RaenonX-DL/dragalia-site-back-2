@@ -378,7 +378,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     const editResult = await QuestPostController.editQuestPost(
       app.mongoClient,
-      {...payload, video: 'videoEdit', seqId: newSeqId, modifyNote: 'mod'},
+      {...payload, video: 'videoEdit', seqId: newSeqId, editNote: 'mod'},
     );
 
     expect(editResult).toBe('UPDATED');
@@ -389,7 +389,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     const editResult = await QuestPostController.editQuestPost(
       app.mongoClient,
-      {...payload, seqId: newSeqId, modifyNote: 'mod'},
+      {...payload, seqId: newSeqId, editNote: 'mod'},
     );
 
     expect(editResult).toBe('NO_CHANGE');
@@ -400,7 +400,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     const editResult = await QuestPostController.editQuestPost(
       app.mongoClient,
-      {...payload, video: 'videoEdit', seqId: 8, modifyNote: 'mod'},
+      {...payload, video: 'videoEdit', seqId: 8, editNote: 'mod'},
     );
 
     expect(editResult).toBe('NOT_FOUND');

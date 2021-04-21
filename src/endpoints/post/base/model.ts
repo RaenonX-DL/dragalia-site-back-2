@@ -1,7 +1,7 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
 import {CollectionInfo} from '../../../base/controller/info';
-import {ModifiableDocumentBase, ModifiableDocumentKey, ModifyNote} from '../../../base/model/modifiable';
+import {EditableDocumentBase, EditableDocumentKey, EditNote} from '../../../base/model/editable';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocument, SequentialDocumentBase, SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentBase, ViewCountableDocumentKey} from '../../../base/model/viewCount';
@@ -14,7 +14,7 @@ export enum PostDocumentKey {
 export type PostDocumentBase =
   MultiLingualDocumentBase
   & SequentialDocumentBase
-  & ModifiableDocumentBase
+  & EditableDocumentBase
   & ViewCountableDocumentBase
   & {
   [PostDocumentKey.title]: string,
@@ -27,7 +27,7 @@ export type PostConstructParams = {
   dateModified?: Date,
   datePublished?: Date,
   id?: ObjectId,
-  modificationNotes?: Array<ModifyNote>,
+  editNotes?: Array<EditNote>,
   viewCount?: number,
 }
 
@@ -39,7 +39,7 @@ export abstract class Post extends SequentialDocument {
   title: string;
   dateModified: Date;
   datePublished: Date;
-  modificationNotes: Array<ModifyNote>;
+  editNotes: Array<EditNote>;
   viewCount: number;
 
   /**
@@ -56,7 +56,7 @@ export abstract class Post extends SequentialDocument {
     this.title = params.title;
     this.dateModified = params.dateModified || now;
     this.datePublished = params.dateModified || now;
-    this.modificationNotes = params.modificationNotes || [];
+    this.editNotes = params.editNotes || [];
     this.viewCount = params.viewCount || 0;
   }
 
@@ -88,9 +88,9 @@ export abstract class Post extends SequentialDocument {
       ...super.toObject(),
       [MultiLingualDocumentKey.language]: this.language,
       [PostDocumentKey.title]: this.title,
-      [ModifiableDocumentKey.modificationNotes]: this.modificationNotes.map((doc) => doc.toObject()),
-      [ModifiableDocumentKey.dateModified]: this.dateModified,
-      [ModifiableDocumentKey.datePublished]: this.datePublished,
+      [EditableDocumentKey.editNotes]: this.editNotes.map((doc) => doc.toObject()),
+      [EditableDocumentKey.dateModified]: this.dateModified,
+      [EditableDocumentKey.datePublished]: this.datePublished,
       [ViewCountableDocumentKey.viewCount]: this.viewCount,
     };
   }

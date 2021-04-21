@@ -189,7 +189,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(doc.addendum).toEqual(questPayload2.addendum);
     expect(doc.datePublished.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModified.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
-    expect(doc.modificationNotes).toHaveLength(0);
+    expect(doc.editNotes).toHaveLength(0);
     expect(doc.viewCount).toEqual(0);
   });
 
@@ -217,7 +217,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     expect(doc.addendum).toEqual(questPayload2.addendum);
     expect(doc.datePublished.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModified.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
-    expect(doc.modificationNotes).toHaveLength(0);
+    expect(doc.editNotes).toHaveLength(0);
     expect(doc.viewCount).toEqual(0);
   });
 });
