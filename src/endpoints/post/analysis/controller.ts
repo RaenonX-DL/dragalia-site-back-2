@@ -65,7 +65,12 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       return {
         ...base,
         forceStrikes: this.post[CharaAnalysisDocumentKey.forceStrike],
-        skills: this.post[CharaAnalysisDocumentKey.skills],
+        skills: this.post[CharaAnalysisDocumentKey.skills].map((doc: CharaAnalysisSkillDocument) => ({
+          name: doc[CharaAnalysisSkillDocumentKey.name],
+          info: doc[CharaAnalysisSkillDocumentKey.info],
+          rotations: doc[CharaAnalysisSkillDocumentKey.rotations],
+          tips: doc[CharaAnalysisSkillDocumentKey.tips],
+        })),
         tipsBuilds: this.post[CharaAnalysisDocumentKey.tipsBuilds],
       };
     }

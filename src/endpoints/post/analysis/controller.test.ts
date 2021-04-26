@@ -1,11 +1,16 @@
 import {MongoError} from 'mongodb';
 
-import {CharaAnalysisPublishPayload, DragonAnalysisPublishPayload} from '../../../api-def/api';
+import {
+  CharaAnalysisPublishPayload,
+  DragonAnalysisPublishPayload,
+  SupportedLanguages,
+} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {SeqIdSkippingError} from '../error';
+import {CharaAnalysisResponse} from './base/response';
 import {AnalysisController} from './controller';
 import {
   CharaAnalysis,
@@ -20,7 +25,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
   const payloadChara: CharaAnalysisPublishPayload = {
     googleUid: 'uid',
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'name',
     summary: 'summary',
     summon: 'summon',
@@ -41,7 +46,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
   const payloadDragon: DragonAnalysisPublishPayload = {
     googleUid: 'uid',
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
@@ -96,7 +101,9 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
         await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
       }
 
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'cht', 0, 25);
+      const postListResult = await AnalysisController.getAnalysisList(
+        app.mongoClient, SupportedLanguages.CHT, 0, 25,
+      );
 
       expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
     });
@@ -106,13 +113,13 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
         await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
       }
 
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'cht', 2, 2);
+      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
 
       expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
     });
 
     it('returns without any error if no analysis available', async () => {
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'cht', 2, 2);
+      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
 
       expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
     });
@@ -122,7 +129,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
         await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
       }
 
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'en', 0, 25);
+      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.EN, 0, 25);
 
       expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
     });
@@ -132,7 +139,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
         await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
       }
 
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'cht', 0, 25);
+      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
 
       expect(postListResult.totalAvailableCount).toBe(7);
     });
@@ -142,7 +149,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
         await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
       }
 
-      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, 'cht', 0, 25);
+      const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
 
       expect(postListResult.totalAvailableCount).toBe(30);
     });
@@ -150,11 +157,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('increases the view count after getting it', async () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(4);
     });
@@ -162,85 +169,121 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('does not increase the view count if specified', async () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });
 
     it('returns the analysis in an alternative language if main unavailable', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: 'en'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.EN});
 
-      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(getResult?.isAltLang).toBe(true);
-      expect(getResult?.post[MultiLingualDocumentKey.language]).toBe('en');
+      expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);
       expect(getResult?.post[SequentialDocumentKey.sequenceId]).toBe(1);
     });
 
     it('returns an empty response for non-existed analysis', async () => {
-      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(getResult).toBeNull();
     });
 
     it('returns all available languages of a analysis', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'en'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'cht'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'jp'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.CHT,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.JP,
+      });
 
-      const postListResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      const postListResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(postListResult?.isAltLang).toBe(false);
-      expect(postListResult?.otherLangs).toStrictEqual(['en', 'jp']);
+      expect(postListResult?.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
     });
 
     it('does not check for the available languages if view count does not increase', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'en'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'cht'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'jp'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.CHT,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.JP,
+      });
 
-      const postListResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
+      const postListResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
 
       expect(postListResult?.isAltLang).toBe(false);
       expect(postListResult?.otherLangs).toStrictEqual([]);
     });
 
     test('if view count behaves correctly according to the specified `incCount`', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'en'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'cht'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'jp'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.CHT,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.JP,
+      });
 
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'en');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'en');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'jp');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'jp');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'jp', false);
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'jp', false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.EN);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.EN);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.JP);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.JP);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.JP, false);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.JP, false);
 
-      let getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'en', false);
+      let getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.EN, false);
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
-      getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht', false);
+      getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT, false);
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(1);
-      getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'jp', false);
+      getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.JP, false);
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
     });
 
     test('if view count behaves correctly when returning the alternative version', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: 'en'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.EN});
 
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
-      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, 'cht');
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+      const getResult = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
 
       expect(getResult?.isAltLang).toBe(true);
-      expect(getResult?.post[MultiLingualDocumentKey.language]).toBe('en');
+      expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);
       expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
     });
 
@@ -267,7 +310,11 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     it('returns available for an unused language in the same ID', async () => {
       const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-      const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, 'en', newSeqId);
+      const availability = await AnalysisController.isAnalysisIdAvailable(
+        app.mongoClient,
+        SupportedLanguages.EN,
+        newSeqId,
+      );
 
       expect(availability).toBe(true);
     });
@@ -277,7 +324,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const availability = await AnalysisController.isAnalysisIdAvailable(
         app.mongoClient,
-        'en',
+        SupportedLanguages.EN,
         newSeqId + 1,
       );
 
@@ -340,12 +387,12 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -374,18 +421,18 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, {
         ...payloadChara,
         seqId: newSeqId,
-        lang: 'en',
+        lang: SupportedLanguages.EN,
         keywords: 'kw-en',
       });
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('en');
+      expect(post.language).toBe(SupportedLanguages.EN);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -416,13 +463,13 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       // Checks if the content is unchanged
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -452,44 +499,56 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     });
 
     it('assigns different ID for different language', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: 'en'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: 'cht'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: 'jp'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.EN});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.CHT});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.JP});
 
       let postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       let post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(1);
       postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(2);
       postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'jp',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
       });
       post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(3);
     });
 
     it('publishes posts in different languages and IDs', async () => {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, lang: 'en'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 2, lang: 'cht'});
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 3, lang: 'jp'});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 2,
+        lang: SupportedLanguages.CHT,
+      });
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+        ...payloadChara,
+        seqId: 3,
+        lang: SupportedLanguages.JP,
+      });
 
       let postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       let post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(1);
       postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(2);
       postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'jp',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
       });
       post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
       expect(post.seqId).toBe(3);
@@ -507,7 +566,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: newSeqId,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
@@ -526,7 +585,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: newSeqId,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
@@ -576,12 +635,12 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -610,18 +669,18 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, {
         ...payloadChara,
         seqId: newSeqId,
-        lang: 'en',
+        lang: SupportedLanguages.EN,
         keywords: 'kw-en',
       });
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('en');
+      expect(post.language).toBe(SupportedLanguages.EN);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -649,12 +708,12 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('dragon');
       expect(post.summary).toBe('dragonSummary');
       expect(post.summonResult).toBe('dragonSummon');
@@ -676,18 +735,18 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
       await AnalysisController.publishDragonAnalysis(app.mongoClient, {
         ...payloadDragon,
         seqId: newSeqId,
-        lang: 'en',
+        lang: SupportedLanguages.EN,
         keywords: 'kw-en',
       });
 
       const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('en');
+      expect(post.language).toBe(SupportedLanguages.EN);
       expect(post.title).toBe('dragon');
       expect(post.summary).toBe('dragonSummary');
       expect(post.summonResult).toBe('dragonSummon');
@@ -711,13 +770,13 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
 
       // Checks if the content is unchanged
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('name');
       expect(post.summary).toBe('summary');
       expect(post.summonResult).toBe('summon');
@@ -748,13 +807,13 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: 1,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
       // Checks if the content is unchanged
       expect(post.seqId).toBe(1);
-      expect(post.language).toBe('cht');
+      expect(post.language).toBe(SupportedLanguages.CHT);
       expect(post.title).toBe('dragon');
       expect(post.summary).toBe('dragonSummary');
       expect(post.summonResult).toBe('dragonSummon');
@@ -777,44 +836,53 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
     });
 
     it('assigns different ID for different language', async () => {
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: 'en'});
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: 'cht'});
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: 'jp'});
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: SupportedLanguages.EN});
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: SupportedLanguages.CHT});
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: SupportedLanguages.JP});
 
       let postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(1);
       postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(2);
       postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'jp',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
       });
       post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(3);
     });
 
     it('publishes posts in different languages and IDs', async () => {
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, lang: 'en'});
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 2, lang: 'cht'});
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 3, lang: 'jp'});
+      await AnalysisController.publishDragonAnalysis(
+        app.mongoClient,
+        {...payloadDragon, seqId: 1, lang: SupportedLanguages.EN},
+      );
+      await AnalysisController.publishDragonAnalysis(
+        app.mongoClient,
+        {...payloadDragon, seqId: 2, lang: SupportedLanguages.CHT},
+      );
+      await AnalysisController.publishDragonAnalysis(
+        app.mongoClient,
+        {...payloadDragon, seqId: 3, lang: SupportedLanguages.JP},
+      );
 
       let postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'en',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
       });
       let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(1);
       postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(2);
       postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-        [MultiLingualDocumentKey.language]: 'jp',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
       });
       post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
       expect(post.seqId).toBe(3);
@@ -832,7 +900,7 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
         [SequentialDocumentKey.sequenceId]: newSeqId,
-        [MultiLingualDocumentKey.language]: 'cht',
+        [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
       });
       const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
@@ -859,6 +927,26 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
       );
 
       expect(editResult).toBe('NOT_FOUND');
+    });
+  });
+
+  describe('analysis get result', () => {
+    test('skill info of `responseReady()` uses response key', async () => {
+      const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+      const result = await AnalysisController.getAnalysis(app.mongoClient, newSeqId);
+
+      expect(result).not.toBeNull();
+
+      const response = result?.toResponseReady() as CharaAnalysisResponse;
+
+      expect(response.skills.length).toBeGreaterThan(0);
+
+      const firstSkill = response.skills[0];
+
+      expect(firstSkill.name).toBe('skill');
+      expect(firstSkill.info).toBe('info');
+      expect(firstSkill.rotations).toBe('rot');
+      expect(firstSkill.tips).toBe('tips');
     });
   });
 });
