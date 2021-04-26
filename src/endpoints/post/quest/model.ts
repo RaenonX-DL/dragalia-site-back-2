@@ -1,6 +1,6 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {QuestPostPayload} from '../../../api-def/api/post/quest/payload';
+import {QuestPostPayload} from '../../../api-def/api';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentBaseKey} from '../../../base/model/base';
 import {EditableDocumentKey, EditNote} from '../../../base/model/editable';

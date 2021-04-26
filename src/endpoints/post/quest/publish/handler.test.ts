@@ -5,7 +5,7 @@ import {
   ApiResponseCode,
   BaseResponse,
   QuestPostPublishPayload,
-  QuestPostPublishSuccessResponse,
+  QuestPostPublishSuccessResponse, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
@@ -22,7 +22,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   const questPayload1: QuestPostPublishPayload = {
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'post1',
     general: 'gen1',
     video: 'vid1',
@@ -45,7 +45,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   };
 
   const questPayload2: QuestPostPublishPayload = {
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'post2',
     general: 'gen2',
     video: 'vid2',
@@ -73,7 +73,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   const questPayload5: QuestPostPublishPayload = {
     ...questPayload2,
-    lang: 'en',
+    lang: SupportedLanguages.EN,
   };
 
   const questPayload6: QuestPostPublishPayload = {

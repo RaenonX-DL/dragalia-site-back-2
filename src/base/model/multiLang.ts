@@ -1,3 +1,4 @@
+import {SupportedLanguages} from '../../api-def/api';
 import {DocumentBase} from './base';
 
 export enum MultiLingualDocumentKey {
@@ -5,5 +6,5 @@ export enum MultiLingualDocumentKey {
 }
 
 export type MultiLingualDocumentBase = DocumentBase & {
-  [MultiLingualDocumentKey.language]: string,
+  [MultiLingualDocumentKey.language]: SupportedLanguages,
 };

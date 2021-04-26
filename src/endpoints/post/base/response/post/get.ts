@@ -1,8 +1,7 @@
 import {
   BaseResponse,
   PostGetSuccessResponse as PostGetSuccessResponseApi,
-} from '../../../../../api-def/api';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
+  ApiResponseCode} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 

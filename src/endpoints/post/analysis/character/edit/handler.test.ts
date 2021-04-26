@@ -5,7 +5,7 @@ import {
   ApiEndPoints, ApiResponseCode,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
-  FailedResponse,
+  FailedResponse, SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -23,7 +23,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'chara1',
     summary: 'sum1',
     summon: 'smn1',
@@ -123,7 +123,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   it('returns failure for non-existing post language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadEdit, lang: 'jp'});
+      .send({...payloadEdit, lang: SupportedLanguages.JP});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;

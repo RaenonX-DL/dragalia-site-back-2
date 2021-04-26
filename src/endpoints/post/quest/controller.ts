@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {QuestPostEditPayload, QuestPostPublishPayload} from '../../../api-def/api';
+import {QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {PostController, PostGetResult, PostListResult} from '../base/controller';
@@ -18,9 +18,9 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
    *
    * @param {QuestPostDocument} post
    * @param {boolean} isAltLang
-   * @param {Array<string>} otherLangs
+   * @param {Array<SupportedLanguages>} otherLangs
    */
-  constructor(post: QuestPostDocument, isAltLang: boolean, otherLangs: Array<string>) {
+  constructor(post: QuestPostDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
     super(post, isAltLang, otherLangs);
   }
 
@@ -33,14 +33,12 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
       title: this.post[PostDocumentKey.title],
       general: this.post[QuestPostDocumentKey.generalInfo],
       video: this.post[QuestPostDocumentKey.video],
-      info: this.post[QuestPostDocumentKey.positionInfo].map((doc) => {
-        return {
-          position: doc[QuestPositionDocumentKey.position],
-          builds: doc[QuestPositionDocumentKey.builds],
-          rotations: doc[QuestPositionDocumentKey.rotations],
-          tips: doc[QuestPositionDocumentKey.tips],
-        };
-      }),
+      positional: this.post[QuestPostDocumentKey.positionInfo].map((doc) => ({
+        position: doc[QuestPositionDocumentKey.position],
+        builds: doc[QuestPositionDocumentKey.builds],
+        rotations: doc[QuestPositionDocumentKey.rotations],
+        tips: doc[QuestPositionDocumentKey.tips],
+      })),
       addendum: this.post[QuestPostDocumentKey.addendum],
     };
   }
@@ -130,15 +128,15 @@ export class QuestPostController extends PostController {
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {number} seqId sequential ID of the post
-   * @param {string} langCode language code of the post
+   * @param {SupportedLanguages} lang language of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @return {Promise} result of getting a quest post
    */
   static async getQuestPost(
-    mongoClient: MongoClient, seqId: number, langCode = 'cht', incCount = true,
+    mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
   ): Promise<QuestPostGetResult | null> {
     return super.getPost<QuestPostDocument, QuestPostGetResult>(
-      QuestPost.getCollection(mongoClient), seqId, langCode, incCount,
+      QuestPost.getCollection(mongoClient), seqId, lang, incCount,
       ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
     );
   }

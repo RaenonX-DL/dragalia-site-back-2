@@ -6,6 +6,7 @@ import {
   CharaAnalysisPublishPayload,
   CharaAnalysisPublishSuccessResponse,
   FailedResponse,
+  SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
@@ -25,7 +26,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   const payload1: CharaAnalysisPublishPayload = {
     googleUid: uidNormal,
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'chara1',
     summary: 'sum1',
     summon: 'smn1',
@@ -56,7 +57,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   const payload4: CharaAnalysisPublishPayload = {
     ...payload2,
-    lang: 'en',
+    lang: SupportedLanguages.EN,
   };
 
   const payload5: CharaAnalysisPublishPayload = {

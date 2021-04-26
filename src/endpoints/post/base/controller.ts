@@ -1,6 +1,6 @@
 import {Collection, Document, MongoClient} from 'mongodb';
 
-import {PostListEntry} from '../../../api-def/api/post/base/response';
+import {SupportedLanguages, PostListEntry} from '../../../api-def/api';
 import {SequencedController} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {DocumentBaseKey} from '../../../base/model/base';
@@ -45,7 +45,7 @@ export class PostListResult {
 export abstract class PostGetResult<T extends PostDocumentBase> {
   post: T;
   isAltLang: boolean;
-  otherLangs: Array<string>;
+  otherLangs: Array<SupportedLanguages>;
 
   /**
    * Construct a post getting result object.
@@ -55,7 +55,7 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
    * @param {Array<string>} otherLangs other languages available, if any
    * @protected
    */
-  protected constructor(post: T, isAltLang: boolean, otherLangs: Array<string>) {
+  protected constructor(post: T, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
     this.post = post;
     this.isAltLang = isAltLang;
     this.otherLangs = otherLangs;
@@ -89,7 +89,7 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
 
 type ResultConstructFunction<D extends PostDocumentBase,
   T extends PostGetResult<D>> =
-  (post: D, isAltLang: boolean, otherLangs: Array<string>) => T;
+  (post: D, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) => T;
 
 
 type PostControllerListPostOptions = {
@@ -168,7 +168,7 @@ export abstract class PostController extends SequencedController {
    *
    * @param {Collection} collection mongo collection for getting the post
    * @param {number} seqId sequence ID of the post
-   * @param {string} langCode language code of the post
+   * @param {SupportedLanguages} lang language of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @param {ResultConstructFunction} resultConstructFunction function to construct the result object
    * @return {Promise<T>} result of getting a post
@@ -176,7 +176,7 @@ export abstract class PostController extends SequencedController {
    */
   protected static async getPost<D extends PostDocumentBase,
     T extends PostGetResult<D>>(
-    collection: Collection, seqId: number, langCode = 'cht', incCount = true,
+    collection: Collection, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
     resultConstructFunction: ResultConstructFunction<D, T>,
   ): Promise<T | null> {
     // Get the code of other available languages
@@ -187,7 +187,7 @@ export abstract class PostController extends SequencedController {
       // If incCount is false, it implies that the post fetch is for other purpose, such as post editing.
 
       const langCodesAvailable = await collection.find(
-        {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: {$ne: langCode}},
+        {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: {$ne: lang}},
         {projection: {[MultiLingualDocumentKey.language]: 1}},
       ).toArray();
       otherLangs = langCodesAvailable.map((doc) => doc[MultiLingualDocumentKey.language]);
@@ -197,7 +197,7 @@ export abstract class PostController extends SequencedController {
 
     let isAltLang = false;
     let post = await collection.findOneAndUpdate(
-      {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: langCode},
+      {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: lang},
       postDataUpdate,
     );
 

@@ -1,7 +1,7 @@
 {
   "name": "dragalia-site-back-2",
   "version": "1.0.0",
-  "description": "Renewed backend of Dragalia Lost info website by OM.",
+  "description": "Renewed backend for Dragalia Lost info website by OM.",
   "main": "dist/main.js",
   "scripts": {
     "dev": "nodemon",

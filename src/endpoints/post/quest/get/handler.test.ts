@@ -7,6 +7,7 @@ import {
   QuestPostGetPayload,
   QuestPostGetSuccessResponse,
   QuestPostPublishPayload,
+  SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {GoogleUserController} from '../../../userControl/controller';
@@ -23,12 +24,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   const payloadGet: QuestPostGetPayload = {
     seqId: 1,
     googleUid: uidNormal,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
   };
 
   const payloadPost: QuestPostPublishPayload = {
     googleUid: uidAdmin,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
     video: 'video',
@@ -85,11 +86,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('cht');
+    expect(json.lang).toBe(SupportedLanguages.CHT);
   });
 
   it('gets an existed post which has an alt version only given sequential ID', async () => {
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN});
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     expect(result.status).toBe(200);
@@ -99,13 +100,13 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(true);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('en');
+    expect(json.lang).toBe(SupportedLanguages.EN);
   });
 
   it('returns all available languages except the current one', async () => {
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'cht'});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'jp'});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP});
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     expect(result.status).toBe(200);
@@ -115,14 +116,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('cht');
-    expect(json.otherLangs).toStrictEqual(['en', 'jp']);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
   });
 
   it('returns nothing as available languages if ID is spread', async () => {
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: 'cht'});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: 'jp'});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP});
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 2});
     expect(result.status).toBe(200);
@@ -132,7 +133,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(2);
-    expect(json.lang).toBe('cht');
+    expect(json.lang).toBe(SupportedLanguages.CHT);
     expect(json.otherLangs).toStrictEqual([]);
   });
 
@@ -215,7 +216,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   });
 
   it('increments view count per request on alternative version', async () => {
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: 'en'});
+    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN});
 
     await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
@@ -227,7 +228,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.lang).toBe('en');
+    expect(json.lang).toBe(SupportedLanguages.EN);
     expect(json.viewCount).toBe(4);
   });
 });

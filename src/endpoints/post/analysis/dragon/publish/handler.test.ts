@@ -5,7 +5,7 @@ import {
   ApiResponseCode,
   DragonAnalysisPublishSuccessResponse,
   DragonAnalysisPublishPayload,
-  FailedResponse,
+  FailedResponse, SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
@@ -23,7 +23,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   const payload1: DragonAnalysisPublishPayload = {
     googleUid: uidNormal,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
@@ -49,7 +49,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   const payload4: DragonAnalysisPublishPayload = {
     ...payload2,
-    lang: 'en',
+    lang: SupportedLanguages.EN,
   };
 
   const payload5: DragonAnalysisPublishPayload = {

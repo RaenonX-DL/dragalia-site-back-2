@@ -6,7 +6,7 @@ import {
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
-  DragonAnalysisPublishPayload,
+  DragonAnalysisPublishPayload, SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
@@ -18,6 +18,8 @@ import {UnhandledAnalysisTypeError} from './error';
 import {
   CharaAnalysis,
   CharaAnalysisDocumentKey,
+  CharaAnalysisSkillDocument,
+  CharaAnalysisSkillDocumentKey,
   dbInfo,
   DragonAnalysis,
   DragonAnalysisDocumentKey,
@@ -36,9 +38,9 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
    *
    * @param {AnalysisDocument} post
    * @param {boolean} isAltLang
-   * @param {Array<string>} otherLangs
+   * @param {Array<SupportedLanguages>} otherLangs
    */
-  constructor(post: AnalysisDocument, isAltLang: boolean, otherLangs: Array<string>) {
+  constructor(post: AnalysisDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
     super(post, isAltLang, otherLangs);
   }
 
@@ -185,13 +187,13 @@ export class AnalysisController extends PostController {
    * Get a list of analyses.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {string} langCode language code of the analyses
+   * @param {SupportedLanguages} lang language code of the analyses
    * @param {number} start starting index of the analysis lists
    * @param {number} limit maximum count of the posts to return
    * @return {Promise<PostListResult>} post listing result
    */
   static async getAnalysisList(
-    mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
+    mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
   ): Promise<PostListResult> {
     const options = {
       start,
@@ -201,7 +203,7 @@ export class AnalysisController extends PostController {
       },
     };
 
-    return AnalysisController.listPosts(UnitAnalysis.getCollection(mongoClient), langCode, options);
+    return AnalysisController.listPosts(UnitAnalysis.getCollection(mongoClient), lang, options);
   }
 
   /**
@@ -219,15 +221,15 @@ export class AnalysisController extends PostController {
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {number} seqId sequential ID of the post
-   * @param {string} langCode language code of the post
+   * @param {SupportedLanguages} lang language code of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @return {Promise<PostGetResult<QuestPostDocument>>} result of getting a quest post
    */
   static async getAnalysis(
-    mongoClient: MongoClient, seqId: number, langCode = 'cht', incCount = true,
+    mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
   ): Promise<AnalysisGetResult | null> {
     return super.getPost<AnalysisDocument, AnalysisGetResult>(
-      UnitAnalysis.getCollection(mongoClient), seqId, langCode, incCount,
+      UnitAnalysis.getCollection(mongoClient), seqId, lang, incCount,
       ((post, isAltLang, otherLangs) => new AnalysisGetResult(post, isAltLang, otherLangs)),
     );
   }

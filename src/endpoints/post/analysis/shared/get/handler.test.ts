@@ -6,7 +6,7 @@ import {
   ApiResponseCode,
   CharaAnalysisPublishPayload,
   CharacterAnalysis,
-  FailedResponse,
+  FailedResponse, SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -25,13 +25,13 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     seqId: 1,
     incCount: true,
     googleUid: uidNormal,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
   };
 
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'name',
     summary: 'summary',
     summon: 'summon',
@@ -86,11 +86,13 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('cht');
+    expect(json.lang).toBe(SupportedLanguages.CHT);
   });
 
   it('gets an analysis which has an alt version only given sequential ID', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: 'en'});
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
+    );
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
     expect(result.status).toBe(200);
@@ -100,13 +102,21 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(true);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('en');
+    expect(json.lang).toBe(SupportedLanguages.EN);
   });
 
   it('returns all available languages except the current one', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 1, lang: 'cht'});
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 1, lang: 'jp'});
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN},
+    );
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {
+      ...payloadPost,
+      seqId: 1,
+      lang: SupportedLanguages.CHT,
+    });
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP},
+    );
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
     expect(result.status).toBe(200);
@@ -116,14 +126,20 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
-    expect(json.lang).toBe('cht');
-    expect(json.otherLangs).toStrictEqual(['en', 'jp']);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
   });
 
   it('returns nothing as available languages if ID is spread', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 1, lang: 'en'});
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 2, lang: 'cht'});
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: 3, lang: 'jp'});
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN},
+    );
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT},
+    );
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP},
+    );
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 2});
     expect(result.status).toBe(200);
@@ -133,7 +149,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(2);
-    expect(json.lang).toBe('cht');
+    expect(json.lang).toBe(SupportedLanguages.CHT);
     expect(json.otherLangs).toStrictEqual([]);
   });
 
@@ -216,7 +232,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   });
 
   it('increments view count per request on alternative version', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: 'en'});
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
+    );
 
     await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
@@ -228,7 +246,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.lang).toBe('en');
+    expect(json.lang).toBe(SupportedLanguages.EN);
     expect(json.viewCount).toBe(4);
   });
 });

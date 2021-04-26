@@ -1,11 +1,12 @@
 import {default as request} from 'supertest';
 
 import {
-  ApiEndPoints,
   AnalysisListPayload,
-  CharaAnalysisPublishPayload,
   AnalysisListResponse,
+  ApiEndPoints,
   ApiResponseCode,
+  CharaAnalysisPublishPayload,
+  SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -22,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LIST} - list analysis`, () =
 
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'name',
     summary: 'summary',
     summon: 'summon',
@@ -43,14 +44,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LIST} - list analysis`, () =
 
   const payloadList1: AnalysisListPayload = {
     googleUid: '',
-    langCode: 'cht',
+    langCode: SupportedLanguages.CHT,
     start: 0,
     limit: 25,
   };
 
   const payloadList2: AnalysisListPayload = {
     googleUid: '',
-    langCode: 'cht',
+    langCode: SupportedLanguages.CHT,
     start: 2,
     limit: 2,
   };
@@ -128,7 +129,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LIST} - list analysis`, () =
 
     const result = await request(app.express)
       .get(ApiEndPoints.POST_ANALYSIS_LIST)
-      .query({...payloadList1, langCode: 'en'});
+      .query({...payloadList1, langCode: SupportedLanguages.EN});
     expect(result.status).toBe(200);
 
     const json: AnalysisListResponse = result.body as AnalysisListResponse;

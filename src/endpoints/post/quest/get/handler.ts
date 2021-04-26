@@ -1,5 +1,4 @@
-import {QuestPostGetPayload} from '../../../../api-def/api/post/quest/payload';
-import {ApiResponseCode} from '../../../../api-def/api/responseCode';
+import {QuestPostGetPayload, ApiResponseCode} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 import {HandlerParams} from '../../../lookup';
 import {handleGetPost} from '../../base/handler/get';

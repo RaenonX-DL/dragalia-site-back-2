@@ -1,5 +1,6 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {SupportedLanguages} from '../../../api-def/api';
 import {CollectionInfo} from '../../../base/controller/info';
 import {EditableDocumentBase, EditableDocumentKey, EditNote} from '../../../base/model/editable';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
@@ -22,7 +23,7 @@ export type PostDocumentBase =
 
 export type PostConstructParams = {
   seqId: number,
-  language: string,
+  language: SupportedLanguages,
   title: string,
   dateModified?: Date,
   datePublished?: Date,
@@ -35,7 +36,7 @@ export type PostConstructParams = {
  * Post data class.
  */
 export abstract class Post extends SequentialDocument {
-  language: string;
+  language: SupportedLanguages;
   title: string;
   dateModified: Date;
   datePublished: Date;

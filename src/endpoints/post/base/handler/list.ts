@@ -1,13 +1,16 @@
 import {MongoClient} from 'mongodb';
 
-import {PostListPayload, PostUnit} from '../../../../api-def/api';
+import {PostListPayload, PostUnit, SupportedLanguages} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
 import {PostListResult} from '../controller';
 import {PostListSuccessResponse} from '../response/post/list';
 
 type FunctionGetPostList = (
-  mongoClient: MongoClient, landCode: string, start: number, limit: number,
+  mongoClient: MongoClient,
+  lang: SupportedLanguages,
+  start: number,
+  limit: number,
 ) => Promise<PostListResult>;
 
 type FunctionConstructResponse<R extends PostListSuccessResponse> = (
@@ -15,8 +18,10 @@ type FunctionConstructResponse<R extends PostListSuccessResponse> = (
 ) => R;
 
 export const handleListPost = async <P extends PostListPayload, R extends PostListSuccessResponse>(
-  mongoClient: MongoClient, payload: P,
-  fnGetPostList: FunctionGetPostList, fnConstructResponse: FunctionConstructResponse<R>,
+  mongoClient: MongoClient,
+  payload: P,
+  fnGetPostList: FunctionGetPostList,
+  fnConstructResponse: FunctionConstructResponse<R>,
 ): Promise<R> => {
   // Get a list of posts
   const {postListEntries, totalAvailableCount} = await fnGetPostList(

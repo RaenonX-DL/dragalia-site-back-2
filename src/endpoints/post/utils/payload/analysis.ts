@@ -4,7 +4,7 @@ import {
   AnalysisListPayload, CharaAnalysisEditPayload, CharaAnalysisPayload,
   CharaAnalysisPublishPayload, DragonAnalysisEditPayload, DragonAnalysisPayload,
   DragonAnalysisPublishPayload,
-} from '../../../../api-def/api/post/analysis/payload';
+} from '../../../../api-def/api';
 import {processPostListPayload, processSinglePostPayload} from './shared';
 
 

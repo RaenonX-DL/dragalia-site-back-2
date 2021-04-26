@@ -1,5 +1,4 @@
-import {PostListEntry, PostListResponse} from '../../../../../api-def/api';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
+import {PostListEntry, PostListResponse, ApiResponseCode} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 

@@ -1,4 +1,4 @@
-import {AnalysisType} from '../../../api-def/api/post/analysis/response';
+import {AnalysisType} from '../../../api-def/api';
 import {CustomError} from '../../../base/error';
 
 /**

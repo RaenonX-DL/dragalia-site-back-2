@@ -1,5 +1,8 @@
-import {BaseResponse, PostEditSuccessResponse as PostEditSuccessResponseApi} from '../../../../../api-def/api';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
+import {
+  BaseResponse,
+  PostEditSuccessResponse as PostEditSuccessResponseApi,
+  ApiResponseCode,
+} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 

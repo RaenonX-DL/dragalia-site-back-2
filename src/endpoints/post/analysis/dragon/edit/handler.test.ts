@@ -6,7 +6,7 @@ import {
   ApiResponseCode,
   DragonAnalysisEditPayload,
   DragonAnalysisPublishPayload,
-  FailedResponse,
+  FailedResponse, SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -24,7 +24,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   const payloadPost: DragonAnalysisPublishPayload = {
     googleUid: uidAdmin,
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'dragon',
     summary: 'dragonSummary',
     summon: 'dragonSummon',
@@ -119,7 +119,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
   it('returns failure for non-existing post language', async () => {
     const result = await request(app.express)
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .send({...payloadEdit, lang: 'jp'});
+      .send({...payloadEdit, lang: SupportedLanguages.JP});
     expect(result.status).toBe(404);
 
     const json: FailedResponse = result.body as FailedResponse;

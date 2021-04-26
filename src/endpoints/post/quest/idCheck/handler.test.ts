@@ -5,7 +5,7 @@ import {
   ApiResponseCode,
   QuestPostIdCheckPayload,
   QuestPostIdCheckResponse,
-  QuestPostPublishPayload,
+  QuestPostPublishPayload, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {GoogleUserController} from '../../../userControl/controller';
@@ -22,7 +22,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
   const payloadPost: QuestPostPublishPayload = {
     googleUid: uidAdmin,
     seqId: 1,
-    lang: 'cht',
+    lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
     video: 'video',
@@ -108,7 +108,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const payloadIdCheck: QuestPostIdCheckPayload = {
       googleUid: uidAdmin,
       seqId: newPostSeqId,
-      lang: 'en',
+      lang: SupportedLanguages.EN,
     };
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
@@ -125,7 +125,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const payloadIdCheck: QuestPostIdCheckPayload = {
       googleUid: uidAdmin,
       seqId: newPostSeqId + 1,
-      lang: 'en',
+      lang: SupportedLanguages.EN,
     };
 
     const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
