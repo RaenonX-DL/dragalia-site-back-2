@@ -1,9 +1,12 @@
 import {Server} from 'http';
 import {AddressInfo} from 'net';
 
+import * as dotenv from 'dotenv';
 import {Application} from 'express';
 
 import {createApp} from './app';
+
+dotenv.config();
 
 const PORT = Number(process.env.PORT) || 8787;
 

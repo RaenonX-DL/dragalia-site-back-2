@@ -1,11 +1,12 @@
 # IntelliJ project files
 .idea/
 
-# Library files
+# Lib files
 node_modules/
 
 # Batch files
 *.sh
+*.bat
 
 # Compiled files
 dist/
@@ -13,6 +14,12 @@ dist/
 # Coverage
 clover.xml
 
+# MongoDB local instance
+.mongodb
+
+# Environment variables
+.env
+
 # Miscellaneous
 .wakatime-project
-mongodb/
+
