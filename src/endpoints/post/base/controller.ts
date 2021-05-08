@@ -327,6 +327,9 @@ export abstract class PostController extends SequencedController {
     if (!seqId) {
       return true;
     }
+    if (seqId < 0) {
+      return false;
+    }
 
     const nextSeqId = await controller.getNextSeqId(mongoClient, {increase: false});
     if (seqId > nextSeqId + 1) {

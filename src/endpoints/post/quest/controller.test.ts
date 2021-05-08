@@ -457,4 +457,12 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     expect(availability).toBe(false);
   });
+
+  it('returns unavailable if ID is negative', async () => {
+    await QuestPostController.publishPost(app.mongoClient, payload);
+
+    const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang, -8);
+
+    expect(availability).toBe(false);
+  });
 });

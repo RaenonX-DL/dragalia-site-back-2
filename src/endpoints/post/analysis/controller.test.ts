@@ -354,6 +354,14 @@ describe(`[Controller] ${AnalysisController.name}`, () => {
 
       expect(availability).toBe(false);
     });
+
+    it('returns unavailable if ID is negative', async () => {
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+
+      const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, payloadChara.lang, -8);
+
+      expect(availability).toBe(false);
+    });
   });
 
   describe(`[Controller] ${AnalysisController.name} (Character)`, () => {

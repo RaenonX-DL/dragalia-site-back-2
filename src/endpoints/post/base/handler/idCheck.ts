@@ -5,7 +5,7 @@ import {GoogleUserController} from '../../../userControl/controller';
 import {PostIdCheckResponse} from '../response/post/idCheck';
 
 type FunctionCheckIdAvailability = (
-  mongoClient: MongoClient, lang: string, seqId?: number
+  mongoClient: MongoClient, lang: string, seqId?: number,
 ) => Promise<boolean>;
 
 type FunctionConstructResponse<R extends PostIdCheckResponse> = (
