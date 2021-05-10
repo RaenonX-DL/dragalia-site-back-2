@@ -21,7 +21,7 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
 
   const userPayload: UserLoginPayload = {
     googleEmail: 'fake@gmail.com',
-    googleUid: '10152403888872984790357',
+    googleUid: '88888888',
   };
 
   const userPayloadEmpty: UserLoginPayload = {

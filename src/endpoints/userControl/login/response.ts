@@ -11,7 +11,7 @@ import {ApiResponse} from '../../../base/response';
  */
 export class UserLoginResponse extends ApiResponse {
   /**
-   * Construct a root endpoint API response.
+   * Construct a user login API response.
    *
    * @param {boolean} isNew if the logged in user is newly registered or not
    */

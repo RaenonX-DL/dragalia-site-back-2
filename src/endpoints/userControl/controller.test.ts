@@ -1,5 +1,6 @@
 import {Application, createApp} from '../../app';
 import {GoogleUserController} from './controller';
+import {UserNotExistsError} from './error';
 
 describe(`[Controller] ${GoogleUserController.name}`, () => {
   let app: Application;
@@ -38,6 +39,14 @@ describe(`[Controller] ${GoogleUserController.name}`, () => {
     const isAdmin = await GoogleUserController.isAdmin(app.mongoClient, '1234567890');
 
     expect(isAdmin).toBe(false);
+  });
+
+  test('if error thrown if the user does not exists for `isAdmin`', async () => {
+    await expect(
+      GoogleUserController.isAdmin(app.mongoClient, '1234567890', true),
+    )
+      .rejects
+      .toThrow(UserNotExistsError);
   });
 
   test('if `isAdmin` is true for the admin user', async () => {

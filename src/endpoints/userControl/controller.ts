@@ -1,5 +1,6 @@
 import {MongoClient} from 'mongodb';
 
+import {UserNotExistsError} from './error';
 import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from './model';
 
 /**
@@ -74,10 +75,16 @@ export class GoogleUserController {
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {string} googleUid Google user ID
+   * @param {boolean} throwOnMissing if `UserNotExistsError` should be thrown if the user does not exist
+   * @throws {UserNotExistsError} if `throwOnMissing` and the user does not exist
    * @return {Promise<boolean>} if the user is an admin
    */
-  static async isAdmin(mongoClient: MongoClient, googleUid: string): Promise<boolean> {
+  static async isAdmin(mongoClient: MongoClient, googleUid: string, throwOnMissing = false): Promise<boolean> {
     const userData = await GoogleUserController.getUserData(mongoClient, googleUid);
+
+    if (!userData && throwOnMissing) {
+      throw new UserNotExistsError(googleUid);
+    }
 
     return userData?.isAdmin || false;
   }
