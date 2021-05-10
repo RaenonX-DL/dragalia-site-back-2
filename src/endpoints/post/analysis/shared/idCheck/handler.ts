@@ -1,7 +1,7 @@
 import {AnalysisIdCheckPayload} from '../../../../../api-def/api';
+import {processAnalysisIdCheckPayload} from '../../../../../utils/payload/post/analysis';
 import {HandlerParams} from '../../../../lookup';
 import {handlePostIdCheck} from '../../../base/handler/idCheck';
-import {processAnalysisIdCheckPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {AnalysisIdCheckResponse} from './response';
 

@@ -1,4 +1,4 @@
-import {UserLoginPayload} from '../../../../api-def/api';
+import {UserLoginPayload} from '../../api-def/api';
 
 export const processUserLoginPayload = <P extends UserLoginPayload>(payload: P): P => {
   if (!payload.googleUid) {

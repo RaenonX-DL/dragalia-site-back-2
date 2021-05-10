@@ -1,7 +1,7 @@
 import {ApiResponseCode, UserLoginPayload} from '../../../api-def/api';
+import {processUserLoginPayload} from '../../../utils/payload/userControl';
 import {HandlerParams} from '../../lookup';
 import {ApiFailedResponse} from '../../post/base/response/failed';
-import {processUserLoginPayload} from '../../post/utils/payload/userControl';
 import {GoogleUserController} from '../controller';
 import {UserLoginResponse} from './response';
 

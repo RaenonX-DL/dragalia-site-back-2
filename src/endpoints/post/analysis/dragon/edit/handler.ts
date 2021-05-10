@@ -1,8 +1,8 @@
 import {DragonAnalysisEditPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {processEditDragonAnalysisPayload} from '../../../../../utils/payload/post/analysis';
 import {HandlerParams} from '../../../../lookup';
 import {handleEditPost} from '../../../base/handler/edit';
-import {processEditDragonAnalysisPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {DragonAnalysisEditResponse} from './response';
 

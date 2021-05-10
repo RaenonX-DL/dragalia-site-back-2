@@ -1,10 +1,10 @@
 import {ApiResponseCode, DragonAnalysisPublishPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {processDragonAnalysisPublishPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {GoogleUserController} from '../../../../userControl/controller';
 import {handlePublishPost} from '../../../base/handler/publish';
 import {ApiFailedResponse} from '../../../base/response/failed';
-import {processDragonAnalysisPublishPayload} from '../../../utils/payload';
 import {AnalysisController} from '../../controller';
 import {DragonAnalysisPublishedResponse} from './response';
 

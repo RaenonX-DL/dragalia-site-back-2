@@ -5,7 +5,7 @@ import {
   QuestPostPayload,
   QuestPostPublishPayload,
   QuestPostIdCheckPayload,
-} from '../../../../api-def/api';
+} from '../../../api-def/api';
 import {processPostListPayload, processSinglePostPayload} from './shared';
 
 const processQuestPayload = <T extends QuestPostPayload>(payload: T): T => {

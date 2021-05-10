@@ -1,7 +1,7 @@
 import {QuestPostListPayload} from '../../../../api-def/api';
+import {processQuestListPayload} from '../../../../utils/payload';
 import {HandlerParams} from '../../../lookup';
 import {handleListPost} from '../../base/handler/list';
-import {processQuestListPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostListResponse} from './response';
 

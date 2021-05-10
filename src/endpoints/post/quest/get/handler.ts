@@ -1,9 +1,9 @@
 import {QuestPostGetPayload, ApiResponseCode} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
+import {processQuestGetPayload} from '../../../../utils/payload';
 import {HandlerParams} from '../../../lookup';
 import {handleGetPost} from '../../base/handler/get';
 import {ApiFailedResponse} from '../../base/response/failed';
-import {processQuestGetPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostGetSuccessResponse} from './response';
 

@@ -1,7 +1,7 @@
 import {AnalysisListPayload} from '../../../../../api-def/api';
+import {processListAnalysisPayload} from '../../../../../utils/payload/post/analysis';
 import {HandlerParams} from '../../../../lookup';
 import {handleListPost} from '../../../base/handler/list';
-import {processListAnalysisPayload} from '../../../utils/payload/analysis';
 import {AnalysisController} from '../../controller';
 import {AnalysisListResponse} from './response';
 

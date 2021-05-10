@@ -1,8 +1,8 @@
 import {QuestPostEditPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
+import {processQuestEditPayload} from '../../../../utils/payload';
 import {HandlerParams} from '../../../lookup';
 import {handleEditPost} from '../../base/handler/edit';
-import {processQuestEditPayload} from '../../utils/payload';
 import {QuestPostController} from '../controller';
 import {QuestPostEditSuccessResponse} from './response';
 

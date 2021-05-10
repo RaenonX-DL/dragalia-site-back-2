@@ -1,9 +1,9 @@
 import {AnalysisGetPayload, ApiResponseCode} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
+import {processGetAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {handleGetPost} from '../../../base/handler/get';
 import {ApiFailedResponse} from '../../../base/response/failed';
-import {processGetAnalysisPayload} from '../../../utils/payload';
 import {AnalysisController} from '../../controller';
 import {AnalysisGetSuccessResponse} from './response';
 
