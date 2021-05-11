@@ -5,7 +5,7 @@ export const corsMiddle = (): RequestHandler => {
   const allowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS;
 
   if (!allowedOriginsEnv) {
-    console.error('Specify allowed CORS origins as `allowedOrigins` in env vars.');
+    console.error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
     process.exit(1);
   }
 
