@@ -3,7 +3,7 @@ import {MongoClient} from 'mongodb';
 import {PostGetPayload, ApiResponseCode, SupportedLanguages} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
-import {PostGetResult} from '../controller';
+import {PostGetResult} from '../controller/get';
 import {PostDocumentBase} from '../model';
 import {ApiFailedResponse} from '../response/failed';
 import {PostGetSuccessResponse} from '../response/post/get';

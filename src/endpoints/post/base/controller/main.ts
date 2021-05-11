@@ -1,103 +1,16 @@
 import {Collection, Document, MongoClient} from 'mongodb';
 
-import {SupportedLanguages, PostListEntry} from '../../../api-def/api';
-import {SequencedController} from '../../../base/controller/seq';
-import {UpdateResult} from '../../../base/enum/updateResult';
-import {DocumentBaseKey} from '../../../base/model/base';
-import {EditableDocumentKey, EditNoteDocumentKey} from '../../../base/model/editable';
-import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../base/model/seq';
-import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
-import {PostDocumentBase, PostDocumentKey} from './model';
-import {PostGetSuccessResponseParam} from './response/post/get';
-
-type PostListDocumentTransformFunction = (post: Document) => PostListEntry;
-
-/**
- * Result object of getting a post list.
- */
-export class PostListResult {
-  posts: Array<Document>;
-  postListEntries: Array<PostListEntry>;
-  totalAvailableCount: number;
-
-  /**
-   * Construct a post list getting result.
-   *
-   * @param {Array<Document>} posts posts returned from document
-   * @param {number} totalAvailableCount total count of the posts available
-   * @param {PostListDocumentTransformFunction} docTransformFunction function to transform the document into an entry
-   */
-  constructor(
-    posts: Array<Document>, totalAvailableCount: number, docTransformFunction: PostListDocumentTransformFunction,
-  ) {
-    this.posts = posts;
-    this.postListEntries = posts.map((post) => docTransformFunction(post));
-    this.totalAvailableCount = totalAvailableCount;
-  }
-}
-
-
-/**
- * Base object of a post getting result.
- * @template T, R
- */
-export abstract class PostGetResult<T extends PostDocumentBase> {
-  post: T;
-  isAltLang: boolean;
-  otherLangs: Array<SupportedLanguages>;
-
-  /**
-   * Construct a post getting result object.
-   *
-   * @param {T} post post document fetched from the database
-   * @param {boolean} isAltLang if the post is returned in an alternative language
-   * @param {Array<string>} otherLangs other languages available, if any
-   * @protected
-   */
-  protected constructor(post: T, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
-    this.post = post;
-    this.isAltLang = isAltLang;
-    this.otherLangs = otherLangs;
-  }
-
-  /**
-   * Convert the result object to an object ready to be used by the response object.
-   *
-   * @return {R} object ready to be used by the response object
-   */
-  protected toResponseReady(): PostGetSuccessResponseParam {
-    return {
-      seqId: this.post[SequentialDocumentKey.sequenceId],
-      lang: this.post[MultiLingualDocumentKey.language],
-      title: this.post[PostDocumentKey.title],
-      isAltLang: this.isAltLang,
-      otherLangs: this.otherLangs,
-      viewCount: this.post[ViewCountableDocumentKey.viewCount],
-      editNotes: this.post[EditableDocumentKey.editNotes].map((doc) => {
-        return {
-          timestamp: doc[EditNoteDocumentKey.datetime],
-          note: doc[EditNoteDocumentKey.note],
-        };
-      }),
-      modified: this.post[EditableDocumentKey.dateModified],
-      published: this.post[EditableDocumentKey.datePublished],
-    };
-  }
-}
-
-
-type ResultConstructFunction<D extends PostDocumentBase,
-  T extends PostGetResult<D>> =
-  (post: D, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) => T;
-
-
-type PostControllerListPostOptions = {
-  start?: number,
-  limit?: number,
-  additionalProjection?: Document,
-  docTransformFunction?: PostListDocumentTransformFunction,
-}
+import {PostListEntry, SupportedLanguages} from '../../../../api-def/api';
+import {SequencedController} from '../../../../base/controller/seq';
+import {UpdateResult} from '../../../../base/enum/updateResult';
+import {DocumentBaseKey} from '../../../../base/model/base';
+import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
+import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../../base/model/seq';
+import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
+import {PostDocumentBase, PostDocumentKey} from '../model';
+import {PostGetResult, ResultConstructFunction} from './get';
+import {PostControllerListOptions, PostListResult} from './list';
 
 
 /**
@@ -109,32 +22,19 @@ export abstract class PostController extends SequencedController {
    *
    * @param {Collection} collection collection to perform the post listing
    * @param {string} langCode language of the posts
-   * @param {PostControllerListPostOptions} options additional options for listing the posts
-   * @return {Promise<PostListResult>} result of getting the post list function to transform the document into an entry
+   * @param {PostControllerListOptions} options additional options for listing the posts
+   * @return {Promise<PostListResult>} promise containing a list of post documents
    * @protected
    */
-  protected static async listPosts(
-    collection: Collection, langCode: string, options: PostControllerListPostOptions = {},
-  ): Promise<PostListResult> {
-    let {
+  protected static async listPosts<E extends PostListEntry, D extends Document>(
+    collection: Collection, langCode: string, options: PostControllerListOptions<E, D>,
+  ): Promise<PostListResult<E>> {
+    const {
       start = 0,
       limit = 0,
-      additionalProjection = {},
-      docTransformFunction,
+      projection = {},
+      transformFunc,
     } = options;
-
-    if (!docTransformFunction) {
-      docTransformFunction = (post) => {
-        return {
-          seqId: post[SequentialDocumentKey.sequenceId],
-          lang: post[MultiLingualDocumentKey.language],
-          title: post[PostDocumentKey.title],
-          viewCount: post[ViewCountableDocumentKey.viewCount],
-          modified: post[EditableDocumentKey.dateModified],
-          published: post[EditableDocumentKey.datePublished],
-        };
-      };
-    }
 
     const query = {[MultiLingualDocumentKey.language]: langCode};
 
@@ -142,7 +42,7 @@ export abstract class PostController extends SequencedController {
       query,
       {
         projection: {
-          ...additionalProjection,
+          ...projection,
           [SequentialDocumentKey.sequenceId]: 1,
           [MultiLingualDocumentKey.language]: 1,
           [PostDocumentKey.title]: 1,
@@ -158,7 +58,11 @@ export abstract class PostController extends SequencedController {
 
     const totalAvailableCount = await collection.countDocuments(query);
 
-    return new PostListResult(posts, totalAvailableCount, docTransformFunction);
+    return new PostListResult<E>(
+      posts,
+      totalAvailableCount,
+      transformFunc,
+    );
   }
 
   /**

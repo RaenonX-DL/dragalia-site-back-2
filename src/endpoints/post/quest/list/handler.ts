@@ -5,9 +5,9 @@ import {handleListPost} from '../../base/handler/list';
 import {QuestPostController} from '../controller';
 import {QuestPostListResponse} from './response';
 
-export const handleListQuestPost = async (
-  {payload, mongoClient}: HandlerParams<QuestPostListPayload>,
-): Promise<QuestPostListResponse> => {
+export const handleListQuestPost = async ({
+  payload, mongoClient,
+}: HandlerParams<QuestPostListPayload>): Promise<QuestPostListResponse> => {
   payload = processQuestListPayload(payload);
 
   return handleListPost(

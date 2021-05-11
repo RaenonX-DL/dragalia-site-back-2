@@ -1,4 +1,9 @@
-import {CharaAnalysisPublishPayload, SupportedLanguages} from '../../../api-def/api';
+import {
+  AnalysisType,
+  CharaAnalysisPublishPayload,
+  DragonAnalysisPublishPayload,
+  SupportedLanguages,
+} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
@@ -28,6 +33,22 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     videos: 'video',
     story: 'story',
     keywords: 'keyword',
+  };
+
+  const payloadDragon: DragonAnalysisPublishPayload = {
+    googleUid: 'uid',
+    lang: SupportedLanguages.CHT,
+    title: 'dragon',
+    summary: 'dragonSummary',
+    summon: 'dragonSummon',
+    normalAttacks: 'dragonNormal',
+    ultimate: 'dragonUltimate',
+    passives: 'dragonPassive',
+    notes: 'dragonNotes',
+    suitableCharacters: 'dragonChara',
+    videos: 'dragonVideo',
+    story: 'dragonStory',
+    keywords: 'dragonKeyword',
   };
 
   beforeAll(async () => {
@@ -111,6 +132,22 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
 
     expect(postListResult.totalAvailableCount).toBe(7);
+  });
+
+  it('returns analysis type for each post entry', async () => {
+    for (let i = 0; i < 3; i++) {
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+    }
+
+    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
+
+    expect(postListResult.totalAvailableCount).toBe(6);
+    expect(postListResult.postListEntries.map((entry) => entry.type)).toStrictEqual([
+      AnalysisType.CHARACTER, AnalysisType.DRAGON,
+      AnalysisType.CHARACTER, AnalysisType.DRAGON,
+      AnalysisType.CHARACTER, AnalysisType.DRAGON,
+    ]);
   });
 
   it('returns correct post count after pagination', async () => {

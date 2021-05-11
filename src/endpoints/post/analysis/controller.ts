@@ -1,7 +1,7 @@
 import {MongoClient} from 'mongodb';
 
 import {
-  AnalysisGetContent,
+  AnalysisGetContent, AnalysisListEntry,
   AnalysisType,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
@@ -10,7 +10,9 @@ import {
 } from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
-import {PostController, PostGetResult, PostListResult} from '../base/controller';
+import {PostGetResult} from '../base/controller/get';
+import {defaultTransformFunction, PostListResult} from '../base/controller/list';
+import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
 import {PostGetSuccessResponseParam} from '../base/response/post/get';
 import {AnalysisResponse} from './base/response';
@@ -199,16 +201,22 @@ export class AnalysisController extends PostController {
    */
   static async getAnalysisList(
     mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
-  ): Promise<PostListResult> {
-    const options = {
-      start,
-      limit,
-      additionalProjection: {
-        [UnitAnalysisDocumentKey.type]: 1,
+  ): Promise<PostListResult<AnalysisListEntry>> {
+    return AnalysisController.listPosts(
+      UnitAnalysis.getCollection(mongoClient),
+      lang,
+      {
+        start,
+        limit,
+        projection: {
+          [UnitAnalysisDocumentKey.type]: 1,
+        },
+        transformFunc: (post) => ({
+          ...defaultTransformFunction(post),
+          type: post[UnitAnalysisDocumentKey.type],
+        }),
       },
-    };
-
-    return AnalysisController.listPosts(UnitAnalysis.getCollection(mongoClient), lang, options);
+    );
   }
 
   /**

@@ -1,9 +1,11 @@
 import {MongoClient} from 'mongodb';
 
-import {QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
+import {PostListEntry, QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
-import {PostController, PostGetResult, PostListResult} from '../base/controller';
+import {PostGetResult} from '../base/controller/get';
+import {defaultTransformFunction, PostListResult} from '../base/controller/list';
+import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
 import {QuestGetResponse} from './get/response';
 import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
@@ -110,8 +112,16 @@ export class QuestPostController extends PostController {
    */
   static async getPostList(
     mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
-  ): Promise<PostListResult> {
-    return QuestPostController.listPosts(QuestPost.getCollection(mongoClient), langCode, {start, limit});
+  ): Promise<PostListResult<PostListEntry>> {
+    return QuestPostController.listPosts(
+      QuestPost.getCollection(mongoClient),
+      langCode,
+      {
+        start,
+        limit,
+        transformFunc: defaultTransformFunction,
+      },
+    );
   }
 
   /**
