@@ -93,7 +93,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(await QuestPostController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
   });
 
-  it('publishes a new post successfully', async () => {
+  it('publishes', async () => {
     const newSeqId = await QuestPostController.publishPost(app.mongoClient, payload);
 
     expect(newSeqId).toBe(1);
@@ -114,6 +114,9 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
       {p: 'pos2', b: 'build2', r: 'rot2', t: 'tip2'},
     ]);
     expect(post.addendum).toBe('addendum');
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(post.datePublishedEpoch).toEqual(expect.any(Number));
+    expect(post.dateModifiedEpoch).toEqual(expect.any(Number));
   });
 
   it('publishes a new post in an used ID but different language', async () => {
@@ -382,6 +385,17 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     );
 
     expect(editResult).toBe('UPDATED');
+
+    const postDoc = await QuestPost.getCollection(app.mongoClient).findOne({
+      [SequentialDocumentKey.sequenceId]: newSeqId,
+      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
+    });
+    const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
+
+    expect(post.video).toBe('videoEdit');
+    expect(post.editNotes.length).toBe(1);
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(post.editNotes[0].timestampEpoch).toEqual(expect.any(Number));
   });
 
   it('edits a post even if no changes were made', async () => {

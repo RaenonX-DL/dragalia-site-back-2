@@ -131,14 +131,14 @@ export class QuestPost extends Post {
       video,
       positionInfo,
       addendum,
-      dateModified,
-      datePublished,
+      dateModifiedEpoch,
+      datePublishedEpoch,
       id,
       editNotes,
       viewCount,
     } = params;
 
-    super({seqId, language, title, dateModified, datePublished, id, editNotes: editNotes, viewCount});
+    super({seqId, language, title, dateModifiedEpoch, datePublishedEpoch, id, editNotes: editNotes, viewCount});
 
     this.generalInfo = generalInfo;
     this.video = video;
@@ -158,8 +158,8 @@ export class QuestPost extends Post {
       video: doc[QuestPostDocumentKey.video],
       positionInfo: doc[QuestPostDocumentKey.positionInfo].map((doc) => QuestPosition.fromDocument(doc)),
       addendum: doc[QuestPostDocumentKey.addendum],
-      dateModified: doc[EditableDocumentKey.dateModified],
-      datePublished: doc[EditableDocumentKey.datePublished],
+      dateModifiedEpoch: doc[EditableDocumentKey.dateModifiedEpoch],
+      datePublishedEpoch: doc[EditableDocumentKey.datePublishedEpoch],
       id: doc[DocumentBaseKey.id],
       editNotes: doc[EditableDocumentKey.editNotes].map((doc) => EditNote.fromDocument(doc)),
       viewCount: doc[ViewCountableDocumentKey.viewCount],
@@ -210,8 +210,8 @@ export class QuestPost extends Post {
       [QuestPostDocumentKey.video]: this.video,
       [QuestPostDocumentKey.positionInfo]: this.positionInfo.map((doc) => doc.toObject()),
       [QuestPostDocumentKey.addendum]: this.addendum,
-      [EditableDocumentKey.dateModified]: this.dateModified,
-      [EditableDocumentKey.datePublished]: this.datePublished,
+      [EditableDocumentKey.dateModifiedEpoch]: this.dateModifiedEpoch,
+      [EditableDocumentKey.datePublishedEpoch]: this.datePublishedEpoch,
       [EditableDocumentKey.editNotes]: this.editNotes.map((doc) => doc.toObject()),
       [ViewCountableDocumentKey.viewCount]: this.viewCount,
     };

@@ -86,7 +86,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
   });
 
-  it('returns correctly-sorted analysis', async () => {
+  it('returns correctly-sorted analyses', async () => {
     for (let i = 0; i < 7; i++) {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
     }
@@ -98,7 +98,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it('returns correctly-sorted analysis if paginated', async () => {
+  it('returns correctly-sorted analyses if paginated', async () => {
     for (let i = 0; i < 7; i++) {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
     }
@@ -148,6 +148,33 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
       AnalysisType.CHARACTER, AnalysisType.DRAGON,
       AnalysisType.CHARACTER, AnalysisType.DRAGON,
     ]);
+  });
+
+  it('returns modification and publish timestamps for each post entry', async () => {
+    for (let i = 0; i < 3; i++) {
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+    }
+
+    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
+
+    expect(postListResult.totalAvailableCount).toBe(6);
+    expect(
+      postListResult
+        .postListEntries
+        .map((entry) => entry.modifiedEpoch)
+        .filter((timestamp) => !!timestamp)
+        .length,
+    )
+      .toBe(6);
+    expect(
+      postListResult
+        .postListEntries
+        .map((entry) => entry.publishedEpoch)
+        .filter((timestamp) => !!timestamp)
+        .length,
+    )
+      .toBe(6);
   });
 
   it('returns correct post count after pagination', async () => {

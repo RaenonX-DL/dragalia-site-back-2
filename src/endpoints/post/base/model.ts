@@ -25,8 +25,8 @@ export type PostConstructParams = {
   seqId: number,
   language: SupportedLanguages,
   title: string,
-  dateModified?: Date,
-  datePublished?: Date,
+  dateModifiedEpoch?: number,
+  datePublishedEpoch?: number,
   id?: ObjectId,
   editNotes?: Array<EditNote>,
   viewCount?: number,
@@ -38,8 +38,8 @@ export type PostConstructParams = {
 export abstract class Post extends SequentialDocument {
   language: SupportedLanguages;
   title: string;
-  dateModified: Date;
-  datePublished: Date;
+  dateModifiedEpoch: number;
+  datePublishedEpoch: number;
   editNotes: Array<EditNote>;
   viewCount: number;
 
@@ -51,12 +51,12 @@ export abstract class Post extends SequentialDocument {
   protected constructor(params: PostConstructParams) {
     super(params);
 
-    const now = new Date();
+    const nowEpoch = new Date().valueOf();
 
     this.language = params.language;
     this.title = params.title;
-    this.dateModified = params.dateModified || now;
-    this.datePublished = params.dateModified || now;
+    this.dateModifiedEpoch = params.dateModifiedEpoch || nowEpoch;
+    this.datePublishedEpoch = params.dateModifiedEpoch || nowEpoch;
     this.editNotes = params.editNotes || [];
     this.viewCount = params.viewCount || 0;
   }
@@ -90,8 +90,8 @@ export abstract class Post extends SequentialDocument {
       [MultiLingualDocumentKey.language]: this.language,
       [PostDocumentKey.title]: this.title,
       [EditableDocumentKey.editNotes]: this.editNotes.map((doc) => doc.toObject()),
-      [EditableDocumentKey.dateModified]: this.dateModified,
-      [EditableDocumentKey.datePublished]: this.datePublished,
+      [EditableDocumentKey.dateModifiedEpoch]: this.dateModifiedEpoch,
+      [EditableDocumentKey.datePublishedEpoch]: this.datePublishedEpoch,
       [ViewCountableDocumentKey.viewCount]: this.viewCount,
     };
   }

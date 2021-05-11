@@ -87,6 +87,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
     expect(json.lang).toBe(SupportedLanguages.CHT);
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(json.publishedEpoch).toEqual(expect.any(Number));
+    expect(json.modifiedEpoch).toEqual(expect.any(Number));
   });
 
   it('gets an existed post which has an alt version only given sequential ID', async () => {
@@ -101,6 +104,26 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.isAltLang).toBe(true);
     expect(json.seqId).toBe(1);
     expect(json.lang).toBe(SupportedLanguages.EN);
+  });
+
+  test('timestamp of edited post is using epoch', async () => {
+    const seqId = await QuestPostController.publishPost(app.mongoClient, payloadPost);
+    await QuestPostController.editQuestPost(app.mongoClient, {...payloadPost, seqId, video: 'a', editNote: 'edit'});
+
+    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.status).toBe(200);
+
+    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.isAltLang).toBe(false);
+    expect(json.seqId).toBe(1);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(json.publishedEpoch).toEqual(expect.any(Number));
+    expect(json.modifiedEpoch).toEqual(expect.any(Number));
+    expect(json.editNotes.length).toBe(1);
+    expect(json.editNotes[0].timestampEpoch).toEqual(expect.any(Number));
   });
 
   it('returns all available languages except the current one', async () => {

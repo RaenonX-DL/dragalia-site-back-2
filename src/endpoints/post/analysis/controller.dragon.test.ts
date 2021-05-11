@@ -86,6 +86,9 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     expect(post.videos).toBe('dragonVideo');
     expect(post.story).toBe('dragonStory');
     expect(post.keywords).toBe('dragonKeyword');
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(post.datePublishedEpoch).toEqual(expect.any(Number));
+    expect(post.dateModifiedEpoch).toEqual(expect.any(Number));
   });
 
   it('publishes in an used ID but different language', async () => {
@@ -318,6 +321,8 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
     expect(post.videos).toBe('videoEdit');
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(post.editNotes[0].timestampEpoch).toEqual(expect.any(Number));
   });
 
   it('edits even if no changes were made', async () => {

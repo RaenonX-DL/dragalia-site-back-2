@@ -1,6 +1,7 @@
 import {Collection, MongoClient} from 'mongodb';
 
 import {AnalysisPayload, AnalysisType} from '../../../../api-def/api';
+import {EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {Post, PostConstructParams, PostDocumentBase, PostDocumentKey} from '../../base/model';
@@ -125,6 +126,7 @@ export abstract class UnitAnalysis extends Post {
       videos: obj[UnitAnalysisDocumentKey.videos],
       story: obj[UnitAnalysisDocumentKey.story],
       keywords: obj[UnitAnalysisDocumentKey.keywords],
+      editNotes: obj[EditableDocumentKey.editNotes].map((editNote) => EditNote.fromDocument(editNote)),
     };
   }
 

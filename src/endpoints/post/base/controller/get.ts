@@ -44,12 +44,12 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
       viewCount: this.post[ViewCountableDocumentKey.viewCount],
       editNotes: this.post[EditableDocumentKey.editNotes].map((doc) => {
         return {
-          timestamp: doc[EditNoteDocumentKey.datetime],
+          timestampEpoch: doc[EditNoteDocumentKey.timestampEpoch],
           note: doc[EditNoteDocumentKey.note],
         };
       }),
-      modified: this.post[EditableDocumentKey.dateModified],
-      published: this.post[EditableDocumentKey.datePublished],
+      modifiedEpoch: this.post[EditableDocumentKey.dateModifiedEpoch],
+      publishedEpoch: this.post[EditableDocumentKey.datePublishedEpoch],
     };
   }
 }

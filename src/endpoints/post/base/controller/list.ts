@@ -47,6 +47,6 @@ export const defaultTransformFunction = (post: Document): PostListEntry => ({
   lang: post[MultiLingualDocumentKey.language],
   title: post[PostDocumentKey.title],
   viewCount: post[ViewCountableDocumentKey.viewCount],
-  modified: post[EditableDocumentKey.dateModified],
-  published: post[EditableDocumentKey.datePublished],
+  modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
+  publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],
 });

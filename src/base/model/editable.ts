@@ -1,26 +1,26 @@
 import {Document, DocumentBase} from './base';
 
 export enum EditableDocumentKey {
-  datePublished = '_dtPub',
-  dateModified = '_dtMod',
+  datePublishedEpoch = '_dtPub',
+  dateModifiedEpoch = '_dtMod',
   editNotes = '_dtMn',
 }
 
 export type EditableDocumentBase = DocumentBase & {
-  [EditableDocumentKey.datePublished]: Date,
-  [EditableDocumentKey.dateModified]: Date,
+  [EditableDocumentKey.datePublishedEpoch]: number,
+  [EditableDocumentKey.dateModifiedEpoch]: number,
   [EditableDocumentKey.editNotes]: Array<EditNoteDocument>,
 };
 
 
 export enum EditNoteDocumentKey {
-  datetime = 'dt',
+  timestampEpoch = 'dt',
   note = 'n',
 }
 
 
 export type EditNoteDocument = DocumentBase & {
-  [EditNoteDocumentKey.datetime]: Date,
+  [EditNoteDocumentKey.timestampEpoch]: number,
   [EditNoteDocumentKey.note]: string,
 }
 
@@ -29,19 +29,19 @@ export type EditNoteDocument = DocumentBase & {
  * Post edit note data class.
  */
 export class EditNote extends Document {
-  date: Date;
+  timestampEpoch: number;
   note: string;
 
   /**
-   * Construct a post modification note document data.
+   * Construct a post edit note document data.
    *
-   * @param {Date} date post modification date
+   * @param {number} timestampEpoch post edit timestamp epoch
    * @param {string} note post modification note
    */
-  constructor(date: Date, note: string) {
+  constructor(timestampEpoch: number, note: string) {
     super();
 
-    this.date = date;
+    this.timestampEpoch = timestampEpoch;
     this.note = note;
   }
 
@@ -49,7 +49,10 @@ export class EditNote extends Document {
    * @inheritDoc
    */
   static fromDocument(obj: EditNoteDocument): EditNote {
-    return new EditNote(obj.dt, obj.n);
+    return new EditNote(
+      obj[EditNoteDocumentKey.timestampEpoch],
+      obj[EditNoteDocumentKey.note],
+    );
   }
 
   /**
@@ -57,8 +60,8 @@ export class EditNote extends Document {
    */
   toObject(): EditNoteDocument {
     return {
-      dt: this.date,
-      n: this.note,
+      [EditNoteDocumentKey.timestampEpoch]: this.timestampEpoch,
+      [EditNoteDocumentKey.note]: this.note,
     };
   }
 }

@@ -46,11 +46,11 @@ export abstract class PostController extends SequencedController {
           [SequentialDocumentKey.sequenceId]: 1,
           [MultiLingualDocumentKey.language]: 1,
           [PostDocumentKey.title]: 1,
-          [EditableDocumentKey.dateModified]: 1,
-          [EditableDocumentKey.datePublished]: 1,
+          [EditableDocumentKey.dateModifiedEpoch]: 1,
+          [EditableDocumentKey.datePublishedEpoch]: 1,
           [ViewCountableDocumentKey.viewCount]: 1,
         },
-        sort: {[EditableDocumentKey.dateModified]: 'desc'},
+        sort: {[EditableDocumentKey.dateModifiedEpoch]: 'desc'},
       })
       .skip(start)
       .limit(limit)
@@ -160,7 +160,7 @@ export abstract class PostController extends SequencedController {
       return 'NOT_FOUND';
     }
 
-    const now = new Date();
+    const nowEpoch = new Date().valueOf();
 
     // Create filter (condition for updating the post)
     let filter = {
@@ -180,8 +180,8 @@ export abstract class PostController extends SequencedController {
       SequentialDocumentKey.sequenceId, // Sequential ID should be immutable
       MultiLingualDocumentKey.language, // Language should be immutable
       EditableDocumentKey.editNotes, // Edit notes should not be updated
-      EditableDocumentKey.dateModified, // Last modified timestamp should be updated later
-      EditableDocumentKey.datePublished, // Publish timestamp should not be updated
+      EditableDocumentKey.dateModifiedEpoch, // Last modified timestamp should be updated later
+      EditableDocumentKey.datePublishedEpoch, // Publish timestamp should not be updated
       ViewCountableDocumentKey.viewCount, // Post view count should not be changed
     ];
     omitKeys.forEach((key) => delete update[key]);
@@ -200,10 +200,10 @@ export abstract class PostController extends SequencedController {
 
     // Add edit note and update the last modified timestamp
     await collection.updateOne(filter, {
-      $set: {[EditableDocumentKey.dateModified]: now},
+      $set: {[EditableDocumentKey.dateModifiedEpoch]: nowEpoch},
       $push: {
         [EditableDocumentKey.editNotes]: {
-          [EditNoteDocumentKey.datetime]: now,
+          [EditNoteDocumentKey.timestampEpoch]: nowEpoch,
           [EditNoteDocumentKey.note]: editNote,
         },
       },

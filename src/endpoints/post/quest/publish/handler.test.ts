@@ -187,8 +187,8 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       (posInfo) => new QuestPosition(posInfo.position, posInfo.builds, posInfo.rotations, posInfo.tips),
     ));
     expect(doc.addendum).toEqual(questPayload2.addendum);
-    expect(doc.datePublished.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
-    expect(doc.dateModified.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
+    expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
+    expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);
     expect(doc.viewCount).toEqual(0);
   });
@@ -215,8 +215,8 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       (posInfo) => new QuestPosition(posInfo.position, posInfo.builds, posInfo.rotations, posInfo.tips),
     ));
     expect(doc.addendum).toEqual(questPayload2.addendum);
-    expect(doc.datePublished.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
-    expect(doc.dateModified.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
+    expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
+    expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);
     expect(doc.viewCount).toEqual(0);
   });

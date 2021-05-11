@@ -6,7 +6,7 @@ import {
   ApiResponseCode,
   CharaAnalysisPublishPayload,
   CharacterAnalysis,
-  FailedResponse, SupportedLanguages,
+  FailedResponse, QuestPostGetSuccessResponse, SupportedLanguages,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -78,7 +78,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('gets an analysis given language and the sequential ID', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(200);
 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;
@@ -87,6 +87,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.isAltLang).toBe(false);
     expect(json.seqId).toBe(1);
     expect(json.lang).toBe(SupportedLanguages.CHT);
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(json.publishedEpoch).toEqual(expect.any(Number));
+    expect(json.modifiedEpoch).toEqual(expect.any(Number));
   });
 
   it('gets an analysis which has an alt version only given sequential ID', async () => {
@@ -94,7 +97,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
     );
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(200);
 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;
@@ -103,6 +106,26 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.isAltLang).toBe(true);
     expect(json.seqId).toBe(1);
     expect(json.lang).toBe(SupportedLanguages.EN);
+  });
+
+  test('timestamp of edited post is using epoch', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
+    await AnalysisController.editCharaAnalysis(app.mongoClient, {...payloadPost, videos: 'a', editNote: 'edit'});
+
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.status).toBe(200);
+
+    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.isAltLang).toBe(false);
+    expect(json.seqId).toBe(1);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    expect(json.publishedEpoch).toEqual(expect.any(Number));
+    expect(json.modifiedEpoch).toEqual(expect.any(Number));
+    expect(json.editNotes.length).toBe(1);
+    expect(json.editNotes[0].timestampEpoch).toEqual(expect.any(Number));
   });
 
   it('returns all available languages except the current one', async () => {
@@ -118,7 +141,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP},
     );
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(200);
 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;
@@ -177,7 +200,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, googleUid: uidNormal, seqId: 1},
+      {...payloadGet, googleUid: uidNormal},
     );
     expect(result.status).toBe(200);
 
@@ -191,7 +214,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
     const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, googleUid: uidAdmin, seqId: 1},
+      {...payloadGet, googleUid: uidAdmin},
     );
     expect(result.status).toBe(200);
 
@@ -218,11 +241,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('increments view count per request', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 1});
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.status).toBe(200);
 
     const json: CharacterAnalysis = result.body as CharacterAnalysis;

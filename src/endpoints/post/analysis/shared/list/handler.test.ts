@@ -217,4 +217,64 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LIST} - list analysis`, () =
     expect(json.postCount).toBe(1);
     expect(json.showAds).toBe(true);
   });
+
+  test('paginated results of start 0, limit 5', async () => {
+    for (let i = 1; i <= 10; i++) {
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: i});
+    }
+
+    const result = await request(app.express)
+      .get(ApiEndPoints.POST_ANALYSIS_LIST)
+      .query({...payloadList1, start: 0, limit: 5});
+    expect(result.status).toBe(200);
+
+    const json: AnalysisListResponse = result.body as AnalysisListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.postCount).toBe(10);
+    expect(json.showAds).toBe(true);
+    expect(json.posts.map((post) => post.seqId)).toStrictEqual([10, 9, 8, 7, 6]);
+  });
+
+  test('paginated results of start 5, limit 5', async () => {
+    for (let i = 1; i <= 10; i++) {
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: i});
+    }
+
+    const result = await request(app.express)
+      .get(ApiEndPoints.POST_ANALYSIS_LIST)
+      .query({...payloadList1, start: 5, limit: 5});
+    expect(result.status).toBe(200);
+
+    const json: AnalysisListResponse = result.body as AnalysisListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.postCount).toBe(10);
+    expect(json.showAds).toBe(true);
+    expect(json.posts.map((post) => post.seqId)).toStrictEqual([5, 4, 3, 2, 1]);
+  });
+
+  test('paginated results sorted according to last modification', async () => {
+    for (let i = 1; i <= 10; i++) {
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, seqId: i});
+    }
+    for (let i = 5; i > 0; i--) {
+      await AnalysisController.editCharaAnalysis(
+        app.mongoClient,
+        {...payloadPost, videos: 'videoEdit', seqId: i, editNote: 'mod'},
+      );
+    }
+
+    const result = await request(app.express)
+      .get(ApiEndPoints.POST_ANALYSIS_LIST)
+      .query({...payloadList1, start: 0, limit: 5});
+    expect(result.status).toBe(200);
+
+    const json: AnalysisListResponse = result.body as AnalysisListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.postCount).toBe(10);
+    expect(json.showAds).toBe(true);
+    expect(json.posts.map((post) => post.seqId)).toStrictEqual([1, 2, 3, 4, 5]);
+  });
 });
