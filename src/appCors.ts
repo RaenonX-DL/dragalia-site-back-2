@@ -2,11 +2,15 @@ import cors, {CorsOptions} from 'cors';
 import {RequestHandler} from 'express';
 
 export const corsMiddle = (): RequestHandler => {
-  const allowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS;
+  let allowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS;
 
   if (!allowedOriginsEnv) {
-    console.error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
-    process.exit(1);
+    if (!process.env.CI) {
+      console.error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
+      process.exit(1);
+    } else {
+      allowedOriginsEnv = '';
+    }
   }
 
   const allowedOrigins = allowedOriginsEnv.split(',');
