@@ -4,8 +4,8 @@ import {default as helmet} from 'helmet';
 import {MongoClient, MongoClientOptions} from 'mongodb';
 import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
-import {corsMiddle} from './appCors';
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
+import {corsMiddle} from './middleware/cors';
 import {handleInternalError} from './statuses/internalError/handler';
 import {handleNotExists} from './statuses/notExists/handler';
 import {clearServer} from './utils/mongodb';
