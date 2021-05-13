@@ -88,4 +88,23 @@ export class GoogleUserController {
 
     return userData?.isAdmin || false;
   }
+
+  /**
+   * Check if the user should have ads shown.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} googleUid Google user ID
+   * @param {boolean} throwOnMissing if `UserNotExistsError` should be thrown if the user does not exist
+   * @throws {UserNotExistsError} if `throwOnMissing` and the user does not exist
+   * @return {Promise<boolean>} if the user should have ads shown
+   */
+  static async showAds(mongoClient: MongoClient, googleUid: string, throwOnMissing = false): Promise<boolean> {
+    const userData = await GoogleUserController.getUserData(mongoClient, googleUid);
+
+    if (!userData && throwOnMissing) {
+      throw new UserNotExistsError(googleUid);
+    }
+
+    return !userData?.isAdsFree;
+  }
 }
