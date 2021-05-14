@@ -22,7 +22,7 @@ import {handleUserIsAdmin} from './userControl/isAdmin/handler';
 import {handleUserLogin} from './userControl/login/handler';
 import {handleUserShowAds} from './userControl/showAds/handler';
 
-type HttpMethods = 'GET' | 'POST';
+type HttpMethods = 'GET' | 'POST' | 'HEAD';
 
 export type HandlerParams<T extends RequestPayloadBase = never> = {
   payload: T,
@@ -69,9 +69,9 @@ export const handleResponse = async <T extends RequestPayloadBase>(
   try {
     let payload;
 
-    if (method == 'GET') {
+    if (method === 'GET' || method === 'HEAD') {
       payload = req.query;
-    } else if (method == 'POST') {
+    } else if (method === 'POST') {
       payload = req.body;
     } else {
       console.warn(`Payload unhandled for method ${method}`);
@@ -94,7 +94,11 @@ export const handleEndpoint = async <T extends RequestPayloadBase>(
   req: Request, res: Response, mongoClient: MongoClient,
   handlers: EndpointHandlers<T>, nextFunction?: NextFunction,
 ): Promise<void> => {
-  const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
+  let method: HttpMethods = req.method.toUpperCase() as HttpMethods;
+
+  if (method === 'HEAD') {
+    method = 'GET';
+  }
 
   if (!handlers[method]) {
     await handleResponse(req, res, mongoClient, handleMethodNotAllowed(Object.keys(handlers)), nextFunction);
