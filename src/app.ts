@@ -89,12 +89,12 @@ export const createApp = async (mongoUri?: string): Promise<Application> => {
 
   // --- Handle erroneous behaviors
   // 404
-  app.setNotFoundHandler((req: FastifyRequest, res: FastifyReply) => {
-    handleResponse(req, res, mongoClient, handleNotExists);
+  app.setNotFoundHandler(async (req: FastifyRequest, res: FastifyReply) => {
+    await handleResponse(req, res, mongoClient, handleNotExists);
   });
   // 500
-  app.setErrorHandler((error: Error, req: FastifyRequest, res: FastifyReply) => {
-    handleResponse(req, res, mongoClient, handleInternalError(error));
+  app.setErrorHandler(async (error: Error, req: FastifyRequest, res: FastifyReply) => {
+    await handleResponse(req, res, mongoClient, handleInternalError(error));
   });
 
   return new Application(app, mongoClient, server);
