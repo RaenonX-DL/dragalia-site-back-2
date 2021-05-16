@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -76,10 +76,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -92,10 +92,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -109,10 +109,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: SupportedLanguages.EN,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -126,10 +126,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: SupportedLanguages.EN,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -143,10 +143,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -160,10 +160,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -177,10 +177,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);
@@ -194,10 +194,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       lang: payload.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisIdCheckResponse = result.body as AnalysisIdCheckResponse;
+    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);

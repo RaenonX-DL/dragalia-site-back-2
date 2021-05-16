@@ -1,5 +1,3 @@
-import {default as request} from 'supertest';
-
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -105,42 +103,42 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   });
 
   it('publishes a new quest post', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload2);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('publishes a new quest post given an alternative language', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload5);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload5);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('publishes a new quest post given a valid unused sequential ID', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_PUBLISH)
-      .send({...questPayload1, googleUid: uidAdmin});
-    expect(result.status).toBe(200);
+      .payload({...questPayload1, googleUid: uidAdmin});
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.body as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload3);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload3);
+    expect(result.statusCode).toBe(200);
 
-    const json: BaseResponse = result.body as BaseResponse;
+    const json: BaseResponse = result.json() as BaseResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
     expect(json.success).toBe(false);
   });
@@ -148,10 +146,10 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it(
     'blocks publishing a quest post with skipping sequential ID',
     async () => {
-      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload4);
-      expect(result.status).toBe(200);
+      const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload4);
+      expect(result.statusCode).toBe(200);
 
-      const json: BaseResponse = result.body as BaseResponse;
+      const json: BaseResponse = result.json() as BaseResponse;
       expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
       expect(json.success).toBe(false);
     });
@@ -159,18 +157,18 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it(
     'blocks publishing a quest post with duplicated ID and language',
     async () => {
-      await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload7);
+      await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload7);
 
-      const result = await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload7);
-      expect(result.status).toBe(200);
+      const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload7);
+      expect(result.statusCode).toBe(200);
 
-      const json: BaseResponse = result.body as BaseResponse;
+      const json: BaseResponse = result.json() as BaseResponse;
       expect(json.code).toBe(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
       expect(json.success).toBe(false);
     });
 
   test('if the published quest post exists in the database', async () => {
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
+    await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload2);
 
     const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -195,9 +193,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload2);
+    await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload2);
     // Normal & change title (expect to fail)
-    await request(app.express).post(ApiEndPoints.POST_QUEST_PUBLISH).send(questPayload6);
+    await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload6);
 
     const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,

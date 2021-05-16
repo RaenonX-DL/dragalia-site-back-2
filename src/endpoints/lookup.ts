@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express';
+import {FastifyReply, FastifyRequest} from 'fastify';
 import {MongoClient} from 'mongodb';
 
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
@@ -27,15 +27,17 @@ type HttpMethods = 'GET' | 'POST' | 'HEAD';
 export type HandlerParams<T extends RequestPayloadBase = never> = {
   payload: T,
   mongoClient: MongoClient,
-  request: Request,
-  response: Response,
+  request: FastifyRequest,
+  response: FastifyReply,
 }
 
-type HandlerFunction<T extends RequestPayloadBase> = (params: HandlerParams<T>) => Promise<ApiResponse>;
+type HandlerFunction<T extends RequestPayloadBase> = (
+  params: HandlerParams<T>
+) => Promise<ApiResponse>;
 
-type EndpointHandlers<T extends RequestPayloadBase = never> = {
-  GET?: HandlerFunction<T>,
-  POST?: HandlerFunction<T>,
+type EndpointHandlers<P extends RequestPayloadBase = never> = {
+  GET?: HandlerFunction<P>,
+  POST?: HandlerFunction<P>,
 }
 
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
@@ -59,40 +61,42 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(
-  req: Request, res: Response, mongoClient: MongoClient,
-  handler: HandlerFunction<T>, nextFunction?: NextFunction,
+  req: FastifyRequest,
+  res: FastifyReply,
+  mongoClient: MongoClient,
+  handler: HandlerFunction<T>,
 ): Promise<void> => {
   const method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
-  console.info(`${method} ${req.path}`);
+  console.info(`${method} ${req.url}`);
 
   try {
-    let payload;
+    let payload: T;
 
     if (method === 'GET' || method === 'HEAD') {
-      payload = req.query;
+      payload = req.query as T;
     } else if (method === 'POST') {
-      payload = req.body;
+      payload = req.body as T;
     } else {
       console.warn(`Payload unhandled for method ${method}`);
-      payload = {};
+      payload = {} as T;
     }
 
     const response = await handler({request: req, response: res, payload, mongoClient});
 
-    res.status(response.httpCode).json(response.toJson());
+    res.status(response.httpCode).send(response.toJson());
   } catch (err) {
-    console.error(`${method} ${req.path} - ERROR: ${err.message}`);
+    console.error(`${method} ${req.url} - ERROR: ${err.message}`);
     console.error(err);
-    if (nextFunction) {
-      nextFunction(err);
-    }
+    throw err;
   }
 };
 
 export const handleEndpoint = async <T extends RequestPayloadBase>(
-  req: Request, res: Response, mongoClient: MongoClient,
-  handlers: EndpointHandlers<T>, nextFunction?: NextFunction,
+  req: FastifyRequest,
+  res: FastifyReply,
+  mongoClient: MongoClient,
+  handlers: EndpointHandlers<T>,
 ): Promise<void> => {
   let method: HttpMethods = req.method.toUpperCase() as HttpMethods;
 
@@ -101,9 +105,9 @@ export const handleEndpoint = async <T extends RequestPayloadBase>(
   }
 
   if (!handlers[method]) {
-    await handleResponse(req, res, mongoClient, handleMethodNotAllowed(Object.keys(handlers)), nextFunction);
+    await handleResponse(req, res, mongoClient, handleMethodNotAllowed(Object.keys(handlers)));
     return;
   }
 
-  await handleResponse(req, res, mongoClient, handlers[method] as HandlerFunction<T>, nextFunction);
+  await handleResponse(req, res, mongoClient, handlers[method] as HandlerFunction<T>);
 };

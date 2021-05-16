@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
@@ -15,10 +15,10 @@ describe(`[Server] GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
   });
 
   it('returns with successful code 100', async () => {
-    const result = await request(app.express).get(ApiEndPoints.ROOT);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.ROOT);
+    expect(result.statusCode).toBe(200);
 
-    const json: BaseResponse = result.body as BaseResponse;
+    const json: BaseResponse = result.json() as BaseResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
   });

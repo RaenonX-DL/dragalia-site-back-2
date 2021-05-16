@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   AnalysisEditSuccessResponse,
@@ -77,67 +77,67 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
   });
 
   it('edits', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA).send(payloadEdit);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA).payload(payloadEdit);
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
+    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('returns success even if no change', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadPost, editNote: 'a'});
-    expect(result.status).toBe(200);
+      .payload({...payloadPost, editNote: 'a'});
+    expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.body as AnalysisEditSuccessResponse;
+    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('returns failure if ID is not given', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadEdit, seqId: undefined});
-    expect(result.status).toBe(400);
+      .payload({...payloadEdit, seqId: undefined});
+    expect(result.statusCode).toBe(400);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
     expect(json.success).toBe(false);
   });
 
   it('returns failure for non-existing post ID & language', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadEdit, seqId: 8});
-    expect(result.status).toBe(404);
+      .payload({...payloadEdit, seqId: 8});
+    expect(result.statusCode).toBe(404);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
     expect(json.success).toBe(false);
   });
 
   it('returns failure for non-existing post language', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadEdit, lang: SupportedLanguages.JP});
-    expect(result.status).toBe(404);
+      .payload({...payloadEdit, lang: SupportedLanguages.JP});
+    expect(result.statusCode).toBe(404);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
     expect(json.success).toBe(false);
   });
 
   it('returns failure when permission insufficient', async () => {
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .send({...payloadEdit, googleUid: uidNormal});
-    expect(result.status).toBe(401);
+      .payload({...payloadEdit, googleUid: uidNormal});
+    expect(result.statusCode).toBe(401);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
     expect(json.success).toBe(false);
   });

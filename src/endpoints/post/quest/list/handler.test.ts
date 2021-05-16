@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -86,10 +86,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_LIST).query(payloadList1);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList1);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(7);
@@ -101,10 +101,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_LIST).query(payloadList2);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList2);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(7);
@@ -112,10 +112,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   });
 
   it('returns an empty result if no post exists yet', async () => {
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_LIST).query(payloadList1);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList1);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(0);
@@ -127,12 +127,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query({...payloadList1, langCode: SupportedLanguages.EN});
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(0);
@@ -144,12 +144,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query({...payloadList1, langCode: 'non-existent'});
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(0);
@@ -161,12 +161,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       await QuestPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query({...payloadList1, googleUid: uidAdmin});
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(7);
@@ -176,12 +176,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   it('returns that the non-ads-free user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query({...payloadList1, googleUid: uidNormal});
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(1);
@@ -191,12 +191,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   it('returns that the ads-free user should not have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query({...payloadList1, googleUid: uidAdsFree});
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(1);
@@ -206,12 +206,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   it('returns that unregistered user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express)
+    const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
       .query(payloadList1);
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.body as QuestPostListResponse;
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(1);

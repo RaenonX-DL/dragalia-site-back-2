@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -81,66 +81,66 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   });
 
   it('publishes a new character analysis', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload2);
+    expect(result.statusCode).toBe(200);
 
-    const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
+    const json: DragonAnalysisPublishSuccessResponse = result.json() as DragonAnalysisPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('publishes a new quest post given an alternative language', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload4);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload4);
+    expect(result.statusCode).toBe(200);
 
-    const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
+    const json: DragonAnalysisPublishSuccessResponse = result.json() as DragonAnalysisPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('publishes a new quest post given a valid unused sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload6);
+    expect(result.statusCode).toBe(200);
 
-    const json: DragonAnalysisPublishSuccessResponse = result.body as DragonAnalysisPublishSuccessResponse;
+    const json: DragonAnalysisPublishSuccessResponse = result.json() as DragonAnalysisPublishSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
   it('blocks publishing a quest post with insufficient permission', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload1);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload1);
+    expect(result.statusCode).toBe(200);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
     expect(json.success).toBe(false);
   });
 
   it('blocks publishing a quest post with skipping sequential ID', async () => {
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload3);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload3);
+    expect(result.statusCode).toBe(200);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
     expect(json.success).toBe(false);
   });
 
   it('blocks publishing a quest post with duplicated ID and language', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
+    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload6);
 
-    const result = await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload6);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload6);
+    expect(result.statusCode).toBe(200);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
     expect(json.success).toBe(false);
   });
 
   test('if the published quest post exists in the database', async () => {
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
+    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload2);
 
     const docQuery = await DragonAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -168,9 +168,9 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload2);
+    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload2);
     // Normal & change title (expect to fail)
-    await request(app.express).post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).send(payload5);
+    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON).payload(payload5);
 
     const docQuery = await DragonAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,

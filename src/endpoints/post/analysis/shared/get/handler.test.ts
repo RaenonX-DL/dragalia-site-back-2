@@ -1,5 +1,3 @@
-import {default as request} from 'supertest';
-
 import {
   AnalysisGetPayload,
   ApiEndPoints,
@@ -78,10 +76,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('gets an analysis given language and the sequential ID', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -97,10 +95,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
     );
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(true);
@@ -112,10 +110,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
     await AnalysisController.editCharaAnalysis(app.mongoClient, {...payloadPost, videos: 'a', editNote: 'edit'});
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -141,10 +139,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP},
     );
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -164,10 +162,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP},
     );
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 2});
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 2});
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -177,10 +175,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   });
 
   it('returns failure for non-existing analysis', async () => {
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(404);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(404);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
     expect(json.success).toBe(false);
   });
@@ -188,10 +186,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('returns failure if sequence ID is not specified', async () => {
     const {seqId, ...payload} = payloadGet;
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payload);
-    expect(result.status).toBe(400);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payload);
+    expect(result.statusCode).toBe(400);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
     expect(json.success).toBe(false);
   });
@@ -199,12 +197,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('indicates that the user should have ads shown', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
       {...payloadGet, googleUid: uidNormal},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.showAds).toBe(true);
@@ -213,12 +211,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('indicates that the user has the admin privilege', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
       {...payloadGet, googleUid: uidAdmin},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -227,12 +225,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('indicates that the user is ads-free', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
       {...payloadGet, googleUid: uidAdsFree},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.showAds).toBe(false);
@@ -241,14 +239,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   it('increments view count per request', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.viewCount).toBe(4);
@@ -259,14 +257,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
       app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
     );
 
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    const result = await request(app.express).get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.body as CharacterAnalysis;
+    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.lang).toBe(SupportedLanguages.EN);

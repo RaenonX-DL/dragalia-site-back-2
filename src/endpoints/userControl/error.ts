@@ -13,3 +13,16 @@ export class UserNotExistsError extends CustomError {
     super(`User ID ${userId} does not exist`);
   }
 }
+
+
+/**
+ * Error to be thrown if the user ID is empty while required.
+ */
+export class UserIdEmptyError extends CustomError {
+  /**
+   * Construct an user ID empty error.
+   */
+  constructor() {
+    super(`User ID should not be empty`);
+  }
+}

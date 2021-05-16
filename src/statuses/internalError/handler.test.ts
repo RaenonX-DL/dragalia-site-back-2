@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
@@ -15,10 +15,10 @@ describe(`[Server] GET ${ApiEndPoints.ERROR_TEST} - the error testing endpoint`,
   });
 
   it('should return 500', async () => {
-    const result = await request(app.express).get(ApiEndPoints.ERROR_TEST);
-    expect(result.status).toBe(500);
+    const result = await app.app.inject().get(ApiEndPoints.ERROR_TEST);
+    expect(result.statusCode).toBe(500);
 
-    const json: BaseResponse = result.body as BaseResponse;
+    const json: BaseResponse = result.json() as BaseResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INTERNAL_ERROR);
     expect(json.success).toBe(false);
   });

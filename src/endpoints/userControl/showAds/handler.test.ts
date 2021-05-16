@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -51,10 +51,10 @@ describe(`[Server] GET ${ApiEndPoints.USER_SHOW_ADS} - check if user should have
   it('returns true if the user should have ads shown', async () => {
     registerUserAsNormal();
 
-    const result = await request(app.express).get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserShowAdsResponse = result.body as UserShowAdsResponse;
+    const json: UserShowAdsResponse = result.json() as UserShowAdsResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.showAds).toBe(true);
   });
@@ -62,34 +62,34 @@ describe(`[Server] GET ${ApiEndPoints.USER_SHOW_ADS} - check if user should have
   it('returns false if the user is ads-free', async () => {
     await registerUserAsAdsFree();
 
-    const result = await request(app.express).get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserShowAdsResponse = result.body as UserShowAdsResponse;
+    const json: UserShowAdsResponse = result.json() as UserShowAdsResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.showAds).toBe(false);
   });
 
   it('returns true if the user ID is empty', async () => {
-    const result = await request(app.express).get(ApiEndPoints.USER_SHOW_ADS).query(userPayloadEmpty);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_SHOW_ADS).query(userPayloadEmpty);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserShowAdsResponse = result.body as UserShowAdsResponse;
+    const json: UserShowAdsResponse = result.json() as UserShowAdsResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_EMPTY_USER_ID);
     expect(json.showAds).toBe(true);
   });
 
   it('returns true if the user ID does not exist', async () => {
-    const result = await request(app.express).get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserShowAdsResponse = result.body as UserShowAdsResponse;
+    const json: UserShowAdsResponse = result.json() as UserShowAdsResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_USER_NOT_EXISTS);
     expect(json.showAds).toBe(true);
   });
 
   test('non-existent user is not stored', async () => {
-    await request(app.express).get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
+    await app.app.inject().get(ApiEndPoints.USER_SHOW_ADS).query(userPayload);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
       {

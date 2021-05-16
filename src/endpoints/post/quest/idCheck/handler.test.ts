@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -78,10 +78,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -94,10 +94,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -111,10 +111,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: SupportedLanguages.EN,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -128,10 +128,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: SupportedLanguages.EN,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -145,10 +145,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -162,10 +162,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -179,10 +179,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);
@@ -196,10 +196,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       lang: payloadPost.lang,
     };
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostIdCheckResponse = result.body as QuestPostIdCheckResponse;
+    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);

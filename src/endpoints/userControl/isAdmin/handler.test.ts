@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -44,10 +44,10 @@ describe(`[Server] GET ${ApiEndPoints.USER_IS_ADMIN} - check if user is admin`, 
   it('returns true if the user is admin', async () => {
     registerUserAsAdmin();
 
-    const result = await request(app.express).get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserIsAdminResponse = result.body as UserIsAdminResponse;
+    const json: UserIsAdminResponse = result.json() as UserIsAdminResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.isAdmin).toBe(true);
   });
@@ -55,34 +55,34 @@ describe(`[Server] GET ${ApiEndPoints.USER_IS_ADMIN} - check if user is admin`, 
   it('returns false if the user is not admin', async () => {
     registerUserAsNormal();
 
-    const result = await request(app.express).get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserIsAdminResponse = result.body as UserIsAdminResponse;
+    const json: UserIsAdminResponse = result.json() as UserIsAdminResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.isAdmin).toBe(false);
   });
 
   it('returns false if the user ID is empty', async () => {
-    const result = await request(app.express).get(ApiEndPoints.USER_IS_ADMIN).query(userPayloadEmpty);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_IS_ADMIN).query(userPayloadEmpty);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserIsAdminResponse = result.body as UserIsAdminResponse;
+    const json: UserIsAdminResponse = result.json() as UserIsAdminResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_EMPTY_USER_ID);
     expect(json.isAdmin).toBe(false);
   });
 
   it('returns false if the user ID does not exist', async () => {
-    const result = await request(app.express).get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
+    expect(result.statusCode).toBe(200);
 
-    const json: UserIsAdminResponse = result.body as UserIsAdminResponse;
+    const json: UserIsAdminResponse = result.json() as UserIsAdminResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_USER_NOT_EXISTS);
     expect(json.isAdmin).toBe(false);
   });
 
   test('non-existent user is not stored', async () => {
-    await request(app.express).get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
+    await app.app.inject().get(ApiEndPoints.USER_IS_ADMIN).query(userPayload);
 
     const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
       {

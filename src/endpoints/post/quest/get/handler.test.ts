@@ -1,4 +1,4 @@
-import {default as request} from 'supertest';
+
 
 import {
   ApiEndPoints,
@@ -78,10 +78,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('gets an existed post given language and the sequential ID', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -95,10 +95,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('gets an existed post which has an alt version only given sequential ID', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN});
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(true);
@@ -110,10 +110,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     const seqId = await QuestPostController.publishPost(app.mongoClient, payloadPost);
     await QuestPostController.editQuestPost(app.mongoClient, {...payloadPost, seqId, video: 'a', editNote: 'edit'});
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -131,10 +131,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.CHT});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP});
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -148,10 +148,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT});
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP});
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 2});
-    expect(result.status).toBe(200);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 2});
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
@@ -161,10 +161,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   });
 
   it('returns failure for non-existing post', async () => {
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(404);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(404);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
     expect(json.success).toBe(false);
   });
@@ -172,10 +172,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('returns failure if sequence ID is not specified', async () => {
     const {seqId, ...payload} = payloadGet;
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payload);
-    expect(result.status).toBe(400);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payload);
+    expect(result.statusCode).toBe(400);
 
-    const json: FailedResponse = result.body as FailedResponse;
+    const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
     expect(json.success).toBe(false);
   });
@@ -183,12 +183,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('indicates that the user should have ads shown', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(
       {...payloadGet, googleUid: uidNormal},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.showAds).toBe(true);
@@ -197,12 +197,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('indicates that the user has the admin privilege', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(
       {...payloadGet, googleUid: uidAdmin},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -211,12 +211,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('indicates that the user is ads-free', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(
       {...payloadGet, googleUid: uidAdsFree},
     );
-    expect(result.status).toBe(200);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.showAds).toBe(false);
@@ -225,14 +225,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('increments view count per request', async () => {
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.viewCount).toBe(4);
@@ -241,14 +241,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   it('increments view count per request on alternative version', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN});
 
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    const result = await request(app.express).get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
-    expect(result.status).toBe(200);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.body as QuestPostGetSuccessResponse;
+    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.lang).toBe(SupportedLanguages.EN);

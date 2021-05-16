@@ -1,11 +1,11 @@
-import {default as compression} from 'compression';
-import express, {Application as ExpressApp, NextFunction, Request, Response} from 'express';
-import {default as helmet} from 'helmet';
+import fastify, {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
+import fastifyCors from 'fastify-cors';
+import fastifyHelmet from 'fastify-helmet';
 import {MongoClient, MongoClientOptions} from 'mongodb';
 import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
-import {corsMiddle} from './middleware/cors';
+import {corsOptions} from './middleware/cors';
 import {handleInternalError} from './statuses/internalError/handler';
 import {handleNotExists} from './statuses/notExists/handler';
 import {clearServer} from './utils/mongodb';
@@ -14,19 +14,19 @@ import {clearServer} from './utils/mongodb';
  * A class holding the application related instances.
  */
 export class Application {
-  express: ExpressApp;
+  app: FastifyInstance;
   mongoClient: MongoClient;
   mongoServer?: MongoMemoryServer;
 
   /**
    * Construct the application.
    *
-   * @param {ExpressApp} express express app
+   * @param {FastifyInstance} app fastify app instance
    * @param {MongoClient} mongoClient mongo client
    * @param {MongoMemoryServer} mongoServer mongo in-memory server
    */
-  constructor(express: ExpressApp, mongoClient: MongoClient, mongoServer?: MongoMemoryServer) {
-    this.express = express;
+  constructor(app: FastifyInstance, mongoClient: MongoClient, mongoServer?: MongoMemoryServer) {
+    this.app = app;
     this.mongoClient = mongoClient;
     this.mongoServer = mongoServer;
   }
@@ -60,7 +60,7 @@ export class Application {
 }
 
 export const createApp = async (mongoUri?: string): Promise<Application> => {
-  const app: ExpressApp = express();
+  const app: FastifyInstance = fastify();
 
   // --- Initialize mongo connection & server
   let mongoClient: MongoClient;
@@ -76,25 +76,24 @@ export const createApp = async (mongoUri?: string): Promise<Application> => {
   }
 
   // --- Attach Middlewares
-  // https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/deployment
-  app.use(compression());
-  app.use(helmet());
-  app.use(corsMiddle());
-  app.use(express.json()); // for parsing application/json
+  app.register(fastifyHelmet);
+  app.register(fastifyCors, corsOptions);
 
   // --- Add routes to the app
   // RFC 2616 - 405 Method Not Allowed: https://tools.ietf.org/html/rfc2616#page-66
   Object.entries(handlerLookup).forEach(([endpoint, handlers]) => {
-    app.all(endpoint, (req: Request, res: Response, next: NextFunction) => {
-      handleEndpoint(req, res, mongoClient, handlers, next);
+    app.all(endpoint, async (req: FastifyRequest, res: FastifyReply) => {
+      await handleEndpoint(req, res, mongoClient, handlers);
     });
   });
 
   // --- Handle erroneous behaviors
-  app.use((req: Request, res: Response, _: NextFunction) => {
+  // 404
+  app.setNotFoundHandler((req: FastifyRequest, res: FastifyReply) => {
     handleResponse(req, res, mongoClient, handleNotExists);
   });
-  app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
+  // 500
+  app.setErrorHandler((error: Error, req: FastifyRequest, res: FastifyReply) => {
     handleResponse(req, res, mongoClient, handleInternalError(error));
   });
 
