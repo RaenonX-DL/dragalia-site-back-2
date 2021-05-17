@@ -13,11 +13,14 @@ const config: Config.InitialOptions = {
   // Coverage
   collectCoverage: true,
   collectCoverageFrom: [
+    // Source files
     './src/**/*.ts',
     // Node environment files
     '!**/node_modules/**',
     // Main file (server entry point)
     '!./src/main.ts',
+    // Init file (server initialization utils)
+    '!./src/utils/init/**/*.ts',
     // Testing files
     '!./src/**/*.test.ts',
     // API definitions
