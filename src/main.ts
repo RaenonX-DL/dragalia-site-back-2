@@ -2,14 +2,21 @@ import * as dotenv from 'dotenv';
 import {FastifyInstance} from 'fastify';
 
 import {createApp} from './app';
+import {isAppOnHeroku} from './utils/init/heroku';
+import {initHerokuNginx} from './utils/init/herokuNginx';
+import {initHttp} from './utils/init/http';
 
 dotenv.config();
 
-const PORT = Number(process.env.PORT) || 8787;
-
 (async () => {
   const app: FastifyInstance = (await createApp(process.env.MONGO_URL || '')).app;
-  await app.listen(PORT, process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost');
+
+  if (!isAppOnHeroku()) {
+    await initHttp(app);
+    return;
+  }
+
+  await initHerokuNginx(app);
 })().catch((e) => {
   console.error(`Application Error: ${e.message}`);
 });
