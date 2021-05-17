@@ -4,6 +4,8 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleGeneralMeta} from './meta/general/handler';
+import {handlePostMeta} from './meta/post/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
 import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
@@ -32,7 +34,7 @@ export type HandlerParams<T extends RequestPayloadBase = never> = {
 }
 
 type HandlerFunction<T extends RequestPayloadBase> = (
-  params: HandlerParams<T>
+  params: HandlerParams<T>,
 ) => Promise<ApiResponse>;
 
 type EndpointHandlers<P extends RequestPayloadBase = never> = {
@@ -40,12 +42,16 @@ type EndpointHandlers<P extends RequestPayloadBase = never> = {
   POST?: HandlerFunction<P>,
 }
 
+// FIXME: Remove show ads after front dev deployed to main
+
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.USER_LOGIN]: {POST: handleUserLogin},
   [ApiEndPoints.USER_IS_ADMIN]: {GET: handleUserIsAdmin},
   [ApiEndPoints.USER_SHOW_ADS]: {GET: handleUserShowAds},
+  [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
+  [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
