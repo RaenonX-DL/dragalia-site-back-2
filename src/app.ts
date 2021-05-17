@@ -8,6 +8,7 @@ import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup'
 import {corsOptions} from './middleware/cors';
 import {handleInternalError} from './statuses/internalError/handler';
 import {handleNotExists} from './statuses/notExists/handler';
+import {isAppOnHeroku} from './utils/init/heroku';
 import {clearServer} from './utils/mongodb';
 
 /**
@@ -60,7 +61,11 @@ export class Application {
 }
 
 export const createApp = async (mongoUri?: string): Promise<Application> => {
-  const app: FastifyInstance = fastify();
+  const app: FastifyInstance = fastify({
+    logger: true,
+    connectionTimeout: 20000, // 20 seconds
+    trustProxy: isAppOnHeroku(),
+  });
 
   // --- Initialize mongo connection & server
   let mongoClient: MongoClient;
