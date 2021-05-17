@@ -1,7 +1,6 @@
 import {ApiResponseCode, PageMetaResponse as PageMetaResponseApi} from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
 import {UserIsAdminResponse} from '../../userControl/isAdmin/response';
-import {UserShowAdsResponse} from '../../userControl/showAds/response';
 
 type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' | 'params'>;
 
@@ -10,7 +9,7 @@ type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' |
  */
 export class GenericPageMetaResponse extends ApiResponse {
   isAdminResponse: UserIsAdminResponse;
-  showAdsResponse: UserShowAdsResponse;
+  showAds: boolean;
   params: { [key in string]: string };
 
   /**
@@ -24,7 +23,7 @@ export class GenericPageMetaResponse extends ApiResponse {
     super(responseCode);
 
     this.isAdminResponse = new UserIsAdminResponse(options.isAdmin, responseCode);
-    this.showAdsResponse = new UserShowAdsResponse(options.showAds, responseCode);
+    this.showAds = options.showAds;
     this.params = options.params;
   }
 
@@ -35,7 +34,7 @@ export class GenericPageMetaResponse extends ApiResponse {
     return {
       ...super.toJson(),
       ...this.isAdminResponse.toJson(),
-      ...this.showAdsResponse.toJson(),
+      showAds: this.showAds,
       params: this.params,
     };
   }

@@ -22,7 +22,6 @@ import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleUserIsAdmin} from './userControl/isAdmin/handler';
 import {handleUserLogin} from './userControl/login/handler';
-import {handleUserShowAds} from './userControl/showAds/handler';
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
 
@@ -49,7 +48,6 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.USER_LOGIN]: {POST: handleUserLogin},
   [ApiEndPoints.USER_IS_ADMIN]: {GET: handleUserIsAdmin},
-  [ApiEndPoints.USER_SHOW_ADS]: {GET: handleUserShowAds},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
