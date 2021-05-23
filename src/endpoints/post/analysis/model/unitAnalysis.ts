@@ -1,6 +1,6 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {AnalysisPayload, AnalysisType} from '../../../../api-def/api';
+import {AnalysisPayload, UnitType} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
@@ -20,7 +20,7 @@ export enum UnitAnalysisDocumentKey {
 }
 
 export type UnitAnalysisDocument = PostDocumentBase & {
-  [UnitAnalysisDocumentKey.type]: AnalysisType,
+  [UnitAnalysisDocumentKey.type]: UnitType,
   [UnitAnalysisDocumentKey.summary]: string,
   [UnitAnalysisDocumentKey.summonResult]: string,
   [UnitAnalysisDocumentKey.passives]: string,
@@ -31,7 +31,7 @@ export type UnitAnalysisDocument = PostDocumentBase & {
 }
 
 export type UnitAnalysisConstructParams = PostConstructParams & {
-  type: AnalysisType,
+  type: UnitType,
   summary: string,
   summonResult: string,
   passives: string,
@@ -45,7 +45,7 @@ export type UnitAnalysisConstructParams = PostConstructParams & {
  * Unit analysis base class.
  */
 export abstract class UnitAnalysis extends Post {
-  type: AnalysisType;
+  type: UnitType;
   summary: string;
   summonResult: string;
   passives: string;
@@ -78,11 +78,11 @@ export abstract class UnitAnalysis extends Post {
    * Convert `payload` to an instance of construct params.
    *
    * @param {T} payload payload to be converted
-   * @param {AnalysisType} type type of the unit analysis
+   * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    */
   static fromPayloadToConstructParams<T extends AnalysisPayload>(
-    payload: T, type: AnalysisType,
+    payload: T, type: UnitType,
   ): UnitAnalysisConstructParams {
     if (!payload.seqId) {
       throw new SeqIdMissingError();
@@ -107,12 +107,12 @@ export abstract class UnitAnalysis extends Post {
    * Convert `obj` to an instance to an instance of construct params.
    *
    * @param {T} obj object to be converted
-   * @param {AnalysisType} type type of the unit analysis
+   * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    * @protected
    */
   protected static fromDocumentToConstructParams<T extends UnitAnalysisDocument>(
-    obj: T, type: AnalysisType,
+    obj: T, type: UnitType,
   ): UnitAnalysisConstructParams {
     return {
       type,

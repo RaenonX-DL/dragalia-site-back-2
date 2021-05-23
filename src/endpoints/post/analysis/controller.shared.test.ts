@@ -1,5 +1,5 @@
 import {
-  AnalysisType,
+  UnitType,
   CharaAnalysisPublishPayload,
   DragonAnalysisPublishPayload,
   SupportedLanguages,
@@ -144,9 +144,9 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
 
     expect(postListResult.totalAvailableCount).toBe(6);
     expect(postListResult.postListEntries.map((entry) => entry.type)).toStrictEqual([
-      AnalysisType.CHARACTER, AnalysisType.DRAGON,
-      AnalysisType.CHARACTER, AnalysisType.DRAGON,
-      AnalysisType.CHARACTER, AnalysisType.DRAGON,
+      UnitType.CHARACTER, UnitType.DRAGON,
+      UnitType.CHARACTER, UnitType.DRAGON,
+      UnitType.CHARACTER, UnitType.DRAGON,
     ]);
   });
 

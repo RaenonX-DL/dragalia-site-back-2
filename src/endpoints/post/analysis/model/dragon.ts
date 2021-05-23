@@ -1,4 +1,4 @@
-import {AnalysisType, DragonAnalysisPayload} from '../../../../api-def/api';
+import {UnitType, DragonAnalysisPayload} from '../../../../api-def/api';
 import {SeqIdMissingError} from '../../error';
 import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
 
@@ -36,7 +36,7 @@ export class DragonAnalysis extends UnitAnalysis {
   constructor(params: DragonAnalysisConstructParams) {
     super({
       ...params,
-      type: AnalysisType.DRAGON,
+      type: UnitType.DRAGON,
     });
 
     this.ultimate = params.ultimate;
@@ -56,7 +56,7 @@ export class DragonAnalysis extends UnitAnalysis {
     }
 
     return new DragonAnalysis({
-      ...super.fromPayloadToConstructParams(payload, AnalysisType.DRAGON),
+      ...super.fromPayloadToConstructParams(payload, UnitType.DRAGON),
       ultimate: payload.ultimate,
       notes: payload.notes,
       suitableCharacters: payload.suitableCharacters,
@@ -69,7 +69,7 @@ export class DragonAnalysis extends UnitAnalysis {
   static fromDocument(obj: DragonAnalysisDocument): DragonAnalysis {
     return new DragonAnalysis(
       {
-        ...super.fromDocumentToConstructParams(obj, AnalysisType.DRAGON),
+        ...super.fromDocumentToConstructParams(obj, UnitType.DRAGON),
         ultimate: obj[DragonAnalysisDocumentKey.ultimate],
         notes: obj[DragonAnalysisDocumentKey.notes],
         suitableCharacters: obj[DragonAnalysisDocumentKey.suitableCharacters],

@@ -1,4 +1,4 @@
-import {AnalysisType, CharaAnalysisPayload} from '../../../../api-def/api';
+import {UnitType, CharaAnalysisPayload} from '../../../../api-def/api';
 import {SeqIdMissingError} from '../../error';
 import {CharaAnalysisSkill, CharaAnalysisSkillDocument} from './charaSkill';
 import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
@@ -38,7 +38,7 @@ export class CharaAnalysis extends UnitAnalysis {
   constructor(params: CharaAnalysisConstructParams) {
     super({
       ...params,
-      type: AnalysisType.CHARACTER,
+      type: UnitType.CHARACTER,
     });
 
     this.forceStrike = params.forceStrike;
@@ -58,7 +58,7 @@ export class CharaAnalysis extends UnitAnalysis {
     }
 
     return new CharaAnalysis({
-      ...super.fromPayloadToConstructParams(payload, AnalysisType.CHARACTER),
+      ...super.fromPayloadToConstructParams(payload, UnitType.CHARACTER),
       forceStrike: payload.forceStrikes,
       skills: payload.skills.map((skill) => new CharaAnalysisSkill(skill)),
       tipsBuilds: payload.tipsBuilds,
@@ -71,7 +71,7 @@ export class CharaAnalysis extends UnitAnalysis {
   static fromDocument(obj: CharaAnalysisDocument): CharaAnalysis {
     return new CharaAnalysis(
       {
-        ...super.fromDocumentToConstructParams(obj, AnalysisType.CHARACTER),
+        ...super.fromDocumentToConstructParams(obj, UnitType.CHARACTER),
         forceStrike: obj[CharaAnalysisDocumentKey.forceStrike],
         skills: obj[CharaAnalysisDocumentKey.skills].map((doc) => CharaAnalysisSkill.fromDocument(doc)),
         tipsBuilds: obj[CharaAnalysisDocumentKey.tipsBuilds],

@@ -2,7 +2,7 @@ import {MongoClient} from 'mongodb';
 
 import {
   AnalysisGetContent, AnalysisListEntry,
-  AnalysisType,
+  UnitType,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
@@ -16,7 +16,7 @@ import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
 import {PostGetSuccessResponseParam} from '../base/response/post/get';
 import {AnalysisResponse} from './base/response';
-import {UnhandledAnalysisTypeError} from './error';
+import {UnhandledUnitTypeError} from './error';
 import {
   CharaAnalysis,
   CharaAnalysisDocumentKey,
@@ -63,7 +63,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       keywords: this.post[UnitAnalysisDocumentKey.keywords],
     };
 
-    if (base.type === AnalysisType.CHARACTER) {
+    if (base.type === UnitType.CHARACTER) {
       return {
         ...base,
         forceStrikes: this.post[CharaAnalysisDocumentKey.forceStrike],
@@ -77,7 +77,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       };
     }
 
-    if (base.type === AnalysisType.DRAGON) {
+    if (base.type === UnitType.DRAGON) {
       return {
         ...base,
         ultimate: this.post[DragonAnalysisDocumentKey.ultimate],
@@ -86,7 +86,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       };
     }
 
-    throw new UnhandledAnalysisTypeError(+base.seqId, base.type);
+    throw new UnhandledUnitTypeError(+base.seqId, base.type);
   }
 }
 
