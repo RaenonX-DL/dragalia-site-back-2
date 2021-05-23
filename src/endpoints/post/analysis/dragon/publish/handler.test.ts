@@ -11,8 +11,8 @@ import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../../base/model/seq';
 import {GoogleUserController} from '../../../../userControl/controller';
-import {PostDocumentKey} from '../../../base/model';
 import {DragonAnalysis, DragonAnalysisDocument} from '../../model/dragon';
+import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 
 
 describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon analysis publishing endpoint`, () => {
@@ -24,7 +24,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
   const payload1: DragonAnalysisPublishPayload = {
     googleUid: uidNormal,
     lang: SupportedLanguages.CHT,
-    title: 'dragon',
+    unitId: 10,
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -54,7 +54,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
 
   const payload5: DragonAnalysisPublishPayload = {
     ...payload1,
-    title: 'chara6',
+    unitId: 99,
   };
 
   const payload6: DragonAnalysisPublishPayload = {
@@ -150,7 +150,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);
@@ -175,13 +175,13 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - dragon an
     const docQuery = await DragonAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: payload2.lang,
-      [PostDocumentKey.title]: payload2.title,
+      [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
     });
     const doc = DragonAnalysis.fromDocument(docQuery as DragonAnalysisDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);

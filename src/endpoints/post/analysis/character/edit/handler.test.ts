@@ -1,5 +1,3 @@
-
-
 import {
   AnalysisEditSuccessResponse,
   ApiEndPoints, ApiResponseCode,
@@ -24,7 +22,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
     googleUid: uidAdmin,
     seqId: 1,
     lang: SupportedLanguages.CHT,
-    title: 'chara1',
+    unitId: 7,
     summary: 'sum1',
     summon: 'smn1',
     passives: 'passive1',

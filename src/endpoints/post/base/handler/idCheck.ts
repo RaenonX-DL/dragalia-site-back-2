@@ -1,11 +1,11 @@
 import {MongoClient} from 'mongodb';
 
-import {PostIdCheckPayload} from '../../../../api-def/api';
+import {PostIdCheckPayload, SupportedLanguages} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {PostIdCheckResponse} from '../response/post/idCheck';
 
 type FunctionCheckIdAvailability = (
-  mongoClient: MongoClient, lang: string, seqId?: number,
+  mongoClient: MongoClient, lang: SupportedLanguages, seqId?: number,
 ) => Promise<boolean>;
 
 type FunctionConstructResponse<R extends PostIdCheckResponse> = (

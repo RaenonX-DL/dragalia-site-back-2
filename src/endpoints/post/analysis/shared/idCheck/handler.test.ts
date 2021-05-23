@@ -23,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     googleUid: uidAdmin,
     seqId: 1,
     lang: SupportedLanguages.CHT,
-    title: 'title',
+    unitId: 7,
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',

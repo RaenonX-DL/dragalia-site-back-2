@@ -1,17 +1,22 @@
 import {MongoClient} from 'mongodb';
 
 import {
-  AnalysisGetContent, AnalysisListEntry,
+  AnalysisGetContent,
   UnitType,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
-  DragonAnalysisPublishPayload, SupportedLanguages,
+  DragonAnalysisPublishPayload,
+  SupportedLanguages,
+  AnalysisLookupAnalyses,
 } from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
+import {EditableDocumentKey} from '../../../base/model/editable';
+import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../base/model/seq';
+import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {PostGetResult} from '../base/controller/get';
-import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
 import {PostGetSuccessResponseParam} from '../base/response/post/get';
@@ -185,38 +190,52 @@ export class AnalysisController extends PostController {
 
     return await AnalysisController.editPost(
       DragonAnalysis.getCollection(mongoClient),
-      payload.seqId, payload.lang,
-      analysis.toObject(), payload.editNote,
+      payload.seqId,
+      payload.lang,
+      analysis.toObject(),
+      payload.editNote,
     );
   }
 
   /**
-   * Get a list of analyses.
+   * Get the lookup info of all analyses.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
    * @param {SupportedLanguages} lang language code of the analyses
-   * @param {number} start starting index of the analysis lists
-   * @param {number} limit maximum count of the posts to return
    * @return {Promise<PostListResult>} post listing result
    */
-  static async getAnalysisList(
-    mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
-  ): Promise<PostListResult<AnalysisListEntry>> {
-    return AnalysisController.listPosts(
-      UnitAnalysis.getCollection(mongoClient),
-      lang,
+  static async getAnalysisLookup(
+    mongoClient: MongoClient, lang: SupportedLanguages,
+  ): Promise<AnalysisLookupAnalyses> {
+    const query = {[MultiLingualDocumentKey.language]: lang};
+
+    const posts = await UnitAnalysis.getCollection(mongoClient).find(
+      query,
       {
-        start,
-        limit,
         projection: {
           [UnitAnalysisDocumentKey.type]: 1,
+          [SequentialDocumentKey.sequenceId]: 1,
+          [UnitAnalysisDocumentKey.unitId]: 1,
+          [MultiLingualDocumentKey.language]: 1,
+          [EditableDocumentKey.dateModifiedEpoch]: 1,
+          [EditableDocumentKey.datePublishedEpoch]: 1,
+          [ViewCountableDocumentKey.viewCount]: 1,
         },
-        transformFunc: (post) => ({
-          ...defaultTransformFunction(post),
-          type: post[UnitAnalysisDocumentKey.type],
-        }),
+      })
+      .toArray();
+
+    return Object.fromEntries(posts.map((post) => [
+      post[UnitAnalysisDocumentKey.unitId],
+      {
+        type: post[UnitAnalysisDocumentKey.type],
+        seqId: post[SequentialDocumentKey.sequenceId],
+        unitId: post[UnitAnalysisDocumentKey.unitId],
+        lang: post[MultiLingualDocumentKey.language],
+        viewCount: post[ViewCountableDocumentKey.viewCount],
+        modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
+        publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],
       },
-    );
+    ]));
   }
 
   /**
@@ -254,16 +273,20 @@ export class AnalysisController extends PostController {
    * (a new ID will be automatically generated and used when publishing an analysis without specifying it)
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string} langCode analysis language code to be checked
+   * @param {SupportedLanguages} lang analysis language to be checked
    * @param {number} seqId analysis sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  static async isAnalysisIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
+  static async isAnalysisIdAvailable(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    seqId?: number,
+  ): Promise<boolean> {
     return super.isIdAvailable(
       AnalysisController,
       mongoClient,
       UnitAnalysis.getCollection(mongoClient),
-      langCode,
+      lang,
       seqId,
     );
   }

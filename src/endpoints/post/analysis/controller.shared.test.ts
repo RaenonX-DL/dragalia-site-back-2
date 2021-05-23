@@ -17,7 +17,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   const payloadChara: CharaAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: SupportedLanguages.CHT,
-    title: 'name',
+    unitId: 7,
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',
@@ -38,7 +38,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   const payloadDragon: DragonAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: SupportedLanguages.CHT,
-    title: 'dragon',
+    unitId: 10,
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -86,32 +86,22 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
   });
 
-  it('returns correctly-sorted analyses', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+  it('returns analyses meta correctly', async () => {
+    for (let unitId = 0; unitId < 7; unitId++) {
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId});
     }
 
-    const postListResult = await AnalysisController.getAnalysisList(
-      app.mongoClient, SupportedLanguages.CHT, 0, 25,
+    const postListResult = await AnalysisController.getAnalysisLookup(
+      app.mongoClient, SupportedLanguages.CHT,
     );
 
-    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
-  });
-
-  it('returns correctly-sorted analyses if paginated', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-    }
-
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
-
-    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
+    expect(Object.values(postListResult).map((post) => post.seqId)).toStrictEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 
   it('returns without any error if no analysis available', async () => {
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
+    const postListResult = await AnalysisController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
 
-    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
+    expect(Object.keys(postListResult).length).toBe(0);
   });
 
   it('returns without any error if no analysis matching the language', async () => {
@@ -119,72 +109,45 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
       await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
     }
 
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.EN, 0, 25);
+    const postListResult = await AnalysisController.getAnalysisLookup(app.mongoClient, SupportedLanguages.EN);
 
-    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
-  });
-
-  it('returns correct post count', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-    }
-
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
-
-    expect(postListResult.totalAvailableCount).toBe(7);
+    expect(Object.keys(postListResult).length).toBe(0);
   });
 
   it('returns analysis type for each post entry', async () => {
     for (let i = 0; i < 3; i++) {
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, unitId: i + 10});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: i + 20});
     }
 
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
+    const postListResult = await AnalysisController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
 
-    expect(postListResult.totalAvailableCount).toBe(6);
-    expect(postListResult.postListEntries.map((entry) => entry.type)).toStrictEqual([
-      UnitType.CHARACTER, UnitType.DRAGON,
-      UnitType.CHARACTER, UnitType.DRAGON,
-      UnitType.CHARACTER, UnitType.DRAGON,
-    ]);
+    expect(Object.values(postListResult).filter((entry) => entry.type === UnitType.CHARACTER).length).toBe(3);
+    expect(Object.values(postListResult).filter((entry) => entry.type === UnitType.DRAGON).length).toBe(3);
   });
 
   it('returns modification and publish timestamps for each post entry', async () => {
     for (let i = 0; i < 3; i++) {
-      await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+      await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, unitId: i + 10});
+      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: i + 20});
     }
 
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
+    const postListResult = await AnalysisController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
 
-    expect(postListResult.totalAvailableCount).toBe(6);
     expect(
-      postListResult
-        .postListEntries
+      Object.values(postListResult)
         .map((entry) => entry.modifiedEpoch)
         .filter((timestamp) => !!timestamp)
         .length,
     )
       .toBe(6);
     expect(
-      postListResult
-        .postListEntries
+      Object.values(postListResult)
         .map((entry) => entry.publishedEpoch)
         .filter((timestamp) => !!timestamp)
         .length,
     )
       .toBe(6);
-  });
-
-  it('returns correct post count after pagination', async () => {
-    for (let i = 0; i < 30; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-    }
-
-    const postListResult = await AnalysisController.getAnalysisList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
-
-    expect(postListResult.totalAvailableCount).toBe(30);
   });
 
   it('increases the view count after getting it', async () => {

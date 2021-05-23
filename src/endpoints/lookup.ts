@@ -12,7 +12,7 @@ import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
-import {handleListAnalysis} from './post/analysis/shared/list/handler';
+import {handleLookupAnalysis} from './post/analysis/shared/lookup/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
@@ -41,8 +41,6 @@ type EndpointHandlers<P extends RequestPayloadBase = never> = {
   POST?: HandlerFunction<P>,
 }
 
-// FIXME: Remove show ads after front dev deployed to main
-
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
@@ -57,7 +55,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
-  [ApiEndPoints.POST_ANALYSIS_LIST]: {GET: handleListAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_LOOKUP]: {GET: handleLookupAnalysis},
   [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},

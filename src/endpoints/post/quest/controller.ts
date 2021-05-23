@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {PostListEntry, QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
+import {PostUnit, QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
 import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {PostGetResult} from '../base/controller/get';
@@ -105,21 +105,27 @@ export class QuestPostController extends PostController {
    * Get a list of quest posts.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {string} langCode language code of the posts
+   * @param {SupportedLanguages} lang language code of the posts
    * @param {number} start starting index of the post lists
    * @param {number} limit maximum count of the posts to return
    * @return {Promise<PostListResult>} post listing result
    */
   static async getPostList(
-    mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
-  ): Promise<PostListResult<PostListEntry>> {
+    mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
+  ): Promise<PostListResult<PostUnit>> {
     return QuestPostController.listPosts(
       QuestPost.getCollection(mongoClient),
-      langCode,
+      lang,
       {
         start,
         limit,
-        transformFunc: defaultTransformFunction,
+        projection: {
+          [PostDocumentKey.title]: 1,
+        },
+        transformFunc: (post) => ({
+          ...defaultTransformFunction(post),
+          title: post[PostDocumentKey.title],
+        }),
       },
     );
   }
@@ -158,16 +164,20 @@ export class QuestPostController extends PostController {
    * (a new ID will be automatically generated and used when publishing a post without specifying it)
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string} langCode post language code to be checked
+   * @param {SupportedLanguages} lang post language to be checked
    * @param {number} seqId post sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
+  static async isPostIdAvailable(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    seqId?: number,
+  ): Promise<boolean> {
     return super.isIdAvailable(
       QuestPostController,
       mongoClient,
       QuestPost.getCollection(mongoClient),
-      langCode,
+      lang,
       seqId,
     );
   }

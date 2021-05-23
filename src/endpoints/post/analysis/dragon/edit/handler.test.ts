@@ -25,7 +25,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     googleUid: uidAdmin,
     seqId: 1,
     lang: SupportedLanguages.CHT,
-    title: 'dragon',
+    unitId: 7,
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -40,7 +40,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
 
   const payloadEdit: DragonAnalysisEditPayload = {
     ...payloadPost,
-    title: 'edit',
+    unitId: 997,
     videos: 'videoNew',
     suitableCharacters: '',
     editNote: 'mod',

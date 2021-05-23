@@ -1,5 +1,3 @@
-
-
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -12,9 +10,9 @@ import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../../base/model/seq';
 import {GoogleUserController} from '../../../../userControl/controller';
-import {PostDocumentKey} from '../../../base/model';
 import {CharaAnalysis, CharaAnalysisDocument} from '../../model/chara';
 import {CharaAnalysisSkill} from '../../model/charaSkill';
+import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 
 
 describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara analysis publishing endpoint`, () => {
@@ -27,7 +25,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     googleUid: uidNormal,
     seqId: 1,
     lang: SupportedLanguages.CHT,
-    title: 'chara1',
+    unitId: 7,
     summary: 'sum1',
     summon: 'smn1',
     passives: 'passive1',
@@ -62,7 +60,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   const payload5: CharaAnalysisPublishPayload = {
     ...payload1,
-    title: 'chara6',
+    unitId: 99,
   };
 
   const payload6: CharaAnalysisPublishPayload = {
@@ -158,7 +156,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);
@@ -186,13 +184,13 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: payload2.lang,
-      [PostDocumentKey.title]: payload2.title,
+      [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
     });
     const doc = CharaAnalysis.fromDocument(docQuery as CharaAnalysisDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
     expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
     expect(doc.summonResult).toEqual(payload2.summon);
     expect(doc.passives).toEqual(payload2.passives);

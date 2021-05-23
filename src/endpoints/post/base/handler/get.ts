@@ -4,24 +4,24 @@ import {PostGetPayload, ApiResponseCode, SupportedLanguages} from '../../../../a
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
 import {PostGetResult} from '../controller/get';
-import {PostDocumentBase} from '../model';
+import {PostDocumentBaseNoTitle} from '../model';
 import {ApiFailedResponse} from '../response/failed';
 import {PostGetSuccessResponse} from '../response/post/get';
 
-type FunctionGetPost<T extends PostDocumentBase, G extends PostGetResult<T>> = (
+type FunctionGetPost<T extends PostDocumentBaseNoTitle, G extends PostGetResult<T>> = (
   mongoClient: MongoClient,
   seqId: number,
   lang: SupportedLanguages,
   incCount: boolean,
 ) => Promise<G | null>;
 
-type FunctionConstructResponse<T extends PostDocumentBase,
+type FunctionConstructResponse<T extends PostDocumentBaseNoTitle,
   R extends PostGetSuccessResponse,
   G extends PostGetResult<T>> = (
   userData: GoogleUser | null, getResult: G,
 ) => R;
 
-export const handleGetPost = async <T extends PostDocumentBase,
+export const handleGetPost = async <T extends PostDocumentBaseNoTitle,
   R extends PostGetSuccessResponse,
   G extends PostGetResult<T>>(
   mongoClient: MongoClient,

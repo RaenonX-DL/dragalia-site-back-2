@@ -1,4 +1,4 @@
-import {PostListEntry, PostListResponse, ApiResponseCode} from '../../../../../api-def/api';
+import {PostListResponse, ApiResponseCode, PostUnit} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 
@@ -9,7 +9,7 @@ export abstract class PostListSuccessResponse extends ApiResponse {
   isAdmin: boolean;
   showAds: boolean;
 
-  posts: Array<PostListEntry>
+  posts: Array<PostUnit>
 
   startIdx: number;
   postCount: number;
@@ -19,13 +19,13 @@ export abstract class PostListSuccessResponse extends ApiResponse {
    *
    * @param {boolean} isAdmin if the user requested this is an admin
    * @param {boolean} showAds if the user requested this should have ads shown
-   * @param {Array<PostListEntry>} posts post entries to be listed
+   * @param {Array<PostUnit>} posts post entries to be listed
    * @param {number} startIdx starting index of the posts
    * @param {number} postCount total count of the posts available
    * @protected
    */
   constructor(
-    isAdmin: boolean, showAds: boolean, posts: Array<PostListEntry>, startIdx: number, postCount: number,
+    isAdmin: boolean, showAds: boolean, posts: Array<PostUnit>, startIdx: number, postCount: number,
   ) {
     super(ApiResponseCode.SUCCESS);
 

@@ -15,7 +15,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   const payloadChara: CharaAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: SupportedLanguages.CHT,
-    title: 'name',
+    unitId: 7,
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',
@@ -81,7 +81,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('name');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('summary');
     expect(post.summonResult).toBe('summon');
     expect(post.passives).toBe('passive');
@@ -124,7 +124,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.EN);
-    expect(post.title).toBe('name');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('summary');
     expect(post.summonResult).toBe('summon');
     expect(post.passives).toBe('passive');
@@ -147,7 +147,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   it('blocks publishing duplicated analysis and the content is unchanged', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1});
     await expect(
-      AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, title: 'duplicated'}),
+      AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, seqId: 1, unitId: 99}),
     )
       .rejects
       .toThrow(MongoError);
@@ -161,7 +161,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     // Checks if the content is unchanged
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('name');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('summary');
     expect(post.summonResult).toBe('summon');
     expect(post.passives).toBe('passive');

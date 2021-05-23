@@ -1,11 +1,16 @@
 import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
-  AnalysisListPayload, CharaAnalysisEditPayload, CharaAnalysisPayload,
-  CharaAnalysisPublishPayload, DragonAnalysisEditPayload, DragonAnalysisPayload,
+  AnalysisLookupPayload,
+  CharaAnalysisEditPayload,
+  CharaAnalysisPayload,
+  CharaAnalysisPublishPayload,
+  DragonAnalysisEditPayload,
+  DragonAnalysisPayload,
   DragonAnalysisPublishPayload,
 } from '../../../api-def/api';
-import {processPostListPayload, processSinglePostPayload} from './shared';
+import {processPayloadBase} from '../base';
+import {processSinglePostPayload} from './shared';
 
 
 const processCharaAnalysisPayload = <T extends CharaAnalysisPayload>(payload: T): T => {
@@ -52,8 +57,8 @@ export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload:
   return payload;
 };
 
-export const processListAnalysisPayload = <T extends AnalysisListPayload>(payload: T): T => {
-  payload = processPostListPayload(payload);
+export const processLookupAnalysisPayload = <T extends AnalysisLookupPayload>(payload: T): T => {
+  payload = processPayloadBase(payload);
 
   return payload;
 };

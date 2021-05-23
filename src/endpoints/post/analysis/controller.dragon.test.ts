@@ -14,7 +14,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   const payloadDragon: DragonAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: SupportedLanguages.CHT,
-    title: 'dragon',
+    unitId: 7,
     summary: 'dragonSummary',
     summon: 'dragonSummon',
     normalAttacks: 'dragonNormal',
@@ -75,7 +75,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('dragon');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
@@ -111,7 +111,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.EN);
-    expect(post.title).toBe('dragon');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
@@ -137,7 +137,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('dragon');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.normalAttacks).toBe('dragonNormal');
@@ -170,7 +170,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
 
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.EN);
-    expect(post.title).toBe('dragon');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.normalAttacks).toBe('dragonNormal');
@@ -186,7 +186,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   it('blocks publishing duplicated analysis and the content is unchanged', async () => {
     await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1});
     await expect(
-      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, title: 'duplicated'}),
+      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, videos: 'v'}),
     )
       .rejects
       .toThrow(MongoError);
@@ -200,42 +200,12 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     // Checks if the content is unchanged
     expect(post.seqId).toBe(1);
     expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('dragon');
+    expect(post.unitId).toBe(7);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
     expect(post.normalAttacks).toBe('dragonNormal');
     expect(post.ultimate).toBe('dragonUltimate');
-    expect(post.notes).toBe('dragonNotes');
-    expect(post.suitableCharacters).toBe('dragonChara');
-    expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('dragonKeyword');
-  });
-
-  it('blocks publishing duplicated analysis and the content is unchanged', async () => {
-    await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1});
-    await expect(
-      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, title: 'duplicated'}),
-    )
-      .rejects
-      .toThrow(MongoError);
-
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
-      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
-    });
-    const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-
-    // Checks if the content is unchanged
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.title).toBe('dragon');
-    expect(post.summary).toBe('dragonSummary');
-    expect(post.summonResult).toBe('dragonSummon');
-    expect(post.normalAttacks).toBe('dragonNormal');
-    expect(post.ultimate).toBe('dragonUltimate');
-    expect(post.passives).toBe('dragonPassive');
     expect(post.notes).toBe('dragonNotes');
     expect(post.suitableCharacters).toBe('dragonChara');
     expect(post.videos).toBe('dragonVideo');

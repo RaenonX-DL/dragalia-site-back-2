@@ -3,14 +3,14 @@ import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/e
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
-import {PostDocumentBase, PostDocumentKey} from '../model';
+import {PostDocumentBaseNoTitle, PostDocumentKey} from '../model';
 import {PostGetSuccessResponseParam} from '../response/post/get';
 
 /**
  * Base object of a post getting result.
  * @template T, R
  */
-export abstract class PostGetResult<T extends PostDocumentBase> {
+export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
   post: T;
   isAltLang: boolean;
   otherLangs: Array<SupportedLanguages>;
@@ -54,6 +54,6 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
   }
 }
 
-export type ResultConstructFunction<D extends PostDocumentBase,
+export type ResultConstructFunction<D extends PostDocumentBaseNoTitle,
   T extends PostGetResult<D>> =
   (post: D, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) => T;

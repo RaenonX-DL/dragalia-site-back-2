@@ -49,7 +49,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     googleUid: uidAdmin,
     seqId: 1,
     lang: SupportedLanguages.EN,
-    title: 'chara1',
+    unitId: 7,
     summary: 'sum1',
     summon: 'smn1',
     passives: 'passive1',
@@ -170,7 +170,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
-      title: payloadAnalysis.title,
+      unitId: payloadAnalysis.unitId,
       description: payloadAnalysis.summary,
     });
   });
