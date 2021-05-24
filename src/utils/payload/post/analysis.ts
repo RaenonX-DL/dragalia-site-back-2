@@ -2,6 +2,7 @@ import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
   AnalysisLookupPayload,
+  AnalysisMeta,
   CharaAnalysisEditPayload,
   CharaAnalysisPayload,
   CharaAnalysisPublishPayload,
@@ -9,9 +10,20 @@ import {
   DragonAnalysisPayload,
   DragonAnalysisPublishPayload,
 } from '../../../api-def/api';
+import {PayloadKeyDeprecatedError} from '../../../endpoints/error';
 import {processPayloadBase} from '../base';
-import {processSinglePostPayload} from './shared';
 
+
+const processAnalysisMetaPayload = <T extends AnalysisMeta>(payload: T): T => {
+  payload.unitId = +payload.unitId;
+
+  // Prevent manual SEQ ID insertion
+  if ('seqId' in payload) {
+    throw new PayloadKeyDeprecatedError('seqId');
+  }
+
+  return payload;
+};
 
 const processCharaAnalysisPayload = <T extends CharaAnalysisPayload>(payload: T): T => {
   if (!payload.skills) {
@@ -24,13 +36,13 @@ const processCharaAnalysisPayload = <T extends CharaAnalysisPayload>(payload: T)
     payload.skills = [payload.skills];
   }
 
-  payload = processSinglePostPayload(payload);
+  payload = processAnalysisMetaPayload(payload);
 
   return payload;
 };
 
 const processDragonAnalysisPayload = <T extends DragonAnalysisPayload>(payload: T): T => {
-  payload = processSinglePostPayload(payload);
+  payload = processAnalysisMetaPayload(payload);
 
   return payload;
 };
@@ -52,7 +64,7 @@ export const processDragonAnalysisPublishPayload = (
 };
 
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
-  payload = processSinglePostPayload(payload);
+  payload = processAnalysisMetaPayload(payload);
 
   return payload;
 };
@@ -76,9 +88,7 @@ export const processEditDragonAnalysisPayload = <T extends DragonAnalysisEditPay
 };
 
 export const processAnalysisIdCheckPayload = <T extends AnalysisIdCheckPayload>(payload: T): T => {
-  payload = processSinglePostPayload(payload);
-
-  payload.unitId = +payload.unitId;
+  payload = processAnalysisMetaPayload(payload);
 
   return payload;
 };

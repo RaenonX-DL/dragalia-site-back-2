@@ -1,6 +1,6 @@
-import {PostEditSuccessResponse} from '../../../base/response/post/edit';
+import {AnalysisEditResponse} from '../../base/response/edit';
 
 /**
  * API response class for editing a dragon analysis.
  */
-export class DragonAnalysisEditResponse extends PostEditSuccessResponse {}
+export class DragonAnalysisEditResponse extends AnalysisEditResponse {}

@@ -1,12 +1,10 @@
-import {PostPublishSuccessResponse} from '../../../base/response/post/publish';
+import {AnalysisPublishResponse} from '../../base/response/publish';
 
 
 /**
- * API response class for the successful dragon analysis publishing.
- *
- * The response contains the post sequential ID.
+ * API response class for the successful dragon analysis publish.
  */
-export class DragonAnalysisPublishedResponse extends PostPublishSuccessResponse {
+export class DragonAnalysisPublishedResponse extends AnalysisPublishResponse {
   /**
    * @inheritDoc
    */

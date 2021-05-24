@@ -1,8 +1,14 @@
 import {MongoClient} from 'mongodb';
 
-import {PostUnit, QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
-import {NextSeqIdArgs} from '../../../base/controller/seq';
+import {
+  SequencedPostMeta,
+  QuestPostEditPayload,
+  QuestPostPublishPayload,
+  SupportedLanguages,
+} from '../../../api-def/api';
+import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
+import {SequentialDocumentKey} from '../../../base/model/seq';
 import {PostGetResult} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
@@ -33,6 +39,7 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
     return {
       ...super.toResponseReady(),
       title: this.post[PostDocumentKey.title],
+      seqId: this.post[SequentialDocumentKey.sequenceId],
       general: this.post[QuestPostDocumentKey.generalInfo],
       video: this.post[QuestPostDocumentKey.video],
       positional: this.post[QuestPostDocumentKey.positionInfo].map((doc) => ({
@@ -49,7 +56,7 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
 /**
  * Quest post controller.
  */
-export class QuestPostController extends PostController {
+export class QuestPostController extends PostController implements SequencedController {
   /**
    * Same as {@link QuestPost.getNextSeqId}.
    *
@@ -59,7 +66,7 @@ export class QuestPostController extends PostController {
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
-    mongoClient: MongoClient, {seqId, increase}: NextSeqIdArgs,
+    mongoClient: MongoClient, {seqId, increase}: NextSeqIdOptions,
   ): Promise<number> {
     return await QuestPost.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
   }
@@ -72,12 +79,10 @@ export class QuestPostController extends PostController {
    * @return {Promise<number>} post sequential ID
    */
   static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
-    payload = {
+    const post: QuestPost = QuestPost.fromPayload({
       ...payload,
       seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
-    };
-
-    const post: QuestPost = QuestPost.fromPayload(payload);
+    });
 
     await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
 
@@ -96,8 +101,12 @@ export class QuestPostController extends PostController {
 
     return await QuestPostController.editPost(
       QuestPost.getCollection(mongoClient),
-      editPayload.seqId, editPayload.lang,
-      post.toObject(), editPayload.editNote,
+      {
+        [SequentialDocumentKey.sequenceId]: editPayload.seqId,
+      },
+      editPayload.lang,
+      post.toObject(),
+      editPayload.editNote,
     );
   }
 
@@ -112,7 +121,7 @@ export class QuestPostController extends PostController {
    */
   static async getPostList(
     mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
-  ): Promise<PostListResult<PostUnit>> {
+  ): Promise<PostListResult<SequencedPostMeta>> {
     return QuestPostController.listPosts(
       QuestPost.getCollection(mongoClient),
       lang,
@@ -152,7 +161,7 @@ export class QuestPostController extends PostController {
     mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
   ): Promise<QuestPostGetResult | null> {
     return super.getPost<QuestPostDocument, QuestPostGetResult>(
-      QuestPost.getCollection(mongoClient), seqId, lang, incCount,
+      QuestPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
       ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
     );
   }
@@ -173,10 +182,10 @@ export class QuestPostController extends PostController {
     lang: SupportedLanguages,
     seqId?: number,
   ): Promise<boolean> {
-    return super.isIdAvailable(
-      QuestPostController,
+    return SequencedController.isIdAvailable(
       mongoClient,
       QuestPost.getCollection(mongoClient),
+      QuestPostController.getNextSeqId,
       lang,
       seqId,
     );

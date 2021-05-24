@@ -1,11 +1,9 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {AnalysisPayload, UnitType} from '../../../../api-def/api';
+import {AnalysisBody, UnitType} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from '../../base/model';
-import {SeqIdMissingError} from '../../error';
 import {dbInfo} from './config';
 
 export enum UnitAnalysisDocumentKey {
@@ -86,25 +84,12 @@ export abstract class UnitAnalysis extends PostNoTitle {
    * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    */
-  static fromPayloadToConstructParams<T extends AnalysisPayload>(
+  static fromPayloadToConstructParams<T extends AnalysisBody>(
     payload: T, type: UnitType,
   ): UnitAnalysisConstructParams {
-    if (!payload.seqId) {
-      throw new SeqIdMissingError();
-    }
-
     return {
+      ...payload,
       type,
-      unitId: payload.unitId,
-      seqId: payload.seqId,
-      language: payload.lang,
-      summary: payload.summary,
-      summonResult: payload.summon,
-      passives: payload.passives,
-      normalAttacks: payload.normalAttacks,
-      videos: payload.videos,
-      story: payload.story,
-      keywords: payload.keywords,
     };
   }
 
@@ -121,8 +106,7 @@ export abstract class UnitAnalysis extends PostNoTitle {
   ): UnitAnalysisConstructParams {
     return {
       type,
-      seqId: obj[SequentialDocumentKey.sequenceId],
-      language: obj[MultiLingualDocumentKey.language],
+      lang: obj[MultiLingualDocumentKey.language],
       unitId: obj[UnitAnalysisDocumentKey.unitId],
       summary: obj[UnitAnalysisDocumentKey.summary],
       summonResult: obj[UnitAnalysisDocumentKey.summonResult],

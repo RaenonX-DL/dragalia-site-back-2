@@ -60,9 +60,14 @@ export class Application {
   }
 }
 
-export const createApp = async (mongoUri?: string): Promise<Application> => {
+type AppCreateOptions = {
+  mongoUri?: string,
+  logger?: boolean,
+}
+
+export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Promise<Application> => {
   const app: FastifyInstance = fastify({
-    logger: true,
+    logger: logger || false,
     connectionTimeout: 20000, // 20 seconds
     trustProxy: isAppOnHeroku(),
   });

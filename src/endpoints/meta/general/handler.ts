@@ -1,5 +1,5 @@
 import {PageMetaPayload} from '../../../api-def/api';
-import {processPageMetaPayload} from '../../../utils/payload/meta';
+import {processPageMetaPayload} from '../../../utils/payload';
 import {HandlerParams} from '../../lookup';
 import {GoogleUserController} from '../../userControl/controller';
 import {generateResponse} from '../utils';

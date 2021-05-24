@@ -22,7 +22,6 @@ export const handleListQuestPost = async ({
     ) => {
       return new QuestPostListResponse(
         userData ? userData.isAdmin : false,
-        userData ? !userData.isAdsFree : true,
         postUnits,
         startIdx,
         availableCount,

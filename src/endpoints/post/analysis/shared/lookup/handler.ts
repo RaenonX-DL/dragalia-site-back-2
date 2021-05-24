@@ -1,5 +1,5 @@
 import {AnalysisLookupPayload} from '../../../../../api-def/api';
-import {processLookupAnalysisPayload} from '../../../../../utils/payload/post/analysis';
+import {processLookupAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {GoogleUserController} from '../../../../userControl/controller';
 import {AnalysisController} from '../../controller';

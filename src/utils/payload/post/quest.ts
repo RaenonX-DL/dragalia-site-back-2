@@ -2,13 +2,14 @@ import {
   QuestPostEditPayload,
   QuestPostGetPayload,
   QuestPostListPayload,
-  QuestPostPayload,
+  QuestPostBody,
   QuestPostPublishPayload,
-  QuestPostIdCheckPayload,
+  QuestPostIdCheckPayload, OptionalSequencedPayload,
 } from '../../../api-def/api';
-import {processPostListPayload, processSinglePostPayload} from './shared';
+import {processSequencedPayload} from '../base';
+import {processPostListPayload} from './list';
 
-const processQuestPayload = <T extends QuestPostPayload>(payload: T): T => {
+const processQuestPayload = <T extends Omit<QuestPostBody, 'seqId'> & OptionalSequencedPayload>(payload: T): T => {
   if (!payload.positional) {
     // If `positional` field does not exist in the payload, and an empty array to it.
     payload.positional = [];
@@ -19,7 +20,7 @@ const processQuestPayload = <T extends QuestPostPayload>(payload: T): T => {
     payload.positional = [payload.positional];
   }
 
-  payload = processSinglePostPayload(payload);
+  payload = processSequencedPayload(payload);
 
   return payload;
 };
@@ -37,13 +38,13 @@ export const processQuestEditPayload = (payload: QuestPostEditPayload): QuestPos
 };
 
 export const processQuestGetPayload = <T extends QuestPostGetPayload>(payload: T): T => {
-  payload = processSinglePostPayload(payload);
+  payload = processSequencedPayload(payload);
 
   return payload;
 };
 
 export const processQuestIdCheckPayload = <T extends QuestPostIdCheckPayload>(payload: T): T => {
-  payload = processSinglePostPayload(payload);
+  payload = processSequencedPayload(payload);
 
   return payload;
 };

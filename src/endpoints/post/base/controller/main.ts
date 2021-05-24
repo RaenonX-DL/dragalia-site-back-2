@@ -1,7 +1,6 @@
-import {Collection, Document, MongoClient} from 'mongodb';
+import {Collection, Document} from 'mongodb';
 
-import {PostUnitNoTitle, SupportedLanguages} from '../../../../api-def/api';
-import {SequencedController} from '../../../../base/controller/seq';
+import {PostMeta, SupportedLanguages} from '../../../../api-def/api';
 import {UpdateResult} from '../../../../base/enum/updateResult';
 import {DocumentBaseKey} from '../../../../base/model/base';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
@@ -16,7 +15,7 @@ import {PostControllerListOptions, PostListResult} from './list';
 /**
  * Sequence controller.
  */
-export abstract class PostController extends SequencedController {
+export abstract class PostController {
   /**
    * Get a list of posts.
    *
@@ -26,7 +25,7 @@ export abstract class PostController extends SequencedController {
    * @return {Promise<PostListResult>} promise containing a list of post documents
    * @protected
    */
-  protected static async listPosts<E extends PostUnitNoTitle, D extends Document>(
+  protected static async listPosts<E extends PostMeta, D extends Document>(
     collection: Collection, lang: SupportedLanguages, options: PostControllerListOptions<E, D>,
   ): Promise<PostListResult<E>> {
     const {
@@ -70,7 +69,7 @@ export abstract class PostController extends SequencedController {
    * If this is called for post displaying purpose, incCount should be true. Otherwise, it should be false.
    *
    * @param {Collection} collection mongo collection for getting the post
-   * @param {number} seqId sequence ID of the post
+   * @param {Document} findCondition base condition to use for finding the desired post
    * @param {SupportedLanguages} lang language of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @param {ResultConstructFunction} resultConstructFunction function to construct the result object
@@ -79,7 +78,10 @@ export abstract class PostController extends SequencedController {
    */
   protected static async getPost<D extends PostDocumentBaseNoTitle,
     T extends PostGetResult<D>>(
-    collection: Collection, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
+    collection: Collection,
+    findCondition: Document,
+    lang = SupportedLanguages.CHT,
+    incCount = true,
     resultConstructFunction: ResultConstructFunction<D, T>,
   ): Promise<T | null> {
     // Get the code of other available languages
@@ -90,7 +92,7 @@ export abstract class PostController extends SequencedController {
       // If incCount is false, it implies that the post fetch is for other purpose, such as post editing.
 
       const langsAvailable = await collection.find(
-        {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: {$ne: lang}},
+        {...findCondition, [MultiLingualDocumentKey.language]: {$ne: lang}},
         {projection: {[MultiLingualDocumentKey.language]: 1}},
       ).toArray();
       otherLangs = langsAvailable.map((doc) => doc[MultiLingualDocumentKey.language]);
@@ -100,13 +102,13 @@ export abstract class PostController extends SequencedController {
 
     let isAltLang = false;
     let post = await collection.findOneAndUpdate(
-      {[SequentialDocumentKey.sequenceId]: seqId, [MultiLingualDocumentKey.language]: lang},
+      {...findCondition, [MultiLingualDocumentKey.language]: lang},
       postDataUpdate,
     );
 
     if (!post.value) {
       post = await collection.findOneAndUpdate(
-        {[SequentialDocumentKey.sequenceId]: seqId},
+        findCondition,
         postDataUpdate,
       );
       if (!post.value) { // Post with the given ID not found
@@ -138,7 +140,7 @@ export abstract class PostController extends SequencedController {
    * - View count
    *
    * @param {Collection} collection mongo collection containing the post to be edited
-   * @param {number | undefined} seqId sequential ID of the post to be edited
+   * @param {Document} filterCondition condition to select the post to edit
    * @param {string | undefined} lang language of the post to be edited
    * @param {D} update document used to replace the old post
    * @param {string} editNote post edit note
@@ -148,14 +150,14 @@ export abstract class PostController extends SequencedController {
    */
   protected static async editPost<D extends PostDocumentBaseNoTitle>(
     collection: Collection,
-    seqId: number | undefined,
+    filterCondition: Document,
     lang: string | undefined,
     update: D,
     editNote: string,
     additionalFilter?: D,
   ): Promise<UpdateResult> {
-    // Returns `NOT_FOUND` if `seqId` or `lang` is falsy - which post to update?
-    if (!seqId || !lang) {
+    // Returns `NOT_FOUND` if `lang` is falsy - which post to update?
+    if (!lang) {
       return 'NOT_FOUND';
     }
 
@@ -163,7 +165,7 @@ export abstract class PostController extends SequencedController {
 
     // Create filter (condition for updating the post)
     let filter = {
-      [SequentialDocumentKey.sequenceId]: seqId,
+      ...filterCondition,
       [MultiLingualDocumentKey.language]: lang,
     };
     if (additionalFilter) {
@@ -176,12 +178,12 @@ export abstract class PostController extends SequencedController {
     // Remove the document keys to **not** to update
     const omitKeys = [
       DocumentBaseKey.id, // Document ID should be immutable
-      SequentialDocumentKey.sequenceId, // Sequential ID should be immutable
       MultiLingualDocumentKey.language, // Language should be immutable
       EditableDocumentKey.editNotes, // Edit notes should not be updated
       EditableDocumentKey.dateModifiedEpoch, // Last modified timestamp should be updated later
       EditableDocumentKey.datePublishedEpoch, // Publish timestamp should not be updated
       ViewCountableDocumentKey.viewCount, // Post view count should not be changed
+      ...Object.keys(filterCondition), // Any keys that is used as the post selecting criteria
     ];
     omitKeys.forEach((key) => delete update[key]);
 
@@ -209,40 +211,5 @@ export abstract class PostController extends SequencedController {
     });
 
     return 'UPDATED';
-  }
-
-  /**
-   * Check if the given ID is available.
-   *
-   * If ``seqId`` is omitted, returns ``true``.
-   * (a new ID will be automatically generated and used when publishing a post without specifying it)
-   *
-   * @param {T} controller class of the controller
-   * @param {MongoClient} mongoClient mongo client
-   * @param {Collection} collection mongo collection to check
-   * @param {SupportedLanguages} lang post language to be checked
-   * @param {number} seqId post sequential ID to be checked
-   * @return {Promise<boolean>} promise containing the availability of the ID
-   */
-  protected static async isIdAvailable<T extends typeof PostController>(
-    controller: T, mongoClient: MongoClient, collection: Collection, lang: SupportedLanguages, seqId?: number,
-  ): Promise<boolean> {
-    if (!seqId) {
-      return true;
-    }
-    if (seqId < 0) {
-      return false;
-    }
-
-    const nextSeqId = await controller.getNextSeqId(mongoClient, {increase: false});
-    if (seqId > nextSeqId + 1) {
-      return false;
-    }
-
-    return !await collection
-      .findOne({
-        [SequentialDocumentKey.sequenceId]: seqId,
-        [MultiLingualDocumentKey.language]: lang,
-      });
   }
 }

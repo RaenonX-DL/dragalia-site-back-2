@@ -1,5 +1,5 @@
 import {ApiResponseCode, UserIsAdminPayload} from '../../../api-def/api';
-import {processUserIsAdminPayload} from '../../../utils/payload/userControl';
+import {processUserIsAdminPayload} from '../../../utils/payload';
 import {HandlerParams} from '../../lookup';
 import {GoogleUserController} from '../controller';
 import {UserNotExistsError} from '../error';

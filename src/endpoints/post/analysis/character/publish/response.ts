@@ -1,16 +1,14 @@
-import {PostPublishSuccessResponse} from '../../../base/response/post/publish';
+import {AnalysisPublishResponse} from '../../base/response/publish';
 
 
 /**
- * API response class for the successful character analysis publishing.
- *
- * The response contains the post sequential ID.
+ * API response class for a successful character analysis publish.
  */
-export class CharaAnalysisPublishedResponse extends PostPublishSuccessResponse {
+export class CharaAnalysisPublishedResponse extends AnalysisPublishResponse {
   /**
    * @inheritDoc
    */
-  constructor(seqId: number) {
-    super(seqId);
+  constructor(unitId: number) {
+    super(unitId);
   }
 }

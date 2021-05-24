@@ -1,22 +1,23 @@
 import {MongoError} from 'mongodb';
 
-import {SupportedLanguages, DragonAnalysisPublishPayload} from '../../../api-def/api';
+import {DragonAnalysisPublishPayload, SupportedLanguages, UnitType} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../base/model/seq';
-import {SeqIdSkippingError} from '../error';
 import {AnalysisController} from './controller';
+import {UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {DragonAnalysis, DragonAnalysisDocument} from './model/dragon';
+import {UnitAnalysisDocumentKey} from './model/unitAnalysis';
 
 describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   let app: Application;
 
   const payloadDragon: DragonAnalysisPublishPayload = {
     googleUid: 'uid',
+    type: UnitType.DRAGON,
     lang: SupportedLanguages.CHT,
-    unitId: 7,
+    unitId: 20040405,
     summary: 'dragonSummary',
-    summon: 'dragonSummon',
+    summonResult: 'dragonSummon',
     normalAttacks: 'dragonNormal',
     ultimate: 'dragonUltimate',
     passives: 'dragonPassive',
@@ -39,43 +40,19 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     await app.close();
   });
 
-  it('increments `nextSeqId` per request', async () => {
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {})).toBe(1);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {})).toBe(2);
-  });
-
-  it('increments `nextSeqId` after request', async () => {
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {})).toBe(1);
-  });
-
-  it('does not increment `nextSeqId` if specified', async () => {
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
-  });
-
-  test('if `nextSeqId` is working as expected', async () => {
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: false})).toBe(0);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: true})).toBe(1);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: false})).toBe(1);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: true})).toBe(2);
-    expect(await AnalysisController.getNextSeqId(app.mongoClient, {increase: true})).toBe(3);
-  });
-
   it('publishes', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+    const unitId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
 
-    expect(newSeqId).toBe(1);
+    expect(unitId).toBe(payloadDragon.unitId);
 
     const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
+      [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.unitId).toBe(7);
+    expect(post.lang).toBe(SupportedLanguages.CHT);
+    expect(post.unitId).toBe(payloadDragon.unitId);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
@@ -92,90 +69,30 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   });
 
   it('publishes in an used ID but different language', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+    const unitId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
 
-    expect(newSeqId).toBe(1);
+    expect(unitId).toBe(payloadDragon.unitId);
 
     await AnalysisController.publishDragonAnalysis(app.mongoClient, {
       ...payloadDragon,
-      seqId: newSeqId,
+      unitId: payloadDragon.unitId,
       lang: SupportedLanguages.EN,
       keywords: 'kw-en',
     });
 
     const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
+      [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.EN);
-    expect(post.unitId).toBe(7);
+    expect(post.lang).toBe(SupportedLanguages.EN);
+    expect(post.unitId).toBe(20040405);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
     expect(post.normalAttacks).toBe('dragonNormal');
     expect(post.ultimate).toBe('dragonUltimate');
-    expect(post.notes).toBe('dragonNotes');
-    expect(post.suitableCharacters).toBe('dragonChara');
-    expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('kw-en');
-  });
-
-  it('publishes successfully', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
-
-    expect(newSeqId).toBe(1);
-
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
-      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
-    });
-    const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.unitId).toBe(7);
-    expect(post.summary).toBe('dragonSummary');
-    expect(post.summonResult).toBe('dragonSummon');
-    expect(post.normalAttacks).toBe('dragonNormal');
-    expect(post.ultimate).toBe('dragonUltimate');
-    expect(post.passives).toBe('dragonPassive');
-    expect(post.notes).toBe('dragonNotes');
-    expect(post.suitableCharacters).toBe('dragonChara');
-    expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('dragonKeyword');
-  });
-
-  it('publishes in an used ID but different language', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
-
-    expect(newSeqId).toBe(1);
-
-    await AnalysisController.publishDragonAnalysis(app.mongoClient, {
-      ...payloadDragon,
-      seqId: newSeqId,
-      lang: SupportedLanguages.EN,
-      keywords: 'kw-en',
-    });
-
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
-      [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
-    });
-    const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.EN);
-    expect(post.unitId).toBe(7);
-    expect(post.summary).toBe('dragonSummary');
-    expect(post.summonResult).toBe('dragonSummon');
-    expect(post.normalAttacks).toBe('dragonNormal');
-    expect(post.ultimate).toBe('dragonUltimate');
-    expect(post.passives).toBe('dragonPassive');
     expect(post.notes).toBe('dragonNotes');
     expect(post.suitableCharacters).toBe('dragonChara');
     expect(post.videos).toBe('dragonVideo');
@@ -184,23 +101,22 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   });
 
   it('blocks publishing duplicated analysis and the content is unchanged', async () => {
-    await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1});
+    await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
     await expect(
-      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 1, videos: 'v'}),
+      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, videos: 'v'}),
     )
       .rejects
       .toThrow(MongoError);
 
     const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
+      [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
 
     // Checks if the content is unchanged
-    expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
-    expect(post.unitId).toBe(7);
+    expect(post.lang).toBe(SupportedLanguages.CHT);
+    expect(post.unitId).toBe(payloadDragon.unitId);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
     expect(post.passives).toBe('dragonPassive');
@@ -213,12 +129,20 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     expect(post.keywords).toBe('dragonKeyword');
   });
 
-  it('blocks publishing ID-skipping analysis', async () => {
+  it('blocks publishing analysis with non-existent unit ID', async () => {
     await expect(
-      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, seqId: 7}),
+      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, unitId: 7}),
     )
       .rejects
-      .toThrow(SeqIdSkippingError);
+      .toThrow(UnitNotExistsError);
+  });
+
+  it('blocks publishing with wrong unit type', async () => {
+    await expect(
+      AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, unitId: 10950101}),
+    )
+      .rejects
+      .toThrow(UnitTypeMismatchError);
   });
 
   it('assigns different ID for different language', async () => {
@@ -230,62 +154,62 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(1);
+    expect(post.unitId).toBe(payloadDragon.unitId);
     postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(2);
+    expect(post.unitId).toBe(payloadDragon.unitId);
     postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(3);
+    expect(post.unitId).toBe(payloadDragon.unitId);
   });
 
-  it('publishes posts in different languages and IDs', async () => {
+  it('publishes analyses in different languages and IDs', async () => {
     await AnalysisController.publishDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, seqId: 1, lang: SupportedLanguages.EN},
+      {...payloadDragon, unitId: 20030102, lang: SupportedLanguages.EN},
     );
     await AnalysisController.publishDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, seqId: 2, lang: SupportedLanguages.CHT},
+      {...payloadDragon, unitId: 20030202, lang: SupportedLanguages.CHT},
     );
     await AnalysisController.publishDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, seqId: 3, lang: SupportedLanguages.JP},
+      {...payloadDragon, unitId: 20030402, lang: SupportedLanguages.JP},
     );
 
     let postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(1);
+    expect(post.unitId).toBe(20030102);
     postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(2);
+    expect(post.unitId).toBe(20030202);
     postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
-    expect(post.seqId).toBe(3);
+    expect(post.unitId).toBe(20030402);
   });
 
   it('edits', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+    await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
 
     const editResult = await AnalysisController.editDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, videos: 'videoEdit', seqId: newSeqId, editNote: 'mod'},
+      {...payloadDragon, videos: 'videoEdit', editNote: 'mod'},
     );
 
     expect(editResult).toBe('UPDATED');
 
     const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: newSeqId,
+      [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     const post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
@@ -296,11 +220,11 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   });
 
   it('edits even if no changes were made', async () => {
-    const newSeqId = await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
+    await AnalysisController.publishDragonAnalysis(app.mongoClient, payloadDragon);
 
     const editResult = await AnalysisController.editDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, seqId: newSeqId, editNote: 'mod'},
+      {...payloadDragon, editNote: 'mod'},
     );
 
     expect(editResult).toBe('NO_CHANGE');
@@ -311,7 +235,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
 
     const editResult = await AnalysisController.editDragonAnalysis(
       app.mongoClient,
-      {...payloadDragon, videos: 'videoEdit', seqId: 8, editNote: 'mod'},
+      {...payloadDragon, videos: 'videoEdit', unitId: 20030102, editNote: 'mod'},
     );
 
     expect(editResult).toBe('NOT_FOUND');

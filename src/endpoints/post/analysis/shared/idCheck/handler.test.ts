@@ -1,11 +1,11 @@
-
-
 import {
+  AnalysisIdCheckPayload,
+  AnalysisIdCheckResponse,
   ApiEndPoints,
   ApiResponseCode,
-  AnalysisIdCheckPayload,
   CharaAnalysisPublishPayload,
-  AnalysisIdCheckResponse, SupportedLanguages,
+  SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -21,11 +21,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   const payload: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
     summary: 'summary',
-    summon: 'summon',
+    summonResult: 'summon',
     passives: 'passive',
     normalAttacks: 'normal',
     forceStrikes: 'force',

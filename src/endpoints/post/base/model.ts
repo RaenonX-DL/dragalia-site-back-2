@@ -1,2 +1,2 @@
-export * from './model/post';
+export * from './model/sequencedPost';
 export * from './model/postNoTitle';

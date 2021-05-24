@@ -172,49 +172,4 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.postCount).toBe(7);
     expect(json.isAdmin).toBe(true);
   });
-
-  it('returns that the non-ads-free user should have ads shown', async () => {
-    await QuestPostController.publishPost(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
-      .query({...payloadList1, googleUid: uidNormal});
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.postCount).toBe(1);
-    expect(json.showAds).toBe(true);
-  });
-
-  it('returns that the ads-free user should not have ads shown', async () => {
-    await QuestPostController.publishPost(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
-      .query({...payloadList1, googleUid: uidAdsFree});
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.postCount).toBe(1);
-    expect(json.showAds).toBe(false);
-  });
-
-  it('returns that unregistered user should have ads shown', async () => {
-    await QuestPostController.publishPost(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
-      .query(payloadList1);
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.postCount).toBe(1);
-    expect(json.showAds).toBe(true);
-  });
 });

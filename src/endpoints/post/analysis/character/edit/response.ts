@@ -1,6 +1,6 @@
-import {PostEditSuccessResponse} from '../../../base/response/post/edit';
+import {AnalysisEditResponse} from '../../base/response/edit';
 
 /**
  * API response class for editing a character analysis.
  */
-export class CharaAnalysisEditResponse extends PostEditSuccessResponse {}
+export class CharaAnalysisEditResponse extends AnalysisEditResponse {}

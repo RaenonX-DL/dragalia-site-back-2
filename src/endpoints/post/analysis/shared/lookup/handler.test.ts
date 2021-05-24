@@ -5,6 +5,7 @@ import {
   ApiResponseCode,
   CharaAnalysisPublishPayload,
   SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -18,10 +19,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
 
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
     summary: 'summary',
-    summon: 'summon',
+    summonResult: 'summon',
     passives: 'passive',
     normalAttacks: 'normal',
     forceStrikes: 'force',
@@ -67,7 +69,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([1, 2]);
+    expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([10950101, 10950201]);
   });
 
   it('returns an empty result if no post exists yet', async () => {
@@ -77,7 +79,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([]);
+    expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
   });
 
   it('returns an empty result if no post matches the querying parameters', async () => {
@@ -92,7 +94,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([]);
+    expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
   });
 
   it('returns nothing if a non-existent language code is used', async () => {
@@ -107,7 +109,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([]);
+    expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
   });
 
   it('returns that the user is an admin', async () => {

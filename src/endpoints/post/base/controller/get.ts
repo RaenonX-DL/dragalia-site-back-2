@@ -4,7 +4,7 @@ import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
 import {PostDocumentBaseNoTitle, PostDocumentKey} from '../model';
-import {PostGetSuccessResponseParam} from '../response/post/get';
+import {PostGetResponseParam} from '../response/post/get';
 
 /**
  * Base object of a post getting result.
@@ -34,7 +34,7 @@ export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
    *
    * @return {R} object ready to be used by the response object
    */
-  protected toResponseReady(): PostGetSuccessResponseParam {
+  protected toResponseReady(): PostGetResponseParam {
     return {
       seqId: this.post[SequentialDocumentKey.sequenceId],
       lang: this.post[MultiLingualDocumentKey.language],

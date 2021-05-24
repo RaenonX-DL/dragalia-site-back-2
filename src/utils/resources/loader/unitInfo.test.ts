@@ -1,5 +1,6 @@
 import * as fetch from 'node-fetch';
 
+import {UnitType} from '../../../api-def/api/other/unit';
 import {CACHE_LIFE_SECS} from '../const';
 import {getUnitInfo, resetCache} from './unitInfo';
 
@@ -44,6 +45,11 @@ describe('Unit info loader', () => {
     expect(fetchFunc).toHaveBeenCalledTimes(4);
 
     jest.restoreAllMocks();
+  });
+
+  test('fetched data correctly recorded its type', async () => {
+    expect((await getUnitInfo(10950101))?.type).toBe(UnitType.CHARACTER);
+    expect((await getUnitInfo(20040405))?.type).toBe(UnitType.DRAGON);
   });
 
   it('does not re-fetch within the cache life period', async () => {

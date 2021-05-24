@@ -1,25 +1,25 @@
 import {MongoClient} from 'mongodb';
 
-import {PostListPayload, PostUnit, SupportedLanguages} from '../../../../api-def/api';
+import {SequencedPostListPayload, SequencedPostMeta, SupportedLanguages} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
 import {PostListResult} from '../controller/list';
-import {PostListSuccessResponse} from '../response/post/list';
+import {PostListResponse} from '../response/post/list';
 
-type FunctionGetPostList<E extends PostUnit> = (
+type FunctionGetPostList<E extends SequencedPostMeta> = (
   mongoClient: MongoClient,
   lang: SupportedLanguages,
   start: number,
   limit: number,
 ) => Promise<PostListResult<E>>;
 
-type FunctionConstructResponse<R extends PostListSuccessResponse> = (
-  userData: GoogleUser | null, postUnits: Array<PostUnit>, startIdx: number, availableCount: number,
+type FunctionConstructResponse<R extends PostListResponse> = (
+  userData: GoogleUser | null, postUnits: Array<SequencedPostMeta>, startIdx: number, availableCount: number,
 ) => R;
 
-export const handleListPost = async <P extends PostListPayload,
-  R extends PostListSuccessResponse,
-  E extends PostUnit>(
+export const handleListPost = async <P extends SequencedPostListPayload,
+  R extends PostListResponse,
+  E extends SequencedPostMeta>(
   mongoClient: MongoClient,
   payload: P,
   fnGetPostList: FunctionGetPostList<E>,

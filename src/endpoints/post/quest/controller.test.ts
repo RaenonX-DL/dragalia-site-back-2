@@ -105,7 +105,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
 
     expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
+    expect(post.lang).toBe(SupportedLanguages.CHT);
     expect(post.title).toBe('post');
     expect(post.generalInfo).toBe('general');
     expect(post.video).toBe('video');
@@ -133,7 +133,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     const post = QuestPost.fromDocument(postDoc as unknown as QuestPostDocument);
 
     expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.EN);
+    expect(post.lang).toBe(SupportedLanguages.EN);
     expect(post.title).toBe('post-en');
     expect(post.generalInfo).toBe('general-en');
     expect(post.video).toBe('video-en');
@@ -144,7 +144,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum-en');
   });
 
-  it('blocks duplicated post publishing and the content should not change', async () => {
+  it('blocks publishing duplicated post and the content should not change', async () => {
     await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1});
     await expect(
       QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, title: 'duplicated'}),
@@ -160,7 +160,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
 
     // Checks if the content is unchanged
     expect(post.seqId).toBe(1);
-    expect(post.language).toBe(SupportedLanguages.CHT);
+    expect(post.lang).toBe(SupportedLanguages.CHT);
     expect(post.title).toBe('post');
     expect(post.generalInfo).toBe('general');
     expect(post.video).toBe('video');
@@ -171,7 +171,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     expect(post.addendum).toBe('addendum');
   });
 
-  it('blocks ID-skipping post publishing', async () => {
+  it('blocks publishing ID-skipping post', async () => {
     await expect(
       QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 7}),
     )

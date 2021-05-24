@@ -1,5 +1,5 @@
 import {ApiResponseCode, PostPageMetaPayload} from '../../../api-def/api';
-import {processPostMetaPayload} from '../../../utils/payload/meta';
+import {processPostMetaPayload} from '../../../utils/payload';
 import {HandlerParams} from '../../lookup';
 import {ApiFailedResponse} from '../../post/base/response/failed';
 import {GoogleUserController} from '../../userControl/controller';

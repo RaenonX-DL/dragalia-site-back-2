@@ -1,22 +1,18 @@
-import {Collection, MongoClient, ObjectId} from 'mongodb';
+import {ObjectId} from 'mongodb';
 
 import {SupportedLanguages} from '../../../../api-def/api';
-import {CollectionInfo} from '../../../../base/controller/info';
+import {Document, DocumentConstructParams} from '../../../../base/model/base';
 import {EditableDocumentBase, EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocument, SequentialDocumentBase, SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentBase, ViewCountableDocumentKey} from '../../../../base/model/viewCount';
-import {IndexInitFunction} from '../../../../utils/mongodb';
 
 export type PostDocumentBaseNoTitle =
   MultiLingualDocumentBase
-  & SequentialDocumentBase
   & EditableDocumentBase
   & ViewCountableDocumentBase
 
-export type PostConstructParamsNoTitle = {
-  seqId: number,
-  language: SupportedLanguages,
+export type PostConstructParamsNoTitle = DocumentConstructParams & {
+  lang: SupportedLanguages,
   dateModifiedEpoch?: number,
   datePublishedEpoch?: number,
   id?: ObjectId,
@@ -27,8 +23,8 @@ export type PostConstructParamsNoTitle = {
 /**
  * Post data class without title.
  */
-export abstract class PostNoTitle extends SequentialDocument {
-  language: SupportedLanguages;
+export abstract class PostNoTitle extends Document {
+  lang: SupportedLanguages;
   dateModifiedEpoch: number;
   datePublishedEpoch: number;
   editNotes: Array<EditNote>;
@@ -44,7 +40,7 @@ export abstract class PostNoTitle extends SequentialDocument {
 
     const nowEpoch = new Date().valueOf();
 
-    this.language = params.language;
+    this.lang = params.lang;
     this.dateModifiedEpoch = params.dateModifiedEpoch || nowEpoch;
     this.datePublishedEpoch = params.dateModifiedEpoch || nowEpoch;
     this.editNotes = params.editNotes || [];
@@ -54,30 +50,10 @@ export abstract class PostNoTitle extends SequentialDocument {
   /**
    * @inheritDoc
    */
-  protected static getCollectionWithInfo(
-    mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunc?: IndexInitFunction,
-  ): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      if (indexInitFunc) {
-        indexInitFunc(collection);
-      }
-      collection.createIndex(
-        [
-          {[SequentialDocumentKey.sequenceId]: -1},
-          {[MultiLingualDocumentKey.language]: 1},
-        ],
-        {unique: true},
-      );
-    }));
-  }
-
-  /**
-   * @inheritDoc
-   */
   toObject(): PostDocumentBaseNoTitle {
     return {
       ...super.toObject(),
-      [MultiLingualDocumentKey.language]: this.language,
+      [MultiLingualDocumentKey.language]: this.lang,
       [EditableDocumentKey.editNotes]: this.editNotes.map((doc) => doc.toObject()),
       [EditableDocumentKey.dateModifiedEpoch]: this.dateModifiedEpoch,
       [EditableDocumentKey.datePublishedEpoch]: this.datePublishedEpoch,

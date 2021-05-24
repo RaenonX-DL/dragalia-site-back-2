@@ -5,7 +5,7 @@ import {HandlerParams} from '../../../lookup';
 import {handleGetPost} from '../../base/handler/get';
 import {ApiFailedResponse} from '../../base/response/failed';
 import {QuestPostController} from '../controller';
-import {QuestPostGetSuccessResponse} from './response';
+import {QuestPostGetResponse} from './response';
 
 export const handleGetQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostGetPayload>,
@@ -19,11 +19,12 @@ export const handleGetQuestPost = async (
   return handleGetPost(
     mongoClient,
     payload,
-    QuestPostController.getQuestPost,
+    (payload) => (
+      QuestPostController.getQuestPost(mongoClient, payload.seqId, payload.lang, true)
+    ),
     (userData, getResult) => {
-      return new QuestPostGetSuccessResponse(
+      return new QuestPostGetResponse(
         userData ? userData.isAdmin : false,
-        userData ? !userData.isAdsFree : true,
         getResult.toResponseReady(),
       );
     },

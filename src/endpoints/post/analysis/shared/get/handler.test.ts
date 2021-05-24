@@ -2,9 +2,11 @@ import {
   AnalysisGetPayload,
   ApiEndPoints,
   ApiResponseCode,
+  CharaAnalysisGetResponse,
   CharaAnalysisPublishPayload,
-  CharacterAnalysis,
-  FailedResponse, QuestPostGetSuccessResponse, SupportedLanguages,
+  FailedResponse,
+  SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -20,7 +22,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   const uidAdsFree = '789123456';
 
   const payloadGet: AnalysisGetPayload = {
-    seqId: 1,
+    unitId: 10950101,
     incCount: true,
     googleUid: uidNormal,
     lang: SupportedLanguages.CHT,
@@ -28,11 +30,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
 
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
-    unitId: 7,
+    unitId: 10950101,
     summary: 'summary',
-    summon: 'summon',
+    summonResult: 'summon',
     passives: 'passive',
     normalAttacks: 'normal',
     forceStrikes: 'force',
@@ -73,24 +75,23 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     await app.close();
   });
 
-  it('gets an analysis given language and the sequential ID', async () => {
+  it('gets an analysis given language and the unit ID', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(1);
     expect(json.lang).toBe(SupportedLanguages.CHT);
     // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
     expect(json.publishedEpoch).toEqual(expect.any(Number));
     expect(json.modifiedEpoch).toEqual(expect.any(Number));
   });
 
-  it('gets an analysis which has an alt version only given sequential ID', async () => {
+  it('gets an analysis which has an alt version only given unit ID', async () => {
     await AnalysisController.publishCharaAnalysis(
       app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN},
     );
@@ -98,26 +99,30 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadGet.unitId);
     expect(json.lang).toBe(SupportedLanguages.EN);
   });
 
   test('timestamp of edited post is using epoch', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-    await AnalysisController.editCharaAnalysis(app.mongoClient, {...payloadPost, videos: 'a', editNote: 'edit'});
+    await AnalysisController.editCharaAnalysis(app.mongoClient, {
+      ...payloadPost,
+      videos: 'a',
+      editNote: 'edit',
+    });
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostGetSuccessResponse = result.json() as QuestPostGetSuccessResponse;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadGet.unitId);
     expect(json.lang).toBe(SupportedLanguages.CHT);
     // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
     expect(json.publishedEpoch).toEqual(expect.any(Number));
@@ -127,49 +132,41 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
   });
 
   it('returns all available languages except the current one', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: SupportedLanguages.EN});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: SupportedLanguages.CHT});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, lang: SupportedLanguages.JP});
+
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
+    expect(result.statusCode).toBe(200);
+
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.isAltLang).toBe(false);
+    expect(json.unitId).toBe(payloadGet.unitId);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
+  });
+
+  it('returns nothing as available languages if unit ID is spread', async () => {
     await AnalysisController.publishCharaAnalysis(
-      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN},
+      app.mongoClient, {...payloadPost, lang: SupportedLanguages.CHT},
     );
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, {
-      ...payloadPost,
-      seqId: 1,
-      lang: SupportedLanguages.CHT,
-    });
     await AnalysisController.publishCharaAnalysis(
-      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.JP},
+      app.mongoClient, {...payloadPost, unitId: 10950102, lang: SupportedLanguages.EN},
+    );
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient, {...payloadPost, unitId: 10130201, lang: SupportedLanguages.JP},
     );
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(1);
-    expect(json.lang).toBe(SupportedLanguages.CHT);
-    expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
-  });
-
-  it('returns nothing as available languages if ID is spread', async () => {
-    await AnalysisController.publishCharaAnalysis(
-      app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN},
-    );
-    await AnalysisController.publishCharaAnalysis(
-      app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT},
-    );
-    await AnalysisController.publishCharaAnalysis(
-      app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP},
-    );
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query({...payloadGet, seqId: 2});
-    expect(result.statusCode).toBe(200);
-
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(2);
+    expect(json.unitId).toBe(payloadGet.unitId);
     expect(json.lang).toBe(SupportedLanguages.CHT);
     expect(json.otherLangs).toStrictEqual([]);
   });
@@ -183,31 +180,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure if sequence ID is not specified', async () => {
-    const {seqId, ...payload} = payloadGet;
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payload);
-    expect(result.statusCode).toBe(400);
-
-    const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
-    expect(json.success).toBe(false);
-  });
-
-  it('indicates that the user should have ads shown', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, googleUid: uidNormal},
-    );
-    expect(result.statusCode).toBe(200);
-
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.showAds).toBe(true);
-  });
-
   it('indicates that the user has the admin privilege', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
 
@@ -216,7 +188,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     );
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
@@ -230,10 +202,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     );
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.showAds).toBe(false);
   });
 
   it('increments view count per request', async () => {
@@ -246,7 +217,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.viewCount).toBe(4);
@@ -264,7 +235,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(200);
 
-    const json: CharacterAnalysis = result.json() as CharacterAnalysis;
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.lang).toBe(SupportedLanguages.EN);

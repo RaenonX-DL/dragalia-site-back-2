@@ -3,7 +3,8 @@ import {
   ApiResponseCode,
   BaseResponse,
   QuestPostPublishPayload,
-  QuestPostPublishSuccessResponse, SupportedLanguages,
+  QuestPostPublishResponse,
+  SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
@@ -19,7 +20,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   const uidAdmin = '78787878887';
 
   const questPayload1: QuestPostPublishPayload = {
-    seqId: 1,
     lang: SupportedLanguages.CHT,
     title: 'post1',
     general: 'gen1',
@@ -106,7 +106,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload2);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishResponse = result.json() as QuestPostPublishResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
@@ -116,7 +116,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload5);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishResponse = result.json() as QuestPostPublishResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
@@ -128,7 +128,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       .payload({...questPayload1, googleUid: uidAdmin});
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostPublishSuccessResponse = result.json() as QuestPostPublishSuccessResponse;
+    const json: QuestPostPublishResponse = result.json() as QuestPostPublishResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
@@ -177,7 +177,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     const doc = QuestPost.fromDocument(docQuery as QuestPostDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
-    expect(doc.language).toEqual(questPayload2.lang);
+    expect(doc.lang).toEqual(questPayload2.lang);
     expect(doc.title).toEqual(questPayload2.title);
     expect(doc.generalInfo).toEqual(questPayload2.general);
     expect(doc.video).toEqual(questPayload2.video);
@@ -205,7 +205,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     const doc = QuestPost.fromDocument(docQuery as QuestPostDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.seqId).toEqual(1);
-    expect(doc.language).toEqual(questPayload2.lang);
+    expect(doc.lang).toEqual(questPayload2.lang);
     expect(doc.title).toEqual(questPayload2.title);
     expect(doc.generalInfo).toEqual(questPayload2.general);
     expect(doc.video).toEqual(questPayload2.video);

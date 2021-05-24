@@ -1,22 +1,21 @@
-import {AnalysisResponse as AnalysisResponseApi} from '../../../../../api-def/api';
-import {PostGetSuccessResponse} from '../../../base/response/post/get';
-import {AnalysisResponse} from '../../base/response';
+import {AnalysisResponse as AnalysisGetResponseApi} from '../../../../../api-def/api';
+import {PostGetResponse} from '../../../base/response/post/get';
+import {AnalysisResponse} from '../../base/response/types';
 
 /**
  * API response class for getting an analysis.
  */
-export class AnalysisGetSuccessResponse extends PostGetSuccessResponse {
+export class AnalysisGetResponse extends PostGetResponse {
   body: AnalysisResponse;
 
   /**
-   * Construct a successful analysis get response.
+   * Construct an analysis get response.
    *
    * @param {boolean} isAdmin if the user is an admin
-   * @param {boolean} showAds if the user should have ads shown
    * @param {CharaAnalysisResponse} params params for constructing an analysis get response
    */
-  constructor(isAdmin: boolean, showAds: boolean, params: AnalysisResponse) {
-    super(isAdmin, showAds, params);
+  constructor(isAdmin: boolean, params: AnalysisResponse) {
+    super(isAdmin, params);
 
     this.body = params;
   }
@@ -24,7 +23,7 @@ export class AnalysisGetSuccessResponse extends PostGetSuccessResponse {
   /**
    * @inheritDoc
    */
-  toJson(): AnalysisResponseApi {
+  toJson(): AnalysisGetResponseApi {
     return {
       ...super.toJson(),
       ...this.body,

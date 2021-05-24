@@ -6,6 +6,7 @@ import {
   PostType,
   QuestPostPublishPayload,
   SupportedLanguages,
+  UnitType,
 } from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
@@ -47,11 +48,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   const payloadAnalysis: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.EN,
-    unitId: 7,
+    unitId: 10950101,
     summary: 'sum1',
-    summon: 'smn1',
+    summonResult: 'smn1',
     passives: 'passive1',
     forceStrikes: 'fs1',
     normalAttacks: 'na1',
@@ -158,32 +159,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.showAds).toBe(true);
   });
 
-  it('returns unit ID as analysis meta if unit info does not exist', async () => {
+  it('returns unit name as analysis meta if unit info exists', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
       lang: SupportedLanguages.EN,
       postId: 1,
-      postType: PostType.ANALYSIS,
-    });
-    expect(response.statusCode).toBe(200);
-
-    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.params).toStrictEqual({
-      title: payloadAnalysis.unitId.toString(),
-      description: payloadAnalysis.summary,
-    });
-  });
-
-  it('returns unit name as analysis meta if unit info exists', async () => {
-    await AnalysisController.publishCharaAnalysis(
-      app.mongoClient,
-      {...payloadAnalysis, seqId: 2, unitId: 10950101},
-    );
-    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
-      lang: SupportedLanguages.EN,
-      postId: 2,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);

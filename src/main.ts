@@ -9,7 +9,10 @@ import {initHttp} from './utils/init/http';
 dotenv.config();
 
 (async () => {
-  const app: FastifyInstance = (await createApp(process.env.MONGO_URL || '')).app;
+  const app: FastifyInstance = (await createApp({
+    mongoUri: process.env.MONGO_URL || '',
+    logger: true,
+  })).app;
 
   if (!isAppOnHeroku()) {
     await initHttp(app);

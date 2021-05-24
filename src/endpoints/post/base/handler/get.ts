@@ -1,38 +1,34 @@
 import {MongoClient} from 'mongodb';
 
-import {PostGetPayload, ApiResponseCode, SupportedLanguages} from '../../../../api-def/api';
+import {PostGetPayload, ApiResponseCode} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
 import {PostGetResult} from '../controller/get';
 import {PostDocumentBaseNoTitle} from '../model';
 import {ApiFailedResponse} from '../response/failed';
-import {PostGetSuccessResponse} from '../response/post/get';
+import {PostGetResponse} from '../response/post/get';
 
-type FunctionGetPost<T extends PostDocumentBaseNoTitle, G extends PostGetResult<T>> = (
-  mongoClient: MongoClient,
-  seqId: number,
-  lang: SupportedLanguages,
-  incCount: boolean,
-) => Promise<G | null>;
+type FunctionGetPost<T extends PostDocumentBaseNoTitle,
+  P extends PostGetPayload,
+  G extends PostGetResult<T>> = (payload: P) => Promise<G | null>;
 
 type FunctionConstructResponse<T extends PostDocumentBaseNoTitle,
-  R extends PostGetSuccessResponse,
+  R extends PostGetResponse,
   G extends PostGetResult<T>> = (
   userData: GoogleUser | null, getResult: G,
 ) => R;
 
 export const handleGetPost = async <T extends PostDocumentBaseNoTitle,
-  R extends PostGetSuccessResponse,
+  P extends PostGetPayload,
+  R extends PostGetResponse,
   G extends PostGetResult<T>>(
   mongoClient: MongoClient,
-  payload: PostGetPayload,
-  fnGetPost: FunctionGetPost<T, G>,
+  payload: P,
+  fnGetPost: FunctionGetPost<T, P, G>,
   fnConstructResponse: FunctionConstructResponse<T, R, G>,
 ): Promise<ApiFailedResponse | R> => {
   // Get a post
-  const getResult = await fnGetPost(
-    mongoClient, payload.seqId, payload.lang, true,
-  );
+  const getResult = await fnGetPost(payload);
   if (!getResult) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS, {httpCode: 404});
   }
