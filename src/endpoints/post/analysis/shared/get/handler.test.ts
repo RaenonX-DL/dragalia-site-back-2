@@ -171,7 +171,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.otherLangs).toStrictEqual([]);
   });
 
-  it('returns failure for non-existing analysis', async () => {
+  it('fails for non-existing analysis', async () => {
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(payloadGet);
     expect(result.statusCode).toBe(404);
 

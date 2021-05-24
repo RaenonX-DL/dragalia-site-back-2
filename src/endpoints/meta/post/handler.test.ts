@@ -99,7 +99,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: uidAdmin,
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -115,7 +115,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: uidAdsFree,
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -131,7 +131,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: uidNormal,
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -147,7 +147,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -163,7 +163,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -174,6 +174,36 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
       title: 'Gala Leonidas',
       description: payloadAnalysis.summary,
     });
+  });
+
+  it('returns not exists if unit info does not exist', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      googleUid: '',
+      lang: SupportedLanguages.EN,
+      postId: 888,
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
+    expect(json.success).toBeFalsy();
+  });
+
+  test('getting analysis does not increase view count', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      googleUid: '',
+      lang: SupportedLanguages.EN,
+      postId: payloadAnalysis.unitId,
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const post = await AnalysisController.getAnalysis(
+      app.mongoClient, payloadAnalysis.unitId, SupportedLanguages.EN, false,
+    );
+
+    expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
 
   it('returns correct quest meta', async () => {
@@ -193,20 +223,6 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     });
   });
 
-  test('getting analysis does not increase view count', async () => {
-    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
-      lang: SupportedLanguages.EN,
-      postId: 1,
-      postType: PostType.ANALYSIS,
-    });
-    expect(response.statusCode).toBe(200);
-
-    const post = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.EN, false);
-
-    expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
-  });
-
   test('getting quest does not increase view count', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
@@ -216,12 +232,12 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     });
     expect(response.statusCode).toBe(200);
 
-    const post = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.EN, false);
+    const post = await QuestPostController.getQuestPost(app.mongoClient, 1, SupportedLanguages.EN, false);
 
     expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
 
-  it('returns failure if the post does not exist', async () => {
+  it('fails if the post does not exist', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
       lang: SupportedLanguages.EN,

@@ -99,7 +99,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.seqId).toBe(1);
   });
 
-  it('returns failure if ID is not given', async () => {
+  it('fails if ID is not given', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, seqId: undefined});
@@ -110,7 +110,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post ID & language', async () => {
+  it('fails for non-existing post ID & language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, seqId: 8});
@@ -121,7 +121,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post language', async () => {
+  it('fails for non-existing post language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, lang: SupportedLanguages.JP});
@@ -132,7 +132,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure when permission insufficient', async () => {
+  it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, googleUid: uidNormal});

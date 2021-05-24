@@ -93,7 +93,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     expect(json.unitId).toBe(payloadEdit.unitId);
   });
 
-  it('returns failure if ID is not given', async () => {
+  it('fails if ID is not given', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
       .payload({...payloadEdit, unitId: undefined});
@@ -104,7 +104,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post ID & language', async () => {
+  it('fails for non-existing post ID & language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
       .payload({...payloadEdit, unitId: 20040102});
@@ -115,7 +115,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     expect(json.success).toBe(false);
   });
 
-  it('returns failure when permission insufficient', async () => {
+  it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
       .payload({...payloadEdit, googleUid: uidNormal});

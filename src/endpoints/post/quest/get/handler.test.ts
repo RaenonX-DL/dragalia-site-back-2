@@ -159,7 +159,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.otherLangs).toStrictEqual([]);
   });
 
-  it('returns failure for non-existing post', async () => {
+  it('fails for non-existing post', async () => {
     const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     expect(result.statusCode).toBe(404);
 
@@ -168,7 +168,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.success).toBe(false);
   });
 
-  it('returns failure if sequence ID is not specified', async () => {
+  it('fails if sequence ID is not specified', async () => {
     const {seqId, ...payload} = payloadGet;
 
     const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payload);
