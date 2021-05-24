@@ -5,7 +5,6 @@ import {UpdateResult} from '../../../../base/enum/updateResult';
 import {DocumentBaseKey} from '../../../../base/model/base';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
 import {PostDocumentBaseNoTitle} from '../model';
 import {PostGetResult, ResultConstructFunction} from './get';
@@ -42,7 +41,6 @@ export abstract class PostController {
       {
         projection: {
           ...projection,
-          [SequentialDocumentKey.sequenceId]: 1,
           [MultiLingualDocumentKey.language]: 1,
           [EditableDocumentKey.dateModifiedEpoch]: 1,
           [EditableDocumentKey.datePublishedEpoch]: 1,

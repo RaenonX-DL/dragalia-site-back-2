@@ -129,10 +129,12 @@ export class QuestPostController extends PostController implements SequencedCont
         start,
         limit,
         projection: {
+          [SequentialDocumentKey.sequenceId]: 1,
           [PostDocumentKey.title]: 1,
         },
         transformFunc: (post) => ({
           ...defaultTransformFunction(post),
+          seqId: post[SequentialDocumentKey.sequenceId],
           title: post[PostDocumentKey.title],
         }),
       },

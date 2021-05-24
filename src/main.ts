@@ -1,12 +1,12 @@
 import * as dotenv from 'dotenv';
 import {FastifyInstance} from 'fastify';
 
+dotenv.config();
+
 import {createApp} from './app';
 import {isAppOnHeroku} from './utils/init/heroku';
 import {initHerokuNginx} from './utils/init/herokuNginx';
 import {initHttp} from './utils/init/http';
-
-dotenv.config();
 
 (async () => {
   const app: FastifyInstance = (await createApp({

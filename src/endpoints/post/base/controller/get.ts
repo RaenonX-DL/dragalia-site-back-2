@@ -1,9 +1,8 @@
 import {SupportedLanguages} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
-import {PostDocumentBaseNoTitle, PostDocumentKey} from '../model';
+import {PostDocumentBaseNoTitle} from '../model';
 import {PostGetResponseParam} from '../response/post/get';
 
 /**
@@ -36,9 +35,7 @@ export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
    */
   protected toResponseReady(): PostGetResponseParam {
     return {
-      seqId: this.post[SequentialDocumentKey.sequenceId],
       lang: this.post[MultiLingualDocumentKey.language],
-      title: this.post[PostDocumentKey.title],
       isAltLang: this.isAltLang,
       otherLangs: this.otherLangs,
       viewCount: this.post[ViewCountableDocumentKey.viewCount],
