@@ -158,7 +158,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.showAds).toBe(true);
   });
 
-  it('returns correct analysis meta', async () => {
+  it('returns unit ID as analysis meta if unit info does not exist', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       googleUid: '',
       lang: SupportedLanguages.EN,
@@ -170,7 +170,28 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
-      unitId: payloadAnalysis.unitId,
+      title: payloadAnalysis.unitId.toString(),
+      description: payloadAnalysis.summary,
+    });
+  });
+
+  it('returns unit name as analysis meta if unit info exists', async () => {
+    await AnalysisController.publishCharaAnalysis(
+      app.mongoClient,
+      {...payloadAnalysis, seqId: 2, unitId: 10950101},
+    );
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      googleUid: '',
+      lang: SupportedLanguages.EN,
+      postId: 2,
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      title: 'Gala Leonidas',
       description: payloadAnalysis.summary,
     });
   });
