@@ -139,7 +139,15 @@ export abstract class UnitAnalysis extends PostNoTitle {
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+      collection.createIndex(
+        [
+          {[UnitAnalysisDocumentKey.unitId]: 1},
+          {[MultiLingualDocumentKey.language]: 1},
+        ],
+        {unique: true},
+      );
+    }));
   }
 
   /**

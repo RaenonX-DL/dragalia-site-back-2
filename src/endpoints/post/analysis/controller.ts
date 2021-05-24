@@ -16,6 +16,7 @@ import {EditableDocumentKey} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {PostGetResult} from '../base/controller/get';
 import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
@@ -267,27 +268,28 @@ export class AnalysisController extends PostController {
   }
 
   /**
-   * Check if the given analysis ID is available.
+   * Check if the given unit ID has analysis available.
    *
-   * If ``seqId`` is omitted, returns ``true``.
-   * (a new ID will be automatically generated and used when publishing an analysis without specifying it)
+   * This also check if the unit ID exists IRL.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {SupportedLanguages} lang analysis language to be checked
-   * @param {number} seqId analysis sequential ID to be checked
+   * @param {number} unitId unit ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
   static async isAnalysisIdAvailable(
     mongoClient: MongoClient,
     lang: SupportedLanguages,
-    seqId?: number,
+    unitId: number,
   ): Promise<boolean> {
-    return super.isIdAvailable(
-      AnalysisController,
-      mongoClient,
-      UnitAnalysis.getCollection(mongoClient),
-      lang,
-      seqId,
-    );
+    if (!await getUnitInfo(unitId)) {
+      return false;
+    }
+
+    return !await UnitAnalysis.getCollection(mongoClient)
+      .findOne({
+        [UnitAnalysisDocumentKey.unitId]: unitId,
+        [MultiLingualDocumentKey.language]: lang,
+      });
   }
 }

@@ -19,7 +19,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
     lang: SupportedLanguages.CHT,
-    unitId: 7,
+    unitId: 10950101,
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',
@@ -58,9 +58,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
   });
 
   it('returns correctly', async () => {
-    for (let unitId = 0; unitId < 7; unitId++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId});
-    }
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_LOOKUP).query(payloadList1);
     expect(result.statusCode).toBe(200);
@@ -68,7 +67,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(Object.values(json.analyses).map((entry) => entry.seqId)).toStrictEqual([1, 2]);
   });
 
   it('returns an empty result if no post exists yet', async () => {
@@ -82,9 +81,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
   });
 
   it('returns an empty result if no post matches the querying parameters', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-    }
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_ANALYSIS_LOOKUP)
@@ -98,9 +96,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
   });
 
   it('returns nothing if a non-existent language code is used', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-    }
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_ANALYSIS_LOOKUP)
@@ -114,9 +111,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
   });
 
   it('returns that the user is an admin', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-    }
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_ANALYSIS_LOOKUP)

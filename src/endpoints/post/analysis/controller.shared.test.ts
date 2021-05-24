@@ -17,7 +17,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   const payloadChara: CharaAnalysisPublishPayload = {
     googleUid: 'uid',
     lang: SupportedLanguages.CHT,
-    unitId: 7,
+    unitId: 10950101,
     summary: 'summary',
     summon: 'summon',
     passives: 'passive',
@@ -105,9 +105,9 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   });
 
   it('returns without any error if no analysis matching the language', async () => {
-    for (let i = 0; i < 7; i++) {
-      await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-    }
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: 10950101});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: 10930401});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: 10950102});
 
     const postListResult = await AnalysisController.getAnalysisLookup(app.mongoClient, SupportedLanguages.EN);
 
@@ -283,78 +283,46 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
 
-  it('returns available for the next unused ID in the same language', async () => {
-    const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-
-    const availability = await AnalysisController.isAnalysisIdAvailable(
-      app.mongoClient,
-      payloadChara.lang,
-      newSeqId + 1,
-    );
-
-    expect(availability).toBe(true);
-  });
-
-  it('returns available if ID is not given', async () => {
+  it('returns available for unused unit ID', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, payloadChara.lang);
-
-    expect(availability).toBe(true);
-  });
-
-  it('returns available for an unused language in the same ID', async () => {
-    const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-
     const availability = await AnalysisController.isAnalysisIdAvailable(
       app.mongoClient,
-      SupportedLanguages.EN,
-      newSeqId,
+      payloadChara.lang,
+      10950102,
     );
 
     expect(availability).toBe(true);
   });
 
-  it('returns available for an unused language in the next unused ID', async () => {
-    const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+  it('returns available for an unused language in an used ID', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
     const availability = await AnalysisController.isAnalysisIdAvailable(
       app.mongoClient,
       SupportedLanguages.EN,
-      newSeqId + 1,
+      payloadChara.unitId,
     );
 
     expect(availability).toBe(true);
   });
 
-  it('returns unavailable for a skipping ID', async () => {
-    const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+  it('returns unavailable for an existing unit ID', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
     const availability = await AnalysisController.isAnalysisIdAvailable(
       app.mongoClient,
       payloadChara.lang,
-      newSeqId + 2,
+      payloadChara.unitId,
     );
 
     expect(availability).toBe(false);
   });
 
-  it('returns unavailable for an existing ID', async () => {
-    const newSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-
-    const availability = await AnalysisController.isAnalysisIdAvailable(
-      app.mongoClient,
-      payloadChara.lang,
-      newSeqId,
-    );
-
-    expect(availability).toBe(false);
-  });
-
-  it('returns unavailable if ID is negative', async () => {
+  it('returns unavailable if unit ID does not exist', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, payloadChara.lang, -8);
+    const availability = await AnalysisController.isAnalysisIdAvailable(app.mongoClient, payloadChara.lang, 7);
 
     expect(availability).toBe(false);
   });

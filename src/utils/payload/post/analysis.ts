@@ -78,5 +78,7 @@ export const processEditDragonAnalysisPayload = <T extends DragonAnalysisEditPay
 export const processAnalysisIdCheckPayload = <T extends AnalysisIdCheckPayload>(payload: T): T => {
   payload = processSinglePostPayload(payload);
 
+  payload.unitId = +payload.unitId;
+
   return payload;
 };

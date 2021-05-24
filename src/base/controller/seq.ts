@@ -6,7 +6,6 @@ export type NextSeqIdArgs = {
   increase?: boolean,
 }
 
-
 /**
  * Sequence controller.
  */
