@@ -1,7 +1,7 @@
 import {AnalysisIdCheckPayload} from '../../../../../api-def/api';
 import {processAnalysisIdCheckPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
-import {GoogleUserController} from '../../../../userControl/controller';
+import {handlePostIdCheck} from '../../../base/handler/idCheck/main';
 import {AnalysisController} from '../../controller';
 import {AnalysisIdCheckResponse} from './response';
 
@@ -10,14 +10,12 @@ export const handleAnalysisIdCheck = async (
 ): Promise<AnalysisIdCheckResponse> => {
   payload = processAnalysisIdCheckPayload(payload);
 
-  // Check the user privilege
-  const isAdmin = await GoogleUserController.isAdmin(mongoClient, payload.googleUid);
-  if (!isAdmin) {
-    return new AnalysisIdCheckResponse(false, false);
-  }
-
-  // Check post ID availability
-  const isAvailable = await AnalysisController.isAnalysisIdAvailable(mongoClient, payload.lang, payload.unitId);
-
-  return new AnalysisIdCheckResponse(isAdmin, isAvailable);
+  return handlePostIdCheck(
+    mongoClient,
+    payload,
+    (payload) => AnalysisController.isAnalysisIdAvailable(mongoClient, payload.lang, payload.unitId),
+    (isAdmin, isAvailable) => {
+      return new AnalysisIdCheckResponse(isAdmin, isAvailable);
+    },
+  );
 };
