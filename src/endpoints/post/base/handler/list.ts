@@ -1,12 +1,12 @@
 import {MongoClient} from 'mongodb';
 
-import {SequencedPostListPayload, SequencedPostMeta, SupportedLanguages} from '../../../../api-def/api';
+import {SequencedPostListPayload, SequencedPostInfo, SupportedLanguages} from '../../../../api-def/api';
 import {GoogleUserController} from '../../../userControl/controller';
 import {GoogleUser} from '../../../userControl/model';
 import {PostListResult} from '../controller/list';
 import {PostListResponse} from '../response/post/list';
 
-type FunctionGetPostList<E extends SequencedPostMeta> = (
+type FunctionGetPostList<E extends SequencedPostInfo> = (
   mongoClient: MongoClient,
   lang: SupportedLanguages,
   start: number,
@@ -14,12 +14,12 @@ type FunctionGetPostList<E extends SequencedPostMeta> = (
 ) => Promise<PostListResult<E>>;
 
 type FunctionConstructResponse<R extends PostListResponse> = (
-  userData: GoogleUser | null, postUnits: Array<SequencedPostMeta>, startIdx: number, availableCount: number,
+  userData: GoogleUser | null, postUnits: Array<SequencedPostInfo>, startIdx: number, availableCount: number,
 ) => R;
 
 export const handleListPost = async <P extends SequencedPostListPayload,
   R extends PostListResponse,
-  E extends SequencedPostMeta>(
+  E extends SequencedPostInfo>(
   mongoClient: MongoClient,
   payload: P,
   fnGetPostList: FunctionGetPostList<E>,

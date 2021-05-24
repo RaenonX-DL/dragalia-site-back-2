@@ -1,6 +1,6 @@
 import {Collection, Document} from 'mongodb';
 
-import {PostMeta, SupportedLanguages} from '../../../../api-def/api';
+import {PostInfo, SupportedLanguages} from '../../../../api-def/api';
 import {UpdateResult} from '../../../../base/enum/updateResult';
 import {DocumentBaseKey} from '../../../../base/model/base';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
@@ -24,7 +24,7 @@ export abstract class PostController {
    * @return {Promise<PostListResult>} promise containing a list of post documents
    * @protected
    */
-  protected static async listPosts<E extends PostMeta, D extends Document>(
+  protected static async listPosts<E extends PostInfo, D extends Document>(
     collection: Collection, lang: SupportedLanguages, options: PostControllerListOptions<E, D>,
   ): Promise<PostListResult<E>> {
     const {

@@ -1,7 +1,7 @@
 import {MongoClient} from 'mongodb';
 
 import {
-  SequencedPostMeta,
+  SequencedPostInfo,
   QuestPostEditPayload,
   QuestPostPublishPayload,
   SupportedLanguages,
@@ -121,7 +121,7 @@ export class QuestPostController extends PostController implements SequencedCont
    */
   static async getPostList(
     mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
-  ): Promise<PostListResult<SequencedPostMeta>> {
+  ): Promise<PostListResult<SequencedPostInfo>> {
     return QuestPostController.listPosts(
       QuestPost.getCollection(mongoClient),
       lang,

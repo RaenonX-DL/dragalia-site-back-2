@@ -1,4 +1,4 @@
-import {SequencedPostListResponse, ApiResponseCode, SequencedPostMeta} from '../../../../../api-def/api';
+import {SequencedPostListResponse, ApiResponseCode, SequencedPostInfo} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 
@@ -8,7 +8,7 @@ import {ApiResponse} from '../../../../../base/response';
 export abstract class PostListResponse extends ApiResponse {
   isAdmin: boolean;
 
-  posts: Array<SequencedPostMeta>
+  posts: Array<SequencedPostInfo>
 
   startIdx: number;
   postCount: number;
@@ -17,13 +17,13 @@ export abstract class PostListResponse extends ApiResponse {
    * Construct a successful post listing API response.
    *
    * @param {boolean} isAdmin if the user requested this is an admin
-   * @param {Array<SequencedPostMeta>} posts post entries to be listed
+   * @param {Array<SequencedPostInfo>} posts post entries to be listed
    * @param {number} startIdx starting index of the posts
    * @param {number} postCount total count of the posts available
    * @protected
    */
   constructor(
-    isAdmin: boolean, posts: Array<SequencedPostMeta>, startIdx: number, postCount: number,
+    isAdmin: boolean, posts: Array<SequencedPostInfo>, startIdx: number, postCount: number,
   ) {
     super(ApiResponseCode.SUCCESS);
 

@@ -1,16 +1,16 @@
 import {Document} from 'mongodb';
 
-import {PostMeta} from '../../../../api-def/api';
+import {PostInfo} from '../../../../api-def/api';
 import {EditableDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
 
-type PostEntryTransformFunction<E extends PostMeta> = (post: Document) => E;
+type PostEntryTransformFunction<E extends PostInfo> = (post: Document) => E;
 
 /**
  * Result object of getting a post list.
  */
-export class PostListResult<E extends PostMeta> {
+export class PostListResult<E extends PostInfo> {
   posts: Array<Document>;
   postListEntries: Array<E>;
   totalAvailableCount: number;
@@ -33,14 +33,14 @@ export class PostListResult<E extends PostMeta> {
   }
 }
 
-export type PostControllerListOptions<E extends PostMeta, D extends Document> = {
+export type PostControllerListOptions<E extends PostInfo, D extends Document> = {
   start?: number,
   limit?: number,
   projection?: D,
   transformFunc: PostEntryTransformFunction<E>,
 }
 
-export const defaultTransformFunction = (post: Document): PostMeta => ({
+export const defaultTransformFunction = (post: Document): PostInfo => ({
   lang: post[MultiLingualDocumentKey.language],
   viewCount: post[ViewCountableDocumentKey.viewCount],
   modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
