@@ -13,6 +13,7 @@ import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handle
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
 import {handleLookupAnalysis} from './post/analysis/shared/lookup/handler';
+import {handleLookupAnalysisLanding} from './post/analysis/shared/lookupLanding/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
@@ -56,6 +57,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_LOOKUP]: {GET: handleLookupAnalysis},
+  [ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING]: {GET: handleLookupAnalysisLanding},
   [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
