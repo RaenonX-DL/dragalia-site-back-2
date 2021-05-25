@@ -4,12 +4,13 @@ import {
   QuestPostListPayload,
   QuestPostBody,
   QuestPostPublishPayload,
-  QuestPostIdCheckPayload, OptionalSequencedPayload,
+  QuestPostIdCheckPayload,
+  OptionalSequenced,
 } from '../../../api-def/api';
 import {processSequencedPayload} from '../base';
 import {processPostListPayload} from './list';
 
-const processQuestPayload = <T extends Omit<QuestPostBody, 'seqId'> & OptionalSequencedPayload>(payload: T): T => {
+const processQuestPayload = <T extends Omit<QuestPostBody, 'seqId'> & OptionalSequenced>(payload: T): T => {
   if (!payload.positional) {
     // If `positional` field does not exist in the payload, and an empty array to it.
     payload.positional = [];
