@@ -1,4 +1,5 @@
 import {
+  CharaAnalysisGetResponse,
   CharaAnalysisPublishPayload,
   DragonAnalysisPublishPayload,
   SupportedLanguages,
@@ -8,7 +9,6 @@ import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
-import {CharaAnalysisResponse} from './base/response/types';
 import {AnalysisController} from './controller';
 import {CharaAnalysis} from './model/chara';
 import {UnitAnalysis, UnitAnalysisDocumentKey} from './model/unitAnalysis';
@@ -349,7 +349,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
 
     expect(result).not.toBeNull();
 
-    const response = result?.toResponseReady() as CharaAnalysisResponse;
+    const response = result?.toResponseReady() as CharaAnalysisGetResponse;
 
     expect(response.skills.length).toBeGreaterThan(0);
 

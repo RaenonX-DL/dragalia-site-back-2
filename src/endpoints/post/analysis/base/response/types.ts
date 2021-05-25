@@ -1,8 +1,7 @@
-import {CharaAnalysisContent, DragonAnalysisContent} from '../../../../../api-def/api/post/analysis/response';
-import {PostGetResponseParam} from '../../../base/response/post/get';
+import {
+  CharaAnalysisBody,
+  DragonAnalysisBody,
+  PostBodyBase,
+} from '../../../../../api-def/api';
 
-export type CharaAnalysisResponse = PostGetResponseParam & CharaAnalysisContent
-
-export type DragonAnalysisResponse = PostGetResponseParam & DragonAnalysisContent
-
-export type AnalysisResponse = CharaAnalysisResponse | DragonAnalysisResponse
+export type AnalysisBodyWithInfo = PostBodyBase & (CharaAnalysisBody | DragonAnalysisBody)

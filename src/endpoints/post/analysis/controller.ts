@@ -7,6 +7,7 @@ import {
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
   DragonAnalysisPublishPayload,
+  PostBodyBase,
   SupportedLanguages,
   UnitType,
 } from '../../../api-def/api';
@@ -18,8 +19,7 @@ import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {PostGetResult} from '../base/controller/get';
 import {PostController} from '../base/controller/main';
-import {PostGetResponseParam} from '../base/response/post/get';
-import {AnalysisResponse} from './base/response/types';
+import {AnalysisBodyWithInfo} from './base/response/types';
 import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {
   CharaAnalysis,
@@ -52,8 +52,8 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
   /**
    * @inheritDoc
    */
-  toResponseReady(): AnalysisResponse {
-    const base: PostGetResponseParam & AnalysisBody = {
+  toResponseReady(): AnalysisBodyWithInfo {
+    const base: PostBodyBase & AnalysisBody = {
       ...super.toResponseReady(),
       type: this.post[UnitAnalysisDocumentKey.type],
       unitId: this.post[UnitAnalysisDocumentKey.unitId],
