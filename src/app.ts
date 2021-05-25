@@ -1,6 +1,7 @@
 import fastify, {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
 import fastifyCors from 'fastify-cors';
 import fastifyHelmet from 'fastify-helmet';
+import {FastifyLoggerOptions} from 'fastify/types/logger';
 import {MongoClient, MongoClientOptions} from 'mongodb';
 import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
@@ -62,7 +63,7 @@ export class Application {
 
 type AppCreateOptions = {
   mongoUri?: string,
-  logger?: boolean,
+  logger?: boolean | FastifyLoggerOptions,
 }
 
 export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Promise<Application> => {
