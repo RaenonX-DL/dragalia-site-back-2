@@ -9,6 +9,7 @@ const config: Config.InitialOptions = {
   },
   // Test setup
   globalSetup: './test/setup.ts',
+  setupFilesAfterEnv: ['./test/setupAfterEnv.ts'],
   globalTeardown: './test/teardown.ts',
   // Coverage
   collectCoverage: true,

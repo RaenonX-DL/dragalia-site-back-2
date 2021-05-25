@@ -13,7 +13,7 @@ if (!allowedOriginsEnv) {
 
 const allowedOrigins = allowedOriginsEnv.split(',');
 
-console.log('Allowed Origins: ', allowedOrigins);
+console.info('Allowed Origins: ', allowedOrigins);
 
 // Setup CORS
 export const corsOptions: FastifyCorsOptions = {
