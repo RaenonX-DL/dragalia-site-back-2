@@ -1,3 +1,6 @@
+import * as fetch from 'node-fetch';
+
+import {charaData, dragonData} from '../../../../../../test/data/unitInfo.data';
 import {
   AnalysisLookupLandingPayload,
   AnalysisLookupLandingResponse,
@@ -7,6 +10,8 @@ import {
   SupportedLanguages,
   UnitType,
 } from '../../../../../api-def/api';
+import {toUnitInfoMap} from '../../../../../api-def/resources/utils/unitInfo';
+import * as utils from '../../../../../api-def/resources/utils/unitInfo';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
 import {AnalysisController} from '../../controller';
@@ -44,11 +49,17 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     lang: SupportedLanguages.CHT,
   };
 
+  const unitMap = toUnitInfoMap(charaData, dragonData);
+
   beforeAll(async () => {
     app = await createApp();
   });
 
   beforeEach(async () => {
+    // Mock fetch to not to fetch the actual unit Info
+    jest.spyOn(fetch, 'default');
+    jest.spyOn(utils, 'toUnitInfoMap').mockReturnValue(unitMap);
+
     await app.reset();
     await GoogleUserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
