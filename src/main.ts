@@ -11,11 +11,13 @@ import {initHttp} from './utils/init/http';
 (async () => {
   const app: FastifyInstance = (await createApp({
     mongoUri: process.env.MONGO_URL || '',
-    logger: {
-      prettyPrint: {
-        translateTime: true,
+    logger: process.env.NODE_ENV === 'production' ?
+      true :
+      {
+        prettyPrint: {
+          translateTime: true,
+        },
       },
-    },
   })).app;
 
   if (!isAppOnHeroku()) {
