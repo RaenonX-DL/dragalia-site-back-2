@@ -33,6 +33,9 @@ jobs:
       - name: npm run lint
         run: npm run lint
 
+      - name: npm run build
+        run: npm run build
+
       - name: npm run test
         run: npm run test
 
@@ -41,6 +44,3 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
-
-      - name: npm run build
-        run: npm run build
