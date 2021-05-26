@@ -31,7 +31,7 @@
     "fastify-cors": "^6.0.1",
     "fastify-helmet": "^5.3.1",
     "mongodb": "^4.0.0-beta.3",
-    "mongodb-memory-server-core": "^6.9.3",
+    "mongodb-memory-server": "^6.9.6",
     "node-fetch": "^2.6.1",
     "pm2": "^4.5.6"
   },
@@ -47,6 +47,7 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.22.1",
     "jest": "^26.6.3",
+    "msw": "^0.29.0",
     "nodemon": "^2.0.7",
     "pino-pretty": "^4.8.0",
     "ts-jest": "^26.5.1",
