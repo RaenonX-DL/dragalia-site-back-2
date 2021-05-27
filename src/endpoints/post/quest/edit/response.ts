@@ -1,11 +1,11 @@
-import {PostEditSuccessResponse} from '../../base/response/post/edit';
+import {SequencedPostEditResponse} from '../../base/response/post/edit/sequenced';
 
 /**
  * API response class for editing a quest post.
  */
-export class QuestPostEditSuccessResponse extends PostEditSuccessResponse {
+export class QuestPostEditResponse extends SequencedPostEditResponse {
   /**
-   * Construct a successful single quest post edit API response.
+   * Construct a quest post edit API response.
    *
    * @param {number} seqId sequential ID of the edited post
    */

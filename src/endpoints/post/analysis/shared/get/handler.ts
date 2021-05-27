@@ -1,11 +1,10 @@
-import {AnalysisGetPayload, ApiResponseCode} from '../../../../../api-def/api';
+import {AnalysisGetPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 import {processGetAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {handleGetPost} from '../../../base/handler/get';
-import {ApiFailedResponse} from '../../../base/response/failed';
 import {AnalysisController} from '../../controller';
-import {AnalysisGetSuccessResponse} from './response';
+import {AnalysisGetResponse} from './response';
 
 
 export const handleGetAnalysis = async (
@@ -13,18 +12,15 @@ export const handleGetAnalysis = async (
 ): Promise<ApiResponse> => {
   payload = processGetAnalysisPayload(payload);
 
-  if (!payload.seqId) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED, {httpCode: 400});
-  }
-
   return handleGetPost(
     mongoClient,
     payload,
-    AnalysisController.getAnalysis,
+    (payload) => (
+      AnalysisController.getAnalysis(mongoClient, payload.unitId, payload.lang, true)
+    ),
     (userData, getResult) => {
-      return new AnalysisGetSuccessResponse(
+      return new AnalysisGetResponse(
         userData ? userData.isAdmin : false,
-        userData ? !userData.isAdsFree : true,
         getResult.toResponseReady(),
       );
     },

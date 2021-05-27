@@ -2,19 +2,19 @@ import {QuestPostEditPayload} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 import {processQuestEditPayload} from '../../../../utils/payload';
 import {HandlerParams} from '../../../lookup';
-import {handleEditPost} from '../../base/handler/edit';
+import {handleEditSequencedPost} from '../../base/handler/edit/sequenced';
 import {QuestPostController} from '../controller';
-import {QuestPostEditSuccessResponse} from './response';
+import {QuestPostEditResponse} from './response';
 
 export const handleEditQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostEditPayload>,
 ): Promise<ApiResponse> => {
   payload = processQuestEditPayload(payload);
 
-  return handleEditPost(
+  return handleEditSequencedPost(
     mongoClient,
     payload,
     QuestPostController.editQuestPost,
-    (seqId) => new QuestPostEditSuccessResponse(seqId),
+    ({seqId}) => new QuestPostEditResponse(seqId),
   );
 };

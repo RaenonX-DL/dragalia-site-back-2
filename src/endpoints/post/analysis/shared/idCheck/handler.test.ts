@@ -1,11 +1,11 @@
-
-
 import {
+  AnalysisIdCheckPayload,
+  AnalysisIdCheckResponse,
   ApiEndPoints,
   ApiResponseCode,
-  AnalysisIdCheckPayload,
   CharaAnalysisPublishPayload,
-  AnalysisIdCheckResponse, SupportedLanguages,
+  SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -21,11 +21,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   const payload: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
-    title: 'title',
+    unitId: 10950101,
     summary: 'summary',
-    summon: 'summon',
+    summonResult: 'summon',
     passives: 'passive',
     normalAttacks: 'normal',
     forceStrikes: 'force',
@@ -40,8 +40,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     story: 'story',
     keywords: 'keyword',
   };
-
-  let newPostSeqId: number;
 
   beforeAll(async () => {
     app = await createApp();
@@ -62,18 +60,18 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
       {[GoogleUserDocumentKey.userId]: uidAdsFree},
       {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
-    newPostSeqId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payload);
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payload);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('returns available for the next unused ID in the same language', async () => {
+  it('returns available for an unused unit ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidAdmin,
-      seqId: newPostSeqId + 1,
       lang: payload.lang,
+      unitId: 10950102,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
@@ -86,27 +84,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     expect(json.available).toBe(true);
   });
 
-  it('returns available if ID is not given', async () => {
+  it('returns available for an unused language in an used ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidAdmin,
-      lang: payload.lang,
-    };
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.statusCode).toBe(200);
-
-    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
-    expect(json.available).toBe(true);
-  });
-
-  it('returns available for an unused language in the same ID', async () => {
-    const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
-      seqId: newPostSeqId,
       lang: SupportedLanguages.EN,
+      unitId: payload.unitId,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
@@ -119,28 +101,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     expect(json.available).toBe(true);
   });
 
-  it('returns available for an unused language in the next unused ID', async () => {
+  it('returns unavailable if unit ID does not exist', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidAdmin,
-      seqId: newPostSeqId + 1,
-      lang: SupportedLanguages.EN,
-    };
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.statusCode).toBe(200);
-
-    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
-    expect(json.available).toBe(true);
-  });
-
-  it('returns unavailable for a skipping ID', async () => {
-    const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
-      seqId: newPostSeqId + 2,
       lang: payload.lang,
+      unitId: 7,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
@@ -153,11 +118,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     expect(json.available).toBe(false);
   });
 
-  it('returns unavailable for an existing ID', async () => {
+  it('returns unavailable for an existing unit ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidAdmin,
-      seqId: newPostSeqId,
       lang: payload.lang,
+      unitId: payload.unitId,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
@@ -173,8 +138,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
   it('returns unavailable for normal user', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidNormal,
-      seqId: newPostSeqId + 1,
       lang: payload.lang,
+      unitId: payload.unitId,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
@@ -190,8 +155,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
   it('returns unavailable for ads-free user', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       googleUid: uidAdsFree,
-      seqId: newPostSeqId + 1,
       lang: payload.lang,
+      unitId: payload.unitId,
     };
 
     const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);

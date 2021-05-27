@@ -1,16 +1,15 @@
 import {SupportedLanguages} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
-import {PostDocumentBase, PostDocumentKey} from '../model';
-import {PostGetSuccessResponseParam} from '../response/post/get';
+import {PostDocumentBaseNoTitle} from '../model';
+import {PostGetResponseParam} from '../response/post/get';
 
 /**
  * Base object of a post getting result.
  * @template T, R
  */
-export abstract class PostGetResult<T extends PostDocumentBase> {
+export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
   post: T;
   isAltLang: boolean;
   otherLangs: Array<SupportedLanguages>;
@@ -34,11 +33,9 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
    *
    * @return {R} object ready to be used by the response object
    */
-  protected toResponseReady(): PostGetSuccessResponseParam {
+  protected toResponseReady(): PostGetResponseParam {
     return {
-      seqId: this.post[SequentialDocumentKey.sequenceId],
       lang: this.post[MultiLingualDocumentKey.language],
-      title: this.post[PostDocumentKey.title],
       isAltLang: this.isAltLang,
       otherLangs: this.otherLangs,
       viewCount: this.post[ViewCountableDocumentKey.viewCount],
@@ -54,6 +51,6 @@ export abstract class PostGetResult<T extends PostDocumentBase> {
   }
 }
 
-export type ResultConstructFunction<D extends PostDocumentBase,
+export type ResultConstructFunction<D extends PostDocumentBaseNoTitle,
   T extends PostGetResult<D>> =
   (post: D, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) => T;

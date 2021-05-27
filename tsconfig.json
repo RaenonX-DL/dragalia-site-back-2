@@ -5,7 +5,6 @@
     "target": "es2020",
     "module": "commonjs",
     "esModuleInterop": true,
-    "lib": [],
     /* Compiling Options */
     "rootDir": ".",
     "outDir": "./dist",
@@ -23,6 +22,7 @@
     /* Module Resolution Options */
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     /* Advanced Options */
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true

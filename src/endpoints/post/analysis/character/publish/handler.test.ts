@@ -1,23 +1,20 @@
-
-
 import {
   ApiEndPoints,
   ApiResponseCode,
   CharaAnalysisPublishPayload,
-  CharaAnalysisPublishSuccessResponse,
+  AnalysisPublishResponse,
   FailedResponse,
-  SupportedLanguages,
+  SupportedLanguages, UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../../base/model/seq';
 import {GoogleUserController} from '../../../../userControl/controller';
-import {PostDocumentKey} from '../../../base/model';
 import {CharaAnalysis, CharaAnalysisDocument} from '../../model/chara';
 import {CharaAnalysisSkill} from '../../model/charaSkill';
+import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 
 
-describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara analysis publishing endpoint`, () => {
+describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish chara analysis`, () => {
   let app: Application;
 
   const uidNormal = '87878787877';
@@ -25,11 +22,11 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   const payload1: CharaAnalysisPublishPayload = {
     googleUid: uidNormal,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
-    title: 'chara1',
+    unitId: 10950101,
     summary: 'sum1',
-    summon: 'smn1',
+    summonResult: 'smn1',
     passives: 'passive1',
     forceStrikes: 'fs1',
     normalAttacks: 'na1',
@@ -50,11 +47,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     googleUid: uidAdmin,
   };
 
-  const payload3: CharaAnalysisPublishPayload = {
-    ...payload2,
-    seqId: 7,
-  };
-
   const payload4: CharaAnalysisPublishPayload = {
     ...payload2,
     lang: SupportedLanguages.EN,
@@ -62,12 +54,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
 
   const payload5: CharaAnalysisPublishPayload = {
     ...payload1,
-    title: 'chara6',
-  };
-
-  const payload6: CharaAnalysisPublishPayload = {
-    ...payload2,
-    seqId: 1,
+    unitId: 99,
   };
 
   beforeAll(async () => {
@@ -88,37 +75,27 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     await app.close();
   });
 
-  it('publishes a new character analysis', async () => {
+  it('publishes', async () => {
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
     expect(result.statusCode).toBe(200);
 
-    const json: CharaAnalysisPublishSuccessResponse = result.json() as CharaAnalysisPublishSuccessResponse;
+    const json: AnalysisPublishResponse = result.json() as AnalysisPublishResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payload2.unitId);
   });
 
-  it('publishes a new quest post given an alternative language', async () => {
+  it('publishes given an alternative language', async () => {
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload4);
     expect(result.statusCode).toBe(200);
 
-    const json: CharaAnalysisPublishSuccessResponse = result.json() as CharaAnalysisPublishSuccessResponse;
+    const json: AnalysisPublishResponse = result.json() as AnalysisPublishResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payload2.unitId);
   });
 
-  it('publishes a new quest post given a valid unused sequential ID', async () => {
-    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload6);
-    expect(result.statusCode).toBe(200);
-
-    const json: CharaAnalysisPublishSuccessResponse = result.json() as CharaAnalysisPublishSuccessResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
-  });
-
-  it('blocks publishing a quest post with insufficient permission', async () => {
+  it('blocks publishing with insufficient permission', async () => {
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload1);
     expect(result.statusCode).toBe(200);
 
@@ -127,19 +104,21 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     expect(json.success).toBe(false);
   });
 
-  it('blocks publishing a quest post with skipping sequential ID', async () => {
-    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload3);
+  it('blocks publishing with non-existing unit ID', async () => {
+    const result = await app.app.inject()
+      .post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA)
+      .payload({...payload2, unitId: 7});
     expect(result.statusCode).toBe(200);
 
     const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
+    expect(json.code).toBe(ApiResponseCode.FAILED_UNIT_NOT_EXISTS);
     expect(json.success).toBe(false);
   });
 
-  it('blocks publishing a quest post with duplicated ID and language', async () => {
-    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload6);
+  it('blocks publishing with duplicated unit ID and language', async () => {
+    await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
 
-    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload6);
+    const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
     expect(result.statusCode).toBe(200);
 
     const json: FailedResponse = result.json() as FailedResponse;
@@ -147,20 +126,42 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
     expect(json.success).toBe(false);
   });
 
-  test('if the published quest post exists in the database', async () => {
+  it('blocks publishing with wrong type of analysis', async () => {
+    const result = await app.app.inject()
+      .post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA)
+      .payload({...payload2, unitId: 20040405});
+    expect(result.statusCode).toBe(200);
+
+    const json: FailedResponse = result.json() as FailedResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_WRONG_ANALYSIS_TYPE);
+    expect(json.success).toBe(false);
+  });
+
+  it('blocks publishing with `seqId` in the payload key', async () => {
+    const result = await app.app.inject()
+      .post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA)
+      .payload({...payload2, seqId: 87});
+    expect(result.statusCode).toBe(200);
+
+    const json: FailedResponse = result.json() as FailedResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_PAYLOAD_KEY_DEPRECATED);
+    expect(json.success).toBe(false);
+  });
+
+  test('if the published analysis exists in the database', async () => {
     await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
 
     const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
+      [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
       [MultiLingualDocumentKey.language]: payload2.lang,
     });
     const doc = CharaAnalysis.fromDocument(docQuery as CharaAnalysisDocument);
     expect(doc).not.toBeFalsy();
-    expect(doc.seqId).toEqual(1);
-    expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
+    expect(doc.lang).toEqual(payload2.lang);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
-    expect(doc.summonResult).toEqual(payload2.summon);
+    expect(doc.summonResult).toEqual(payload2.summonResult);
     expect(doc.passives).toEqual(payload2.passives);
     expect(doc.normalAttacks).toEqual(payload2.normalAttacks);
     expect(doc.forceStrike).toEqual(payload2.forceStrikes);
@@ -180,21 +181,20 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - chara anal
   test('if the data is unchanged after a failed request', async () => {
     // Admin & new post
     await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
-    // Normal & change title (expect to fail)
+    // Normal & change unit ID (expect to fail)
     await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload5);
 
     const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: payload2.lang,
-      [PostDocumentKey.title]: payload2.title,
+      [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
     });
     const doc = CharaAnalysis.fromDocument(docQuery as CharaAnalysisDocument);
     expect(doc).not.toBeFalsy();
-    expect(doc.seqId).toEqual(1);
-    expect(doc.language).toEqual(payload2.lang);
-    expect(doc.title).toEqual(payload2.title);
+    expect(doc.unitId).toEqual(payload2.unitId);
+    expect(doc.lang).toEqual(payload2.lang);
+    expect(doc.unitId).toEqual(payload2.unitId);
     expect(doc.summary).toEqual(payload2.summary);
-    expect(doc.summonResult).toEqual(payload2.summon);
+    expect(doc.summonResult).toEqual(payload2.summonResult);
     expect(doc.passives).toEqual(payload2.passives);
     expect(doc.normalAttacks).toEqual(payload2.normalAttacks);
     expect(doc.forceStrike).toEqual(payload2.forceStrikes);

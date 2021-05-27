@@ -4,6 +4,8 @@ on: [ push ]
 
 env:
   CI: true
+  REACT_APP_RESOURCE_ROOT: https://raw.githubusercontent.com/RaenonX-DL/dragalia-site-resources/main
+  REACT_APP_DEPOT_ROOT: https://raw.githubusercontent.com/RaenonX-DL/dragalia-data-depot/main
 
 jobs:
   build:
@@ -31,6 +33,9 @@ jobs:
       - name: npm run lint
         run: npm run lint
 
+      - name: npm run build
+        run: npm run build
+
       - name: npm run test
         run: npm run test
 
@@ -39,6 +44,3 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
-
-      - name: npm run build
-        run: npm run build

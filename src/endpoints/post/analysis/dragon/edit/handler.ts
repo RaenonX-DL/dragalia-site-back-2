@@ -1,9 +1,9 @@
 import {DragonAnalysisEditPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
-import {processEditDragonAnalysisPayload} from '../../../../../utils/payload/post/analysis';
+import {processEditDragonAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
-import {handleEditPost} from '../../../base/handler/edit';
 import {AnalysisController} from '../../controller';
+import {handleEditAnalysis} from '../../handler';
 import {DragonAnalysisEditResponse} from './response';
 
 export const handleEditDragonAnalysis = async (
@@ -11,10 +11,10 @@ export const handleEditDragonAnalysis = async (
 ): Promise<ApiResponse> => {
   payload = processEditDragonAnalysisPayload(payload);
 
-  return handleEditPost(
+  return handleEditAnalysis(
     mongoClient,
     payload,
     AnalysisController.editDragonAnalysis,
-    (seqId) => new DragonAnalysisEditResponse({seqId}),
+    ({unitId}) => new DragonAnalysisEditResponse(unitId),
   );
 };

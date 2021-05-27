@@ -1,15 +1,14 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {AnalysisPayload, UnitType} from '../../../../api-def/api';
+import {AnalysisBody, UnitType} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
-import {Post, PostConstructParams, PostDocumentBase, PostDocumentKey} from '../../base/model';
-import {SeqIdMissingError} from '../../error';
+import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from '../../base/model';
 import {dbInfo} from './config';
 
 export enum UnitAnalysisDocumentKey {
   type = 'tp',
+  unitId = 'id',
   summary = 'sm',
   summonResult = 'r',
   passives = 'p',
@@ -19,8 +18,9 @@ export enum UnitAnalysisDocumentKey {
   keywords = 'k',
 }
 
-export type UnitAnalysisDocument = PostDocumentBase & {
+export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
   [UnitAnalysisDocumentKey.type]: UnitType,
+  [UnitAnalysisDocumentKey.unitId]: number,
   [UnitAnalysisDocumentKey.summary]: string,
   [UnitAnalysisDocumentKey.summonResult]: string,
   [UnitAnalysisDocumentKey.passives]: string,
@@ -30,8 +30,9 @@ export type UnitAnalysisDocument = PostDocumentBase & {
   [UnitAnalysisDocumentKey.keywords]: string,
 }
 
-export type UnitAnalysisConstructParams = PostConstructParams & {
+export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
   type: UnitType,
+  unitId: number,
   summary: string,
   summonResult: string,
   passives: string,
@@ -44,8 +45,9 @@ export type UnitAnalysisConstructParams = PostConstructParams & {
 /**
  * Unit analysis base class.
  */
-export abstract class UnitAnalysis extends Post {
+export abstract class UnitAnalysis extends PostNoTitle {
   type: UnitType;
+  unitId: number;
   summary: string;
   summonResult: string;
   passives: string;
@@ -62,9 +64,10 @@ export abstract class UnitAnalysis extends Post {
   protected constructor(params: UnitAnalysisConstructParams) {
     super(params);
 
-    const {type, summary, summonResult, passives, normalAttacks, videos, story, keywords} = params;
+    const {type, unitId, summary, summonResult, passives, normalAttacks, videos, story, keywords} = params;
 
     this.type = type;
+    this.unitId = unitId;
     this.summary = summary;
     this.summonResult = summonResult;
     this.passives = passives;
@@ -81,25 +84,12 @@ export abstract class UnitAnalysis extends Post {
    * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    */
-  static fromPayloadToConstructParams<T extends AnalysisPayload>(
+  static fromPayloadToConstructParams<T extends AnalysisBody>(
     payload: T, type: UnitType,
   ): UnitAnalysisConstructParams {
-    if (!payload.seqId) {
-      throw new SeqIdMissingError();
-    }
-
     return {
+      ...payload,
       type,
-      seqId: payload.seqId,
-      language: payload.lang,
-      title: payload.title,
-      summary: payload.summary,
-      summonResult: payload.summon,
-      passives: payload.passives,
-      normalAttacks: payload.normalAttacks,
-      videos: payload.videos,
-      story: payload.story,
-      keywords: payload.keywords,
     };
   }
 
@@ -116,9 +106,8 @@ export abstract class UnitAnalysis extends Post {
   ): UnitAnalysisConstructParams {
     return {
       type,
-      seqId: obj[SequentialDocumentKey.sequenceId],
-      language: obj[MultiLingualDocumentKey.language],
-      title: obj[PostDocumentKey.title],
+      lang: obj[MultiLingualDocumentKey.language],
+      unitId: obj[UnitAnalysisDocumentKey.unitId],
       summary: obj[UnitAnalysisDocumentKey.summary],
       summonResult: obj[UnitAnalysisDocumentKey.summonResult],
       passives: obj[UnitAnalysisDocumentKey.passives],
@@ -134,7 +123,15 @@ export abstract class UnitAnalysis extends Post {
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+      collection.createIndex(
+        [
+          {[UnitAnalysisDocumentKey.unitId]: 1},
+          {[MultiLingualDocumentKey.language]: 1},
+        ],
+        {unique: true},
+      );
+    }));
   }
 
   /**
@@ -144,7 +141,7 @@ export abstract class UnitAnalysis extends Post {
     return {
       ...super.toObject(),
       [UnitAnalysisDocumentKey.type]: this.type,
-      [PostDocumentKey.title]: this.title,
+      [UnitAnalysisDocumentKey.unitId]: this.unitId,
       [UnitAnalysisDocumentKey.summary]: this.summary,
       [UnitAnalysisDocumentKey.summonResult]: this.summonResult,
       [UnitAnalysisDocumentKey.passives]: this.passives,

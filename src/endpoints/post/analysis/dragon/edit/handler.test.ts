@@ -1,12 +1,12 @@
-
-
 import {
-  AnalysisEditSuccessResponse,
+  AnalysisEditResponse,
   ApiEndPoints,
   ApiResponseCode,
   DragonAnalysisEditPayload,
   DragonAnalysisPublishPayload,
-  FailedResponse, SupportedLanguages,
+  FailedResponse,
+  SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -23,11 +23,11 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
 
   const payloadPost: DragonAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.DRAGON,
     lang: SupportedLanguages.CHT,
-    title: 'dragon',
+    unitId: 20040405,
     summary: 'dragonSummary',
-    summon: 'dragonSummon',
+    summonResult: 'dragonSummon',
     normalAttacks: 'dragonNormal',
     ultimate: 'dragonUltimate',
     passives: 'dragonPassive',
@@ -40,7 +40,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
 
   const payloadEdit: DragonAnalysisEditPayload = {
     ...payloadPost,
-    title: 'edit',
     videos: 'videoNew',
     suitableCharacters: '',
     editNote: 'mod',
@@ -76,10 +75,10 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON).payload(payloadEdit);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
+    const json: AnalysisEditResponse = result.json() as AnalysisEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadEdit.unitId);
   });
 
   it('returns success even if no change', async () => {
@@ -88,27 +87,27 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
       .payload({...payloadPost, editNote: 'a'});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
+    const json: AnalysisEditResponse = result.json() as AnalysisEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadEdit.unitId);
   });
 
-  it('returns failure if ID is not given', async () => {
+  it('fails if ID is not given', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .payload({...payloadEdit, seqId: undefined});
+      .payload({...payloadEdit, unitId: undefined});
     expect(result.statusCode).toBe(400);
 
     const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
+    expect(json.code).toBe(ApiResponseCode.FAILED_UNIT_ID_NOT_SPECIFIED);
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post ID & language', async () => {
+  it('fails for non-existing post ID & language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .payload({...payloadEdit, seqId: 8});
+      .payload({...payloadEdit, unitId: 20040102});
     expect(result.statusCode).toBe(404);
 
     const json: FailedResponse = result.json() as FailedResponse;
@@ -116,18 +115,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post language', async () => {
-    const result = await app.app.inject()
-      .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
-      .payload({...payloadEdit, lang: SupportedLanguages.JP});
-    expect(result.statusCode).toBe(404);
-
-    const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
-    expect(json.success).toBe(false);
-  });
-
-  it('returns failure when permission insufficient', async () => {
+  it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
       .payload({...payloadEdit, googleUid: uidNormal});

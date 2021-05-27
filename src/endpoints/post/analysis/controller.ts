@@ -1,28 +1,31 @@
-import {MongoClient} from 'mongodb';
+import {MongoClient, FindCursor} from 'mongodb';
 
 import {
-  AnalysisGetContent, AnalysisListEntry,
-  UnitType,
+  AnalysisBody,
+  AnalysisLookupAnalyses, AnalysisLookupEntry,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
-  DragonAnalysisPublishPayload, SupportedLanguages,
+  DragonAnalysisPublishPayload,
+  PostBodyBase,
+  SupportedLanguages,
+  UnitType,
 } from '../../../api-def/api';
-import {NextSeqIdArgs} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
+import {EditableDocumentKey} from '../../../base/model/editable';
+import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../base/model/seq';
+import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {PostGetResult} from '../base/controller/get';
-import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
-import {PostDocumentKey} from '../base/model';
-import {PostGetSuccessResponseParam} from '../base/response/post/get';
-import {AnalysisResponse} from './base/response';
-import {UnhandledUnitTypeError} from './error';
+import {AnalysisBodyWithInfo} from './base/response/types';
+import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {
   CharaAnalysis,
   CharaAnalysisDocumentKey,
   CharaAnalysisSkillDocument,
   CharaAnalysisSkillDocumentKey,
-  dbInfo,
   DragonAnalysis,
   DragonAnalysisDocumentKey,
   UnitAnalysis,
@@ -49,11 +52,12 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
   /**
    * @inheritDoc
    */
-  toResponseReady(): AnalysisResponse {
-    const base: PostGetSuccessResponseParam & AnalysisGetContent = {
+  toResponseReady(): AnalysisBodyWithInfo {
+    const base: PostBodyBase & AnalysisBody = {
       ...super.toResponseReady(),
       type: this.post[UnitAnalysisDocumentKey.type],
-      title: this.post[PostDocumentKey.title],
+      unitId: this.post[UnitAnalysisDocumentKey.unitId],
+      lang: this.post[MultiLingualDocumentKey.language],
       summary: this.post[UnitAnalysisDocumentKey.summary],
       summonResult: this.post[UnitAnalysisDocumentKey.summonResult],
       passives: this.post[UnitAnalysisDocumentKey.passives],
@@ -86,7 +90,7 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       };
     }
 
-    throw new UnhandledUnitTypeError(+base.seqId, base.type);
+    throw new UnhandledUnitTypeError(+base.unitId, base.type);
   }
 }
 
@@ -95,61 +99,65 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
  */
 export class AnalysisController extends PostController {
   /**
-   * Same as {@link UnitAnalysis.getNextSeqId}.
+   * Check if the unit is valid.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {number?} seqId desired post sequential ID to use
-   * @param {boolean} increase increase the counter or not
-   * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
+   * The method will execute successfully if the unit exists and matches the expected type.
+   * Otherwise, the corresponding error will be thrown.
+   *
+   * @param {number} unitId unit ID to be checked
+   * @param {UnitType} expectedType expected unit type
+   * @throws UnitNotExistsError if the unit does not exist
+   * @throws UnitTypeMismatchError if the unit type is not the expected one
+   * @return {Promise<void>}
    */
-  static async getNextSeqId(
-    mongoClient: MongoClient, {seqId, increase}: NextSeqIdArgs,
-  ): Promise<number> {
-    return await UnitAnalysis.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
+  static async checkUnitValid(unitId: number, expectedType: UnitType): Promise<void> {
+    const unitInfo = await getUnitInfo(unitId);
+
+    if (!unitInfo) {
+      throw new UnitNotExistsError(unitId);
+    } else if (unitInfo.type !== expectedType) {
+      throw new UnitTypeMismatchError(unitId, expectedType, unitInfo.type);
+    }
   }
 
   /**
-   * Publish a new character analysis and get its sequential ID.
+   * Publish a new character analysis and return its unit ID.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {CharaAnalysisPublishPayload} payload payload for creating a character analysis
-   * @return {Promise<number>} post sequential ID
+   * @throws UnitNotExistsError if the unit does not exist using the unit ID in `payload`
+   * @throws UnitTypeMismatchError if the unit type is not character
+   * @return {Promise<number>} post unit ID
    */
   static async publishCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisPublishPayload,
   ): Promise<number> {
-    payload = {
-      ...payload,
-      seqId: await AnalysisController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
-    };
+    await AnalysisController.checkUnitValid(payload.unitId, UnitType.CHARACTER);
 
-    const post: CharaAnalysis = CharaAnalysis.fromPayload(payload);
+    const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
-    await CharaAnalysis.getCollection(mongoClient).insertOne(post.toObject());
+    await CharaAnalysis.getCollection(mongoClient).insertOne(analysis.toObject());
 
-    return post.seqId;
+    return analysis.unitId;
   }
 
   /**
-   * Publish a new dragon analysis and get its sequential ID.
+   * Publish a new dragon analysis and return its unit ID.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {DragonAnalysisPublishPayload} payload payload for creating a dragon analysis
-   * @return {Promise<number>} post sequential ID
+   * @return {Promise<number>} post unit ID
    */
   static async publishDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisPublishPayload,
   ): Promise<number> {
-    payload = {
-      ...payload,
-      seqId: await AnalysisController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
-    };
+    await AnalysisController.checkUnitValid(payload.unitId, UnitType.DRAGON);
 
-    const post: DragonAnalysis = DragonAnalysis.fromPayload(payload);
+    const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
-    await DragonAnalysis.getCollection(mongoClient).insertOne(post.toObject());
+    await DragonAnalysis.getCollection(mongoClient).insertOne(analysis.toObject());
 
-    return post.seqId;
+    return analysis.unitId;
   }
 
   /**
@@ -166,8 +174,12 @@ export class AnalysisController extends PostController {
 
     return await AnalysisController.editPost(
       CharaAnalysis.getCollection(mongoClient),
-      payload.seqId, payload.lang,
-      analysis.toObject(), payload.editNote,
+      {
+        [UnitAnalysisDocumentKey.unitId]: payload.unitId,
+      },
+      payload.lang,
+      analysis.toObject(),
+      payload.editNote,
     );
   }
 
@@ -185,38 +197,94 @@ export class AnalysisController extends PostController {
 
     return await AnalysisController.editPost(
       DragonAnalysis.getCollection(mongoClient),
-      payload.seqId, payload.lang,
-      analysis.toObject(), payload.editNote,
+      {
+        [UnitAnalysisDocumentKey.unitId]: payload.unitId,
+      },
+      payload.lang,
+      analysis.toObject(),
+      payload.editNote,
     );
   }
 
   /**
-   * Get a list of analyses.
+   * Get the lookup info of all analyses.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
    * @param {SupportedLanguages} lang language code of the analyses
-   * @param {number} start starting index of the analysis lists
-   * @param {number} limit maximum count of the posts to return
    * @return {Promise<PostListResult>} post listing result
    */
-  static async getAnalysisList(
-    mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
-  ): Promise<PostListResult<AnalysisListEntry>> {
-    return AnalysisController.listPosts(
-      UnitAnalysis.getCollection(mongoClient),
-      lang,
-      {
-        start,
-        limit,
-        projection: {
-          [UnitAnalysisDocumentKey.type]: 1,
-        },
-        transformFunc: (post) => ({
-          ...defaultTransformFunction(post),
-          type: post[UnitAnalysisDocumentKey.type],
-        }),
-      },
+  static async getAnalysisLookup(
+    mongoClient: MongoClient, lang: SupportedLanguages,
+  ): Promise<AnalysisLookupAnalyses> {
+    const analysisInfo = await AnalysisController.getAnalysisInfo(mongoClient, lang);
+
+    return Object.fromEntries(
+      analysisInfo.map((analysisInfo) => [analysisInfo.unitId, analysisInfo]),
     );
+  }
+
+  /**
+   * Get the info of most recently modified analyses.
+   *
+   * @param {MongoClient} mongoClient mongo client to perform the listing
+   * @param {SupportedLanguages} lang language code of the analyses
+   * @param {number} maxCount maximum number of the analyses to get
+   * @return {Promise<PostListResult>} post listing result
+   */
+  static async getAnalysisLookupLanding(
+    mongoClient: MongoClient, lang: SupportedLanguages, maxCount = 3,
+  ): Promise<Array<AnalysisLookupEntry>> {
+    return AnalysisController.getAnalysisInfo(mongoClient, lang, (cursor) => {
+      return cursor
+        // Sort by last modified epoch DESC
+        .sort([EditableDocumentKey.dateModifiedEpoch, -1])
+        // Limit the count to return
+        .limit(maxCount);
+    });
+  }
+
+  /**
+   * Get all analyses info.
+   *
+   * @param {MongoClient} mongoClient mongo client to perform the listing
+   * @param {SupportedLanguages} lang language code of the analyses
+   * @param {FindCursor} postFindProcess function to be executed after `find()` but before `toArray()`
+   * @return {Promise<PostListResult>} post listing result
+   */
+  private static async getAnalysisInfo(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    postFindProcess: (cursor: FindCursor) => FindCursor = (cursor) => cursor,
+  ): Promise<Array<AnalysisLookupEntry>> {
+    const query = {[MultiLingualDocumentKey.language]: lang};
+
+    const analyses = UnitAnalysis.getCollection(mongoClient)
+      .find(
+        query,
+        {
+          projection: {
+            [UnitAnalysisDocumentKey.type]: 1,
+            [SequentialDocumentKey.sequenceId]: 1,
+            [UnitAnalysisDocumentKey.unitId]: 1,
+            [MultiLingualDocumentKey.language]: 1,
+            [EditableDocumentKey.dateModifiedEpoch]: 1,
+            [EditableDocumentKey.datePublishedEpoch]: 1,
+            [ViewCountableDocumentKey.viewCount]: 1,
+          },
+        });
+    const analysisArray = await postFindProcess(analyses).toArray();
+
+    return analysisArray.map((post) => (
+      {
+        type: post[UnitAnalysisDocumentKey.type],
+        seqId: post[SequentialDocumentKey.sequenceId],
+        unitId: post[UnitAnalysisDocumentKey.unitId],
+        lang: post[MultiLingualDocumentKey.language],
+        viewCount: post[ViewCountableDocumentKey.viewCount],
+        modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
+        publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],
+      }
+    ));
   }
 
   /**
@@ -226,45 +294,62 @@ export class AnalysisController extends PostController {
    * `incCount` should be `true`. Otherwise, it should be `false`.
    *
    * Returns the alternative language version
-   * if the analysis of the given sequential ID
+   * if the analysis of the given unit ID
    * in the specified language is not available,
    * but the version in the other language is available.
    *
-   * Returns ``null`` if the post with the given sequential ID is not found.
+   * Returns ``null`` if the post with the given unit ID is not found.
+   *
+   * The analysis which sequential ID matches ``unitId`` will also be returned for legacy purpose.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {number} seqId sequential ID of the post
+   * @param {number} unitId unit ID of the post
    * @param {SupportedLanguages} lang language code of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @return {Promise<PostGetResult<QuestPostDocument>>} result of getting a quest post
    */
   static async getAnalysis(
-    mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
+    mongoClient: MongoClient, unitId: number, lang: SupportedLanguages, incCount = true,
   ): Promise<AnalysisGetResult | null> {
     return super.getPost<AnalysisDocument, AnalysisGetResult>(
-      UnitAnalysis.getCollection(mongoClient), seqId, lang, incCount,
-      ((post, isAltLang, otherLangs) => new AnalysisGetResult(post, isAltLang, otherLangs)),
+      UnitAnalysis.getCollection(mongoClient),
+      {
+        $or: [
+          {[UnitAnalysisDocumentKey.unitId]: unitId},
+          {[SequentialDocumentKey.sequenceId]: unitId},
+        ],
+      },
+      lang,
+      incCount,
+      (post, isAltLang, otherLangs) => (
+        new AnalysisGetResult(post, isAltLang, otherLangs)
+      ),
     );
   }
 
   /**
-   * Check if the given analysis ID is available.
+   * Check if the given unit ID has analysis available.
    *
-   * If ``seqId`` is omitted, returns ``true``.
-   * (a new ID will be automatically generated and used when publishing an analysis without specifying it)
+   * This also check if the unit ID exists IRL.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string} langCode analysis language code to be checked
-   * @param {number} seqId analysis sequential ID to be checked
+   * @param {SupportedLanguages} lang analysis language to be checked
+   * @param {number} unitId unit ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  static async isAnalysisIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
-    return super.isIdAvailable(
-      AnalysisController,
-      mongoClient,
-      UnitAnalysis.getCollection(mongoClient),
-      langCode,
-      seqId,
-    );
+  static async isAnalysisIdAvailable(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    unitId: number,
+  ): Promise<boolean> {
+    if (!await getUnitInfo(unitId)) {
+      return false;
+    }
+
+    return !await UnitAnalysis.getCollection(mongoClient)
+      .findOne({
+        [UnitAnalysisDocumentKey.unitId]: unitId,
+        [MultiLingualDocumentKey.language]: lang,
+      });
   }
 }

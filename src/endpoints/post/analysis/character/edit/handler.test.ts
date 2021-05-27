@@ -1,11 +1,12 @@
-
-
 import {
-  AnalysisEditSuccessResponse,
-  ApiEndPoints, ApiResponseCode,
+  AnalysisEditResponse,
+  ApiEndPoints,
+  ApiResponseCode,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
-  FailedResponse, SupportedLanguages,
+  FailedResponse,
+  SupportedLanguages,
+  UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {GoogleUserController} from '../../../../userControl/controller';
@@ -22,11 +23,11 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
 
   const payloadPost: CharaAnalysisPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
+    type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
-    title: 'chara1',
+    unitId: 10950101,
     summary: 'sum1',
-    summon: 'smn1',
+    summonResult: 'smn1',
     passives: 'passive1',
     forceStrikes: 'fs1',
     normalAttacks: 'na1',
@@ -44,7 +45,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
 
   const payloadEdit: CharaAnalysisEditPayload = {
     ...payloadPost,
-    title: 'edit',
     videos: 'videoNew',
     skills: [],
     editNote: 'mod',
@@ -80,10 +80,10 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA).payload(payloadEdit);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
+    const json: AnalysisEditResponse = result.json() as AnalysisEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadEdit.unitId);
   });
 
   it('returns success even if no change', async () => {
@@ -92,27 +92,27 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
       .payload({...payloadPost, editNote: 'a'});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisEditSuccessResponse = result.json() as AnalysisEditSuccessResponse;
+    const json: AnalysisEditResponse = result.json() as AnalysisEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.seqId).toBe(1);
+    expect(json.unitId).toBe(payloadEdit.unitId);
   });
 
-  it('returns failure if ID is not given', async () => {
+  it('fails if unit ID is not given', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .payload({...payloadEdit, seqId: undefined});
+      .payload({...payloadEdit, unitId: undefined});
     expect(result.statusCode).toBe(400);
 
     const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_ID_NOT_SPECIFIED);
+    expect(json.code).toBe(ApiResponseCode.FAILED_UNIT_ID_NOT_SPECIFIED);
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post ID & language', async () => {
+  it('fails for non-existing post ID & language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .payload({...payloadEdit, seqId: 8});
+      .payload({...payloadEdit, unitId: 10950102, lang: SupportedLanguages.CHT});
     expect(result.statusCode).toBe(404);
 
     const json: FailedResponse = result.json() as FailedResponse;
@@ -120,18 +120,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post language', async () => {
-    const result = await app.app.inject()
-      .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
-      .payload({...payloadEdit, lang: SupportedLanguages.JP});
-    expect(result.statusCode).toBe(404);
-
-    const json: FailedResponse = result.json() as FailedResponse;
-    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
-    expect(json.success).toBe(false);
-  });
-
-  it('returns failure when permission insufficient', async () => {
+  it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_CHARA)
       .payload({...payloadEdit, googleUid: uidNormal});

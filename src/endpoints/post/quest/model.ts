@@ -1,13 +1,13 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {QuestPostPayload} from '../../../api-def/api';
+import {QuestPostBody} from '../../../api-def/api';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentBaseKey} from '../../../base/model/base';
 import {EditableDocumentKey, EditNote} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
-import {Post, PostConstructParams, PostDocumentBase, PostDocumentKey} from '../base/model';
+import {SequencedPost, SequencedPostConstructParams, PostDocumentBase, PostDocumentKey} from '../base/model';
 import {SeqIdMissingError} from '../error';
 
 export const dbInfo: CollectionInfo = {
@@ -101,7 +101,7 @@ export class QuestPosition extends Document {
   }
 }
 
-export type QuestPostConstructParams = PostConstructParams & {
+export type QuestPostConstructParams = SequencedPostConstructParams & {
   generalInfo: string,
   video: string,
   positionInfo: Array<QuestPosition>,
@@ -111,7 +111,7 @@ export type QuestPostConstructParams = PostConstructParams & {
 /**
  * A quest post document.
  */
-export class QuestPost extends Post {
+export class QuestPost extends SequencedPost {
   generalInfo: string;
   video: string;
   positionInfo: Array<QuestPosition>;
@@ -125,7 +125,7 @@ export class QuestPost extends Post {
   constructor(params: QuestPostConstructParams) {
     const {
       seqId,
-      language,
+      lang,
       title,
       generalInfo,
       video,
@@ -138,7 +138,7 @@ export class QuestPost extends Post {
       viewCount,
     } = params;
 
-    super({seqId, language, title, dateModifiedEpoch, datePublishedEpoch, id, editNotes: editNotes, viewCount});
+    super({seqId, lang, title, dateModifiedEpoch, datePublishedEpoch, id, editNotes: editNotes, viewCount});
 
     this.generalInfo = generalInfo;
     this.video = video;
@@ -151,8 +151,9 @@ export class QuestPost extends Post {
    */
   static fromDocument(doc: QuestPostDocument): QuestPost {
     return new QuestPost({
+      id: doc[DocumentBaseKey.id],
       seqId: doc[SequentialDocumentKey.sequenceId],
-      language: doc[MultiLingualDocumentKey.language],
+      lang: doc[MultiLingualDocumentKey.language],
       title: doc[PostDocumentKey.title],
       generalInfo: doc[QuestPostDocumentKey.generalInfo],
       video: doc[QuestPostDocumentKey.video],
@@ -160,7 +161,6 @@ export class QuestPost extends Post {
       addendum: doc[QuestPostDocumentKey.addendum],
       dateModifiedEpoch: doc[EditableDocumentKey.dateModifiedEpoch],
       datePublishedEpoch: doc[EditableDocumentKey.datePublishedEpoch],
-      id: doc[DocumentBaseKey.id],
       editNotes: doc[EditableDocumentKey.editNotes].map((doc) => EditNote.fromDocument(doc)),
       viewCount: doc[ViewCountableDocumentKey.viewCount],
     });
@@ -172,14 +172,14 @@ export class QuestPost extends Post {
    * @param {T} payload payload to be converted
    * @return {QuestPost} converted quest post instance
    */
-  static fromPayload<T extends QuestPostPayload>(payload: T): QuestPost {
+  static fromPayload<T extends QuestPostBody>(payload: T): QuestPost {
     if (!payload.seqId) {
       throw new SeqIdMissingError();
     }
 
     return new QuestPost({
       seqId: payload.seqId,
-      language: payload.lang,
+      lang: payload.lang,
       title: payload.title,
       generalInfo: payload.general,
       video: payload.video,
@@ -204,7 +204,7 @@ export class QuestPost extends Post {
     return {
       [DocumentBaseKey.id]: this.id,
       [SequentialDocumentKey.sequenceId]: this.seqId,
-      [MultiLingualDocumentKey.language]: this.language,
+      [MultiLingualDocumentKey.language]: this.lang,
       [PostDocumentKey.title]: this.title,
       [QuestPostDocumentKey.generalInfo]: this.generalInfo,
       [QuestPostDocumentKey.video]: this.video,

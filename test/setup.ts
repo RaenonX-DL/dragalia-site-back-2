@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+
 export = async (): Promise<void> => {
-  console.log('Global test setup');
+  dotenv.config();
 }

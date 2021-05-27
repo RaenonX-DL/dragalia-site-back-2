@@ -6,7 +6,7 @@ import {GoogleUserController} from '../../../userControl/controller';
 import {handlePublishPost} from '../../base/handler/publish';
 import {ApiFailedResponse} from '../../base/response/failed';
 import {QuestPostController} from '../controller';
-import {QuestPostPublishSuccessResponse} from './response';
+import {QuestPostPublishResponse} from './response';
 
 export const handlePublishQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostPublishPayload>,
@@ -22,6 +22,6 @@ export const handlePublishQuestPost = async (
     mongoClient,
     payload,
     QuestPostController.publishPost,
-    (seqId) => new QuestPostPublishSuccessResponse(seqId),
+    (seqId) => new QuestPostPublishResponse(seqId),
   );
 };

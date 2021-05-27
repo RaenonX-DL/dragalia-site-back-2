@@ -3,7 +3,7 @@ import {Collection, MongoClient} from 'mongodb';
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
-import {NextSeqIdArgs} from '../controller/seq';
+import {NextSeqIdOptions} from '../controller/seq';
 import {Document, DocumentBase, DocumentConstructParams} from './base';
 
 
@@ -29,7 +29,7 @@ export type SequentialDocumentConstructParams = DocumentConstructParams & {
 /**
  * Sequential document class.
  */
-export abstract class SequentialDocument extends Document {
+export class SequentialDocument extends Document {
   protected static seqCollection: Collection;
 
   seqId: number;
@@ -39,7 +39,7 @@ export abstract class SequentialDocument extends Document {
    *
    * @param {SequentialDocumentConstructParams} _ parameters to construct a sequential document
    */
-  protected constructor({id, seqId}: SequentialDocumentConstructParams) {
+  constructor({id, seqId}: SequentialDocumentConstructParams) {
     super({id});
 
     this.seqId = seqId;
@@ -62,7 +62,7 @@ export abstract class SequentialDocument extends Document {
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
-    mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase}: NextSeqIdArgs,
+    mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase}: NextSeqIdOptions,
   ): Promise<number> {
     if (increase == null) { // `==` to check for both `null` and `undefined`
       increase = true;

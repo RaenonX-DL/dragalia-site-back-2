@@ -1,5 +1,4 @@
 import {UnitType, CharaAnalysisPayload} from '../../../../api-def/api';
-import {SeqIdMissingError} from '../../error';
 import {CharaAnalysisSkill, CharaAnalysisSkillDocument} from './charaSkill';
 import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
 
@@ -53,10 +52,6 @@ export class CharaAnalysis extends UnitAnalysis {
    * @return {QuestPost} converted character analysis instance
    */
   static fromPayload<T extends CharaAnalysisPayload>(payload: T): CharaAnalysis {
-    if (!payload.seqId) {
-      throw new SeqIdMissingError();
-    }
-
     return new CharaAnalysis({
       ...super.fromPayloadToConstructParams(payload, UnitType.CHARACTER),
       forceStrike: payload.forceStrikes,

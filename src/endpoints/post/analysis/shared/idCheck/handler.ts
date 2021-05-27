@@ -1,7 +1,7 @@
 import {AnalysisIdCheckPayload} from '../../../../../api-def/api';
-import {processAnalysisIdCheckPayload} from '../../../../../utils/payload/post/analysis';
+import {processAnalysisIdCheckPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
-import {handlePostIdCheck} from '../../../base/handler/idCheck';
+import {handlePostIdCheck} from '../../../base/handler/idCheck/main';
 import {AnalysisController} from '../../controller';
 import {AnalysisIdCheckResponse} from './response';
 
@@ -13,7 +13,7 @@ export const handleAnalysisIdCheck = async (
   return handlePostIdCheck(
     mongoClient,
     payload,
-    AnalysisController.isAnalysisIdAvailable,
+    (payload) => AnalysisController.isAnalysisIdAvailable(mongoClient, payload.lang, payload.unitId),
     (isAdmin, isAvailable) => {
       return new AnalysisIdCheckResponse(isAdmin, isAvailable);
     },

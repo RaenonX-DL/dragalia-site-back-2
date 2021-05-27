@@ -1,6 +1,6 @@
 import {UnitType, DragonAnalysisPayload} from '../../../../api-def/api';
-import {SeqIdMissingError} from '../../error';
 import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
+
 
 export enum DragonAnalysisDocumentKey {
   ultimate = 'ult',
@@ -45,16 +45,12 @@ export class DragonAnalysis extends UnitAnalysis {
   }
 
   /**
-   * Convert `payload` to a `CharaAnalysis`.
+   * Convert `payload` to a `DragonAnalysis`.
    *
    * @param {T} payload payload to be converted
-   * @return {QuestPost} converted character analysis instance
+   * @return {QuestPost} converted dragon analysis instance
    */
   static fromPayload<T extends DragonAnalysisPayload>(payload: T): DragonAnalysis {
-    if (!payload.seqId) {
-      throw new SeqIdMissingError();
-    }
-
     return new DragonAnalysis({
       ...super.fromPayloadToConstructParams(payload, UnitType.DRAGON),
       ultimate: payload.ultimate,

@@ -3,6 +3,7 @@ import {MongoClient} from 'mongodb';
 import {PostPageMetaParams} from '../../../api-def/api/meta/post/response';
 import {SupportedLanguages} from '../../../api-def/api/other/lang';
 import {PostType} from '../../../api-def/api/post/types';
+import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {trim} from '../../../utils/string';
 import {AnalysisController} from '../../post/analysis/controller';
 import {UnitAnalysisDocumentKey} from '../../post/analysis/model/unitAnalysis';
@@ -21,8 +22,11 @@ const getAnalysisMeta = async (
     return null;
   }
 
+  const unitId = analysis.post[UnitAnalysisDocumentKey.unitId];
+  const unitInfo = await getUnitInfo(unitId);
+
   return {
-    title: analysis.post[PostDocumentKey.title],
+    title: unitInfo ? unitInfo.name[lang] : unitId.toString(),
     description: trim(analysis.post[UnitAnalysisDocumentKey.summary], 100),
   };
 };

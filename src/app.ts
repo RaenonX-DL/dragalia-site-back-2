@@ -1,6 +1,7 @@
 import fastify, {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
 import fastifyCors from 'fastify-cors';
 import fastifyHelmet from 'fastify-helmet';
+import {FastifyLoggerOptions} from 'fastify/types/logger';
 import {MongoClient, MongoClientOptions} from 'mongodb';
 import {MongoMemoryServer} from 'mongodb-memory-server-core';
 
@@ -60,9 +61,14 @@ export class Application {
   }
 }
 
-export const createApp = async (mongoUri?: string): Promise<Application> => {
+type AppCreateOptions = {
+  mongoUri?: string,
+  logger?: boolean | FastifyLoggerOptions,
+}
+
+export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Promise<Application> => {
   const app: FastifyInstance = fastify({
-    logger: true,
+    logger: logger || false,
     connectionTimeout: 20000, // 20 seconds
     trustProxy: isAppOnHeroku(),
   });

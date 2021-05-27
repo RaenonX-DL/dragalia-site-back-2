@@ -1,8 +1,14 @@
 import {MongoClient} from 'mongodb';
 
-import {PostListEntry, QuestPostEditPayload, QuestPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
-import {NextSeqIdArgs} from '../../../base/controller/seq';
+import {
+  SequencedPostInfo,
+  QuestPostEditPayload,
+  QuestPostPublishPayload,
+  SupportedLanguages,
+} from '../../../api-def/api';
+import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
 import {UpdateResult} from '../../../base/enum/updateResult';
+import {SequentialDocumentKey} from '../../../base/model/seq';
 import {PostGetResult} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
@@ -33,6 +39,7 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
     return {
       ...super.toResponseReady(),
       title: this.post[PostDocumentKey.title],
+      seqId: this.post[SequentialDocumentKey.sequenceId],
       general: this.post[QuestPostDocumentKey.generalInfo],
       video: this.post[QuestPostDocumentKey.video],
       positional: this.post[QuestPostDocumentKey.positionInfo].map((doc) => ({
@@ -49,7 +56,7 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
 /**
  * Quest post controller.
  */
-export class QuestPostController extends PostController {
+export class QuestPostController extends PostController implements SequencedController {
   /**
    * Same as {@link QuestPost.getNextSeqId}.
    *
@@ -59,7 +66,7 @@ export class QuestPostController extends PostController {
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
-    mongoClient: MongoClient, {seqId, increase}: NextSeqIdArgs,
+    mongoClient: MongoClient, {seqId, increase}: NextSeqIdOptions,
   ): Promise<number> {
     return await QuestPost.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
   }
@@ -72,12 +79,10 @@ export class QuestPostController extends PostController {
    * @return {Promise<number>} post sequential ID
    */
   static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
-    payload = {
+    const post: QuestPost = QuestPost.fromPayload({
       ...payload,
       seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
-    };
-
-    const post: QuestPost = QuestPost.fromPayload(payload);
+    });
 
     await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
 
@@ -96,8 +101,12 @@ export class QuestPostController extends PostController {
 
     return await QuestPostController.editPost(
       QuestPost.getCollection(mongoClient),
-      editPayload.seqId, editPayload.lang,
-      post.toObject(), editPayload.editNote,
+      {
+        [SequentialDocumentKey.sequenceId]: editPayload.seqId,
+      },
+      editPayload.lang,
+      post.toObject(),
+      editPayload.editNote,
     );
   }
 
@@ -105,21 +114,29 @@ export class QuestPostController extends PostController {
    * Get a list of quest posts.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {string} langCode language code of the posts
+   * @param {SupportedLanguages} lang language code of the posts
    * @param {number} start starting index of the post lists
    * @param {number} limit maximum count of the posts to return
    * @return {Promise<PostListResult>} post listing result
    */
   static async getPostList(
-    mongoClient: MongoClient, langCode: string, start = 0, limit = 0,
-  ): Promise<PostListResult<PostListEntry>> {
+    mongoClient: MongoClient, lang: SupportedLanguages, start = 0, limit = 0,
+  ): Promise<PostListResult<SequencedPostInfo>> {
     return QuestPostController.listPosts(
       QuestPost.getCollection(mongoClient),
-      langCode,
+      lang,
       {
         start,
         limit,
-        transformFunc: defaultTransformFunction,
+        projection: {
+          [SequentialDocumentKey.sequenceId]: 1,
+          [PostDocumentKey.title]: 1,
+        },
+        transformFunc: (post) => ({
+          ...defaultTransformFunction(post),
+          seqId: post[SequentialDocumentKey.sequenceId],
+          title: post[PostDocumentKey.title],
+        }),
       },
     );
   }
@@ -146,7 +163,7 @@ export class QuestPostController extends PostController {
     mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
   ): Promise<QuestPostGetResult | null> {
     return super.getPost<QuestPostDocument, QuestPostGetResult>(
-      QuestPost.getCollection(mongoClient), seqId, lang, incCount,
+      QuestPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
       ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
     );
   }
@@ -158,16 +175,20 @@ export class QuestPostController extends PostController {
    * (a new ID will be automatically generated and used when publishing a post without specifying it)
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string} langCode post language code to be checked
+   * @param {SupportedLanguages} lang post language to be checked
    * @param {number} seqId post sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the ID
    */
-  static async isPostIdAvailable(mongoClient: MongoClient, langCode: string, seqId?: number): Promise<boolean> {
-    return super.isIdAvailable(
-      QuestPostController,
+  static async isPostIdAvailable(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    seqId?: number,
+  ): Promise<boolean> {
+    return SequencedController.isIdAvailable(
       mongoClient,
       QuestPost.getCollection(mongoClient),
-      langCode,
+      QuestPostController.getNextSeqId,
+      lang,
       seqId,
     );
   }

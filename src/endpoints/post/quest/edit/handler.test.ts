@@ -3,7 +3,7 @@ import {
   ApiResponseCode,
   FailedResponse,
   QuestPostEditPayload,
-  QuestPostEditSuccessResponse,
+  QuestPostEditResponse,
   QuestPostPublishPayload,
   SupportedLanguages,
 } from '../../../../api-def/api';
@@ -21,7 +21,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
 
   const payloadPost: QuestPostPublishPayload = {
     googleUid: uidAdmin,
-    seqId: 1,
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -45,6 +44,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
 
   const payloadEdit: QuestPostEditPayload = {
     ...payloadPost,
+    seqId: 1,
     title: 'edit',
     video: 'videoNew',
     positional: [],
@@ -81,7 +81,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_EDIT).payload(payloadEdit);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostEditSuccessResponse = result.json() as QuestPostEditSuccessResponse;
+    const json: QuestPostEditResponse = result.json() as QuestPostEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
@@ -90,16 +90,16 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('returns success even if no change', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .payload({...payloadPost, editNote: 'a'});
+      .payload({...payloadPost, seqId: 1, editNote: 'a'});
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostEditSuccessResponse = result.json() as QuestPostEditSuccessResponse;
+    const json: QuestPostEditResponse = result.json() as QuestPostEditResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.seqId).toBe(1);
   });
 
-  it('returns failure if ID is not given', async () => {
+  it('fails if ID is not given', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, seqId: undefined});
@@ -110,7 +110,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post ID & language', async () => {
+  it('fails for non-existing post ID & language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, seqId: 8});
@@ -121,7 +121,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure for non-existing post language', async () => {
+  it('fails for non-existing post language', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, lang: SupportedLanguages.JP});
@@ -132,7 +132,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     expect(json.success).toBe(false);
   });
 
-  it('returns failure when permission insufficient', async () => {
+  it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, googleUid: uidNormal});

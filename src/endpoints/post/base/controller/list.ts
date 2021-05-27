@@ -1,18 +1,16 @@
 import {Document} from 'mongodb';
 
-import {PostListEntry} from '../../../../api-def/api';
+import {PostInfo} from '../../../../api-def/api';
 import {EditableDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
-import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
-import {PostDocumentKey} from '../model';
 
-type PostEntryTransformFunction<E extends PostListEntry> = (post: Document) => E;
+type PostEntryTransformFunction<E extends PostInfo> = (post: Document) => E;
 
 /**
  * Result object of getting a post list.
  */
-export class PostListResult<E extends PostListEntry> {
+export class PostListResult<E extends PostInfo> {
   posts: Array<Document>;
   postListEntries: Array<E>;
   totalAvailableCount: number;
@@ -35,17 +33,15 @@ export class PostListResult<E extends PostListEntry> {
   }
 }
 
-export type PostControllerListOptions<E extends PostListEntry, D extends Document> = {
+export type PostControllerListOptions<E extends PostInfo, D extends Document> = {
   start?: number,
   limit?: number,
   projection?: D,
   transformFunc: PostEntryTransformFunction<E>,
 }
 
-export const defaultTransformFunction = (post: Document): PostListEntry => ({
-  seqId: post[SequentialDocumentKey.sequenceId],
+export const defaultTransformFunction = (post: Document): PostInfo => ({
   lang: post[MultiLingualDocumentKey.language],
-  title: post[PostDocumentKey.title],
   viewCount: post[ViewCountableDocumentKey.viewCount],
   modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
   publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],

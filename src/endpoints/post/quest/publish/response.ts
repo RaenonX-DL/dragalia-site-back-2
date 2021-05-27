@@ -1,4 +1,4 @@
-import {PostPublishSuccessResponse} from '../../base/response/post/publish';
+import {SequencedPostPublishResponse} from '../../base/response/post/publish/sequenced';
 
 
 /**
@@ -6,7 +6,7 @@ import {PostPublishSuccessResponse} from '../../base/response/post/publish';
  *
  * The response contains the post sequential ID.
  */
-export class QuestPostPublishSuccessResponse extends PostPublishSuccessResponse {
+export class QuestPostPublishResponse extends SequencedPostPublishResponse {
   /**
    * @inheritDoc
    */
