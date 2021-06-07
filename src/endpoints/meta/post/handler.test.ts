@@ -171,8 +171,8 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
-      title: 'Gala Leonidas',
-      description: payloadAnalysis.summary,
+      name: 'Gala Leonidas',
+      summary: payloadAnalysis.summary,
     });
   });
 
@@ -219,7 +219,6 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
       title: payloadQuest.title,
-      description: payloadQuest.general,
     });
   });
 
@@ -264,7 +263,6 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
       title: payloadQuest.title,
-      description: payloadQuest.general,
     });
   });
 });
