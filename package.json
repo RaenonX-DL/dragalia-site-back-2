@@ -32,7 +32,8 @@
     "newrelic": "^7.4.0",
     "node-fetch": "^2.6.1",
     "pm2": "^4.5.6",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
