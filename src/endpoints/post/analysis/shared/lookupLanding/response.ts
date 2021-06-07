@@ -4,7 +4,7 @@ import {
   AnalysisLookupEntry,
 } from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
-import {UserIsAdminResponse} from '../../../../userControl/isAdmin/response';
+import {UserIsAdminResponse} from '../../../../userControl/base/response';
 
 type ConstructOptions = {
   isAdmin: boolean,

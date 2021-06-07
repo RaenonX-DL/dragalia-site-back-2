@@ -1,4 +1,4 @@
-import {UserIsAdminPayload, UserLoginPayload} from '../../api-def/api';
+import {UserLoginPayload} from '../../api-def/api';
 import {processPayloadBase} from './base';
 
 export const processUserLoginPayload = <P extends UserLoginPayload>(payload: P): P => {
@@ -9,8 +9,4 @@ export const processUserLoginPayload = <P extends UserLoginPayload>(payload: P):
   }
 
   return payload;
-};
-
-export const processUserIsAdminPayload = <P extends UserIsAdminPayload>(payload: P): P => {
-  return processPayloadBase(payload);
 };

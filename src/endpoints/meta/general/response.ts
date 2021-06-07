@@ -1,6 +1,6 @@
 import {ApiResponseCode, PageMetaResponse as PageMetaResponseApi} from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
-import {UserIsAdminResponse} from '../../userControl/isAdmin/response';
+import {UserIsAdminResponse} from '../../userControl/base/response';
 
 type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' | 'params'>;
 
