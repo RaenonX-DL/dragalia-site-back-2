@@ -191,7 +191,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
   });
 
   it('indicates that the user is ads-free', async () => {

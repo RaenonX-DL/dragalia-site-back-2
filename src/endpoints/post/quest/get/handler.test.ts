@@ -190,7 +190,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     const json: QuestPostGetResponse = result.json() as QuestPostGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
   });
 
   it('increments view count per request', async () => {

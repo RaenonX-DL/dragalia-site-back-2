@@ -84,7 +84,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -100,7 +99,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -117,7 +115,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -134,7 +131,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -151,7 +147,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(false);
   });
 
@@ -168,41 +163,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
-    expect(json.available).toBe(false);
-  });
-
-  it('returns unavailable for normal user', async () => {
-    const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidNormal,
-      seqId: newPostSeqId + 1,
-      lang: payloadPost.lang,
-    };
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(false);
-    expect(json.available).toBe(false);
-  });
-
-  it('returns unavailable for ads-free user', async () => {
-    const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdsFree,
-      seqId: newPostSeqId + 1,
-      lang: payloadPost.lang,
-    };
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_ID_CHECK).query(payloadIdCheck);
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(false);
     expect(json.available).toBe(false);
   });
 });

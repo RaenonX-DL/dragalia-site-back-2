@@ -4,19 +4,16 @@ import {
   AnalysisLookupAnalyses,
 } from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
-import {UserIsAdminResponse} from '../../../../userControl/base/response';
+
 
 type ConstructOptions = {
-  isAdmin: boolean,
   analyses: AnalysisLookupAnalyses
 }
 
 /**
  * API response class for getting the info for analysis lookup.
  */
-export class AnalysisLookupResponse extends ApiResponse implements UserIsAdminResponse {
-  isAdmin: boolean;
-
+export class AnalysisLookupResponse extends ApiResponse {
   analyses: AnalysisLookupAnalyses
 
   /**
@@ -27,7 +24,6 @@ export class AnalysisLookupResponse extends ApiResponse implements UserIsAdminRe
   constructor(options: ConstructOptions) {
     super(ApiResponseCode.SUCCESS);
 
-    this.isAdmin = options.isAdmin;
     this.analyses = options.analyses;
   }
 
@@ -37,7 +33,6 @@ export class AnalysisLookupResponse extends ApiResponse implements UserIsAdminRe
   toJson(): AnalysisLookupResponseApi {
     return {
       ...super.toJson(),
-      isAdmin: this.isAdmin,
       analyses: this.analyses,
     };
   }

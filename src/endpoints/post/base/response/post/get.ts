@@ -3,12 +3,11 @@ import {
   PostBodyBase,
   PostGetResponse as PostGetResponseApi,
   ApiResponseCode,
-  UserIsAdminResponse,
 } from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
 
-export type PostGetResponseParam = Omit<PostGetResponseApi, keyof BaseResponse | keyof UserIsAdminResponse>;
+export type PostGetResponseParam = Omit<PostGetResponseApi, keyof BaseResponse>;
 
 /**
  * API response class for getting a post.
@@ -18,21 +17,16 @@ export type PostGetResponseParam = Omit<PostGetResponseApi, keyof BaseResponse |
  * but not included in the view count calculation of this get response.
  */
 export abstract class PostGetResponse extends ApiResponse {
-  isAdmin: boolean;
-
   params: PostBodyBase;
 
   /**
    * Construct a successful post getting API response.
    *
-   * @param {boolean} isAdmin if the user is an admin
    * @param {PostBodyBase} params parameters for constructing a successful post getting response
    * @protected
    */
-  protected constructor(isAdmin: boolean, params: PostBodyBase) {
+  protected constructor(params: PostBodyBase) {
     super(ApiResponseCode.SUCCESS);
-
-    this.isAdmin = isAdmin;
 
     this.params = params;
   }
@@ -43,7 +37,6 @@ export abstract class PostGetResponse extends ApiResponse {
   toJson(): PostGetResponseApi {
     return {
       ...super.toJson(),
-      isAdmin: this.isAdmin,
       ...this.params,
     };
   }

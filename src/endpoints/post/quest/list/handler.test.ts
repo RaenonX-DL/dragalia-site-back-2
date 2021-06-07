@@ -170,6 +170,5 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(7);
-    expect(json.isAdmin).toBe(true);
   });
 });

@@ -7,6 +7,7 @@ import {ApiFailedResponse} from '../../base/response/failed';
 import {QuestPostController} from '../controller';
 import {QuestPostGetResponse} from './response';
 
+
 export const handleGetQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostGetPayload>,
 ): Promise<ApiResponse> => {
@@ -22,9 +23,8 @@ export const handleGetQuestPost = async (
     (payload) => (
       QuestPostController.getQuestPost(mongoClient, payload.seqId, payload.lang, true)
     ),
-    (userData, getResult) => {
+    (getResult) => {
       return new QuestPostGetResponse(
-        userData ? userData.isAdmin : false,
         getResult.toResponseReady(),
       );
     },

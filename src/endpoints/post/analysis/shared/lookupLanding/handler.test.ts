@@ -129,6 +129,5 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
   });
 });

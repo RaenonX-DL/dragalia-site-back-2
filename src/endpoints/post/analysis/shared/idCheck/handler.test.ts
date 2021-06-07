@@ -80,7 +80,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -97,7 +96,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(true);
   });
 
@@ -114,7 +112,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(false);
   });
 
@@ -131,7 +128,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
     expect(json.available).toBe(false);
   });
 
@@ -148,7 +144,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(false);
     expect(json.available).toBe(false);
   });
 
@@ -165,7 +160,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
     const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(false);
     expect(json.available).toBe(false);
   });
 });

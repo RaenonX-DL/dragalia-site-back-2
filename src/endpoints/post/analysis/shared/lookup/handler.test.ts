@@ -124,6 +124,5 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.isAdmin).toBe(true);
   });
 });
