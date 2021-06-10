@@ -17,7 +17,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   let app: Application;
 
   const payloadChara: CharaAnalysisPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
@@ -39,7 +39,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   };
 
   const payloadDragon: DragonAnalysisPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     type: UnitType.DRAGON,
     lang: SupportedLanguages.CHT,
     unitId: 10,

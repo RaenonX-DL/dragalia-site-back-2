@@ -8,8 +8,8 @@ import {
   UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
-import {GoogleUserController} from '../../../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../../../userControl/model';
+import {UserController} from '../../../../userControl/controller';
+import {User, UserDocumentKey} from '../../../../userControl/model';
 import {AnalysisController} from '../../controller';
 
 describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis ID availability`, () => {
@@ -20,7 +20,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
   const uidAdsFree = '789123456';
 
   const payload: CharaAnalysisPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
@@ -47,18 +47,18 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payload);
   });
@@ -69,7 +69,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns available for an unused unit ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: payload.lang,
       unitId: 10950102,
     };
@@ -85,7 +85,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns available for an unused language in an used ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: SupportedLanguages.EN,
       unitId: payload.unitId,
     };
@@ -101,7 +101,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns unavailable if unit ID does not exist', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: payload.lang,
       unitId: 7,
     };
@@ -117,7 +117,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns unavailable for an existing unit ID', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: payload.lang,
       unitId: payload.unitId,
     };
@@ -133,7 +133,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns unavailable for normal user', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidNormal,
+      uid: uidNormal,
       lang: payload.lang,
       unitId: payload.unitId,
     };
@@ -149,7 +149,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   it('returns unavailable for ads-free user', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
-      googleUid: uidAdsFree,
+      uid: uidAdsFree,
       lang: payload.lang,
       unitId: payload.unitId,
     };

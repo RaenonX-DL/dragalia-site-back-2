@@ -25,7 +25,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
   });
 
   const payload: QuestPostPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -48,7 +48,7 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
   };
 
   const payload2: QuestPostPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     lang: SupportedLanguages.EN,
     title: 'post-en',
     general: 'general-en',

@@ -2,7 +2,7 @@
 
 import {ApiEndPoints, ApiResponseCode, FailedResponse, UserLoginPayload, UserLoginResponse} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
-import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from '../model';
+import {User, UserDocument, UserDocumentKey} from '../model';
 
 describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, () => {
   let app: Application;
@@ -20,13 +20,13 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   });
 
   const userPayload: UserLoginPayload = {
-    googleEmail: 'fake@gmail.com',
-    googleUid: '88888888',
+    email: 'fake@gmail.com',
+    uid: '88888888',
   };
 
   const userPayloadEmpty: UserLoginPayload = {
-    googleEmail: '',
-    googleUid: '',
+    email: '',
+    uid: '',
   };
 
   it('registers a new user', async () => {
@@ -54,13 +54,13 @@ describe(`[Server] GET ${ApiEndPoints.USER_LOGIN} - the user login endpoint`, ()
   it('stores the user data', async () => {
     await app.app.inject().post(ApiEndPoints.USER_LOGIN).payload(userPayload);
 
-    const docQuery = await GoogleUser.getCollection(await app.mongoClient).findOne(
+    const docQuery = await User.getCollection(await app.mongoClient).findOne(
       {
-        [GoogleUserDocumentKey.userId]: userPayload.googleUid,
-        [GoogleUserDocumentKey.email]: userPayload.googleEmail,
+        [UserDocumentKey.userId]: userPayload.uid,
+        [UserDocumentKey.email]: userPayload.email,
       },
     );
-    const doc = GoogleUser.fromDocument(docQuery as GoogleUserDocument);
+    const doc = User.fromDocument(docQuery as UserDocument);
     expect(doc).not.toBeFalsy();
     expect(doc.loginCount).toEqual(1);
     expect(doc.lastLogin.valueOf() - Date.now()).toBeLessThanOrEqual(1000);

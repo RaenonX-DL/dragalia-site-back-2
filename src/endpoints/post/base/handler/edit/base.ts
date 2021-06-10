@@ -3,7 +3,7 @@ import {MongoClient} from 'mongodb';
 import {PostEditPayload} from '../../../../../api-def/api/post/base/payload/common';
 import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
 import {ApiResponse} from '../../../../../base/response';
-import {GoogleUserController} from '../../../../userControl/controller';
+import {UserController} from '../../../../userControl/controller';
 import {ApiFailedResponse} from '../../response/failed';
 import {PostEditResponse} from '../../response/post/edit/common';
 import {FunctionConstructResponse, FunctionEditPost} from './types';
@@ -15,7 +15,7 @@ export const handleEditPost = async <P extends PostEditPayload, R extends PostEd
   fnConstructResponse: FunctionConstructResponse<P, R>,
 ): Promise<ApiResponse> => {
   // Check user privilege
-  const isAdmin = await GoogleUserController.isAdmin(mongoClient, payload.googleUid);
+  const isAdmin = await UserController.isAdmin(mongoClient, payload.uid);
   if (!isAdmin) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, {httpCode: 401});
   }

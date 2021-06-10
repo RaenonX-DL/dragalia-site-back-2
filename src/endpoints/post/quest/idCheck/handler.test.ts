@@ -8,8 +8,8 @@ import {
   QuestPostPublishPayload, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {GoogleUserController} from '../../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../../userControl/model';
+import {UserController} from '../../../userControl/controller';
+import {User, UserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
 
 describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availability of a quest post`, () => {
@@ -20,7 +20,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
   const uidAdsFree = '789123456';
 
   const payloadPost: QuestPostPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     seqId: 1,
     lang: SupportedLanguages.CHT,
     title: 'post',
@@ -51,18 +51,18 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
     newPostSeqId = await QuestPostController.publishPost(app.mongoClient, payloadPost);
   });
@@ -73,7 +73,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns available for the next unused ID in the same language', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       seqId: newPostSeqId + 1,
       lang: payloadPost.lang,
     };
@@ -89,7 +89,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns available if ID is not given', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: payloadPost.lang,
     };
 
@@ -104,7 +104,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns available for an unused language in the same ID', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       seqId: newPostSeqId,
       lang: SupportedLanguages.EN,
     };
@@ -120,7 +120,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns available for an unused language in the next unused ID', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       seqId: newPostSeqId + 1,
       lang: SupportedLanguages.EN,
     };
@@ -136,7 +136,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns unavailable for a skipping ID', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       seqId: newPostSeqId + 2,
       lang: payloadPost.lang,
     };
@@ -152,7 +152,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
 
   it('returns unavailable for an existing ID', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       seqId: newPostSeqId,
       lang: payloadPost.lang,
     };

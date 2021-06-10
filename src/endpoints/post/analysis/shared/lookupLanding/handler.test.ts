@@ -8,7 +8,7 @@ import {
   UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
-import {GoogleUserController} from '../../../../userControl/controller';
+import {UserController} from '../../../../userControl/controller';
 import {AnalysisController} from '../../controller';
 
 
@@ -18,7 +18,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
   const uidAdmin = '78787878887';
 
   const payloadPost: CharaAnalysisPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
@@ -40,7 +40,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
   };
 
   const payloadLookup: AnalysisLookupLandingPayload = {
-    googleUid: '',
+    uid: '',
     lang: SupportedLanguages.CHT,
   };
 
@@ -50,7 +50,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
   });
@@ -123,7 +123,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING)
-      .query({...payloadLookup, googleUid: uidAdmin});
+      .query({...payloadLookup, uid: uidAdmin});
     expect(result.statusCode).toBe(200);
 
     const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;

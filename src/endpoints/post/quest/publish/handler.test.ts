@@ -9,7 +9,7 @@ import {
 import {Application, createApp} from '../../../../app';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
-import {GoogleUserController} from '../../../userControl/controller';
+import {UserController} from '../../../userControl/controller';
 import {PostDocumentKey} from '../../base/model';
 import {QuestPosition, QuestPost, QuestPostDocument} from '../model';
 
@@ -39,7 +39,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add1',
-    googleUid: uidNormal,
+    uid: uidNormal,
   };
 
   const questPayload2: QuestPostPublishPayload = {
@@ -56,12 +56,12 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add2',
-    googleUid: uidAdmin,
+    uid: uidAdmin,
   };
 
   const questPayload3: QuestPostPublishPayload = {
     ...questPayload2,
-    googleUid: uidNormal,
+    uid: uidNormal,
   };
 
   const questPayload4: QuestPostPublishPayload = {
@@ -90,10 +90,10 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
   });
@@ -125,7 +125,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it('publishes a new quest post given a valid unused sequential ID', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_PUBLISH)
-      .payload({...questPayload1, googleUid: uidAdmin});
+      .payload({...questPayload1, uid: uidAdmin});
     expect(result.statusCode).toBe(200);
 
     const json: QuestPostPublishResponse = result.json() as QuestPostPublishResponse;

@@ -3,12 +3,13 @@ import {Collection, MongoClient, ObjectId} from 'mongodb';
 import {CollectionInfo} from '../../base/controller/info';
 import {Document, DocumentBase, DocumentBaseKey} from '../../base/model/base';
 
+
 export const dbInfo: CollectionInfo = {
   dbName: 'user',
   collectionName: 'google',
 };
 
-export enum GoogleUserDocumentKey {
+export enum UserDocumentKey {
   email = 'em',
   userId = 'uid',
   isAdmin = 'a',
@@ -17,21 +18,21 @@ export enum GoogleUserDocumentKey {
   lastLogin = 'lr',
 }
 
-export type GoogleUserDocument = DocumentBase & {
-  [GoogleUserDocumentKey.email]: string,
-  [GoogleUserDocumentKey.userId]: string,
-  [GoogleUserDocumentKey.isAdmin]: boolean,
-  [GoogleUserDocumentKey.adsFreeExpiry]?: Date,
-  [GoogleUserDocumentKey.loginCount]: number,
-  [GoogleUserDocumentKey.lastLogin]: Date,
+export type UserDocument = DocumentBase & {
+  [UserDocumentKey.email]: string,
+  [UserDocumentKey.userId]: string,
+  [UserDocumentKey.isAdmin]: boolean,
+  [UserDocumentKey.adsFreeExpiry]?: Date,
+  [UserDocumentKey.loginCount]: number,
+  [UserDocumentKey.lastLogin]: Date,
 }
 
 /**
- * A Google user document.
+ * A user data document.
  */
-export class GoogleUser extends Document {
-  googleEmail: string;
-  googleUid: string;
+export class User extends Document {
+  email: string;
+  uid: string;
   isAdmin: boolean;
   adsFreeExpiry?: Date;
   loginCount: number;
@@ -40,10 +41,10 @@ export class GoogleUser extends Document {
   isAdsFree: boolean;
 
   /**
-   * Construct a Google user document data.
+   * Construct a user data.
    *
-   * @param {string} googleEmail email of the google account
-   * @param {string} googleUid unique user ID of the google account, this should consist of numbers
+   * @param {string} email email of the account
+   * @param {string} uid unique user ID of the account
    * @param {boolean} isAdmin if the user is a site admin
    * @param {Date} adsFreeExpiry date of the ads-free service expiry
    * @param {ObjectId} id document object ID
@@ -51,13 +52,13 @@ export class GoogleUser extends Document {
    * @param {Date} lastLogin last login time
    */
   constructor(
-    googleEmail: string, googleUid: string, isAdmin: boolean, adsFreeExpiry?: Date,
+    email: string, uid: string, isAdmin: boolean, adsFreeExpiry?: Date,
     id?: ObjectId, loginCount?: number, lastLogin?: Date,
   ) {
     super({id});
 
-    this.googleEmail = googleEmail;
-    this.googleUid = googleUid;
+    this.email = email;
+    this.uid = uid;
     this.isAdmin = isAdmin;
     this.adsFreeExpiry = adsFreeExpiry;
     this.loginCount = loginCount || 0;
@@ -69,15 +70,15 @@ export class GoogleUser extends Document {
   /**
    * @inheritDoc
    */
-  static fromDocument(doc: GoogleUserDocument): GoogleUser {
-    return new GoogleUser(
-      doc[GoogleUserDocumentKey.email],
-      doc[GoogleUserDocumentKey.userId],
-      doc[GoogleUserDocumentKey.isAdmin],
-      doc[GoogleUserDocumentKey.adsFreeExpiry],
+  static fromDocument(doc: UserDocument): User {
+    return new User(
+      doc[UserDocumentKey.email],
+      doc[UserDocumentKey.userId],
+      doc[UserDocumentKey.isAdmin],
+      doc[UserDocumentKey.adsFreeExpiry],
       doc[DocumentBaseKey.id],
-      doc[GoogleUserDocumentKey.loginCount],
-      doc[GoogleUserDocumentKey.lastLogin],
+      doc[UserDocumentKey.loginCount],
+      doc[UserDocumentKey.lastLogin],
     );
   }
 
@@ -86,23 +87,23 @@ export class GoogleUser extends Document {
    */
   static getCollection(mongoClient: MongoClient): Collection {
     return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      collection.createIndex(GoogleUserDocumentKey.userId, {unique: true});
-      collection.createIndex(GoogleUserDocumentKey.adsFreeExpiry, {expireAfterSeconds: 1});
+      collection.createIndex(UserDocumentKey.userId, {unique: true});
+      collection.createIndex(UserDocumentKey.adsFreeExpiry, {expireAfterSeconds: 1});
     }));
   }
 
   /**
    * @inheritDoc
    */
-  toObject(): GoogleUserDocument {
+  toObject(): UserDocument {
     return {
       [DocumentBaseKey.id]: this.id,
-      [GoogleUserDocumentKey.email]: this.googleEmail,
-      [GoogleUserDocumentKey.userId]: this.googleUid,
-      [GoogleUserDocumentKey.isAdmin]: this.isAdmin,
-      [GoogleUserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
-      [GoogleUserDocumentKey.loginCount]: this.loginCount,
-      [GoogleUserDocumentKey.lastLogin]: this.lastLogin,
+      [UserDocumentKey.email]: this.email,
+      [UserDocumentKey.userId]: this.uid,
+      [UserDocumentKey.isAdmin]: this.isAdmin,
+      [UserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
+      [UserDocumentKey.loginCount]: this.loginCount,
+      [UserDocumentKey.lastLogin]: this.lastLogin,
     };
   }
 }

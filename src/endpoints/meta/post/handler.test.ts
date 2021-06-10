@@ -12,8 +12,8 @@ import {Application, createApp} from '../../../app';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {AnalysisController} from '../../post/analysis/controller';
 import {QuestPostController} from '../../post/quest/controller';
-import {GoogleUserController} from '../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../userControl/model';
+import {UserController} from '../../userControl/controller';
+import {User, UserDocumentKey} from '../../userControl/model';
 
 describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
   let app: Application;
@@ -23,7 +23,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
   const uidAdmin = 'uidAdmin';
 
   const payloadQuest: QuestPostPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     seqId: 1,
     lang: SupportedLanguages.EN,
     title: 'post',
@@ -47,7 +47,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
   };
 
   const payloadAnalysis: CharaAnalysisPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.EN,
     unitId: 10950101,
@@ -74,18 +74,18 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadAnalysis);
     await QuestPostController.publishPost(app.mongoClient, payloadQuest);
@@ -97,7 +97,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('the return is correct for admin users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: uidAdmin,
+      uid: uidAdmin,
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -113,7 +113,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('the return is correct for ads-free users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: uidAdsFree,
+      uid: uidAdsFree,
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -129,7 +129,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('the return is correct for normal users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: uidNormal,
+      uid: uidNormal,
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -145,7 +145,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('the return is correct without user ID', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -161,7 +161,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   it('returns unit name as analysis meta if unit info exists', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -178,7 +178,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   it('returns not exists if unit info does not exist', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: 888,
       postType: PostType.ANALYSIS,
@@ -192,7 +192,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('getting analysis does not increase view count', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
@@ -208,7 +208,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   it('returns correct quest meta', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: 1,
       postType: PostType.QUEST,
@@ -224,7 +224,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   test('getting quest does not increase view count', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: 1,
       postType: PostType.QUEST,
@@ -238,7 +238,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   it('fails if the post does not exist', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.EN,
       postId: 88888888,
       postType: PostType.QUEST,
@@ -252,7 +252,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   it('returns meta if the post exists in alt language', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
-      googleUid: '',
+      uid: '',
       lang: SupportedLanguages.CHT,
       postId: 1,
       postType: PostType.QUEST,

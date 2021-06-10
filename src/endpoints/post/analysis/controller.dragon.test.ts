@@ -12,7 +12,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   let app: Application;
 
   const payloadDragon: DragonAnalysisPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     type: UnitType.DRAGON,
     lang: SupportedLanguages.CHT,
     unitId: 20040405,

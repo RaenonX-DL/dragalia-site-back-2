@@ -8,8 +8,8 @@ import {
   QuestPostPublishPayload, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {GoogleUserController} from '../../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../../userControl/model';
+import {UserController} from '../../../userControl/controller';
+import {User, UserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
 
 describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing endpoint`, () => {
@@ -20,7 +20,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   const uidAdsFree = '789123456';
 
   const payloadPost: QuestPostPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -43,14 +43,14 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   };
 
   const payloadList1: QuestPostListPayload = {
-    googleUid: '',
+    uid: '',
     lang: SupportedLanguages.CHT,
     start: 0,
     limit: 25,
   };
 
   const payloadList2: QuestPostListPayload = {
-    googleUid: '',
+    uid: '',
     lang: SupportedLanguages.CHT,
     start: 2,
     limit: 2,
@@ -62,18 +62,18 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
   });
 
@@ -163,7 +163,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_QUEST_LIST)
-      .query({...payloadList1, googleUid: uidAdmin});
+      .query({...payloadList1, uid: uidAdmin});
     expect(result.statusCode).toBe(200);
 
     const json: QuestPostListResponse = result.json() as QuestPostListResponse;

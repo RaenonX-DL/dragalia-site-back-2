@@ -9,7 +9,7 @@ import {
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
-import {GoogleUserController} from '../../../../userControl/controller';
+import {UserController} from '../../../../userControl/controller';
 import {DragonAnalysis, DragonAnalysisDocument} from '../../model/dragon';
 import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 
@@ -21,7 +21,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
   const uidAdmin = '78787878887';
 
   const payload1: DragonAnalysisPublishPayload = {
-    googleUid: uidNormal,
+    uid: uidNormal,
     type: UnitType.DRAGON,
     lang: SupportedLanguages.CHT,
     unitId: 20040405,
@@ -39,7 +39,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
 
   const payload2: DragonAnalysisPublishPayload = {
     ...payload1,
-    googleUid: uidAdmin,
+    uid: uidAdmin,
   };
 
   const payload4: DragonAnalysisPublishPayload = {
@@ -58,10 +58,10 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
   });

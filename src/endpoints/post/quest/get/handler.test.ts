@@ -8,8 +8,8 @@ import {
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {GoogleUserController} from '../../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../../userControl/model';
+import {UserController} from '../../../userControl/controller';
+import {User, UserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
 
 
@@ -22,12 +22,12 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
 
   const payloadGet: QuestPostGetPayload = {
     seqId: 1,
-    googleUid: uidNormal,
+    uid: uidNormal,
     lang: SupportedLanguages.CHT,
   };
 
   const payloadPost: QuestPostPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -55,18 +55,18 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
   });
 
@@ -183,7 +183,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
 
     const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(
-      {...payloadGet, googleUid: uidAdmin},
+      {...payloadGet, uid: uidAdmin},
     );
     expect(result.statusCode).toBe(200);
 

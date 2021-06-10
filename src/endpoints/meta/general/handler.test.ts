@@ -1,7 +1,7 @@
 import {ApiEndPoints, ApiResponseCode, PageMetaResponse} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
-import {GoogleUserController} from '../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../userControl/model';
+import {UserController} from '../../userControl/controller';
+import {User, UserDocumentKey} from '../../userControl/model';
 
 describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, () => {
   let app: Application;
@@ -16,18 +16,18 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidNormal, 'normal@email.com',
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdmin, 'admin@email.com', true,
     );
-    await GoogleUserController.userLogin(
+    await UserController.userLogin(
       app.mongoClient, uidAdsFree, 'adsFree@email.com',
     );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
+    await User.getCollection(app.mongoClient).updateOne(
+      {[UserDocumentKey.userId]: uidAdsFree},
+      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
     );
   });
 
@@ -37,7 +37,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   test('the return is correct for admin users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_GENERAL).query({
-      googleUid: uidAdmin,
+      uid: uidAdmin,
     });
     expect(response.statusCode).toBe(200);
 
@@ -50,7 +50,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   test('the return is correct for ads-free users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_GENERAL).query({
-      googleUid: uidAdsFree,
+      uid: uidAdsFree,
     });
     expect(response.statusCode).toBe(200);
 
@@ -63,7 +63,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   test('the return is correct for normal users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_GENERAL).query({
-      googleUid: uidNormal,
+      uid: uidNormal,
     });
     expect(response.statusCode).toBe(200);
 
@@ -76,7 +76,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   test('the return is correct without user ID', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_GENERAL).query({
-      googleUid: '',
+      uid: '',
     });
     expect(response.statusCode).toBe(200);
 
