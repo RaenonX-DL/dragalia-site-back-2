@@ -311,14 +311,26 @@ export class AnalysisController extends PostController {
   static async getAnalysis(
     mongoClient: MongoClient, unitId: number, lang: SupportedLanguages, incCount = true,
   ): Promise<AnalysisGetResult | null> {
+    // Tries to get the analysis using `unitId` (indexed)
+    const result = await super.getPost<AnalysisDocument, AnalysisGetResult>(
+      UnitAnalysis.getCollection(mongoClient),
+      {[UnitAnalysisDocumentKey.unitId]: unitId},
+      lang,
+      incCount,
+      (post, isAltLang, otherLangs) => (
+        new AnalysisGetResult(post, isAltLang, otherLangs)
+      ),
+    );
+
+    // Early return if found
+    if (result) {
+      return result;
+    }
+
+    // Otherwise, use sequential ID to get the analysis instead
     return super.getPost<AnalysisDocument, AnalysisGetResult>(
       UnitAnalysis.getCollection(mongoClient),
-      {
-        $or: [
-          {[UnitAnalysisDocumentKey.unitId]: unitId},
-          {[SequentialDocumentKey.sequenceId]: unitId},
-        ],
-      },
+      {[SequentialDocumentKey.sequenceId]: unitId},
       lang,
       incCount,
       (post, isAltLang, otherLangs) => (
