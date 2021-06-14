@@ -12,7 +12,7 @@
     "dev": "nodemon",
     "build": "tsc -p .",
     "start": "pm2-runtime start pm2.yml --env production",
-    "test": "jest",
+    "test": "jest --maxWorkers=50% --colors",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix"
   },
