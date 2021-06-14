@@ -1,4 +1,5 @@
-import {DocumentBase} from './base';
+import {DocumentBase} from '../../api-def/models';
+
 
 export enum ViewCountableDocumentKey {
   viewCount = '_vc'

@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../../../test/data/user';
 import {
   AnalysisIdCheckPayload,
   AnalysisIdCheckResponse,
@@ -8,16 +11,14 @@ import {
   UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
-import {UserController} from '../../../../userControl/controller';
-import {User, UserDocumentKey} from '../../../../userControl/model';
 import {AnalysisController} from '../../controller';
+
 
 describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis ID availability`, () => {
   let app: Application;
 
-  const uidAdmin = '78787878887';
-  const uidNormal = '1234567890';
-  const uidAdsFree = '789123456';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const payload: CharaAnalysisPublishPayload = {
     uid: uidAdmin,
@@ -47,19 +48,8 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payload);
   });
 
@@ -134,22 +124,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_ID_CHECK} - check analysis I
   it('returns unavailable for normal user', async () => {
     const payloadIdCheck: AnalysisIdCheckPayload = {
       uid: uidNormal,
-      lang: payload.lang,
-      unitId: payload.unitId,
-    };
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_ID_CHECK).query(payloadIdCheck);
-    expect(result.statusCode).toBe(200);
-
-    const json: AnalysisIdCheckResponse = result.json() as AnalysisIdCheckResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.available).toBe(false);
-  });
-
-  it('returns unavailable for ads-free user', async () => {
-    const payloadIdCheck: AnalysisIdCheckPayload = {
-      uid: uidAdsFree,
       lang: payload.lang,
       unitId: payload.unitId,
     };

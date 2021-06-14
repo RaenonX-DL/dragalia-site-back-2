@@ -21,7 +21,6 @@ import {handleListQuestPost} from './post/quest/list/handler';
 import {handlePublishQuestPost} from './post/quest/publish/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
-import {handleUserLogin} from './userControl/login/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -45,7 +44,6 @@ type EndpointHandlers<P extends RequestPayloadBase = never> = {
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
-  [ApiEndPoints.USER_LOGIN]: {POST: handleUserLogin},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},

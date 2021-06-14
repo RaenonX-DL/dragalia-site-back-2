@@ -1,14 +1,16 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../test/data/user';
 import {ApiEndPoints, ApiResponseCode, PageMetaResponse} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
-import {UserController} from '../../userControl/controller';
-import {User, UserDocumentKey} from '../../userControl/model';
+
 
 describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, () => {
   let app: Application;
 
-  const uidNormal = 'uidNormal';
-  const uidAdsFree = 'uidAdsFree';
-  const uidAdmin = 'uidAdmin';
+  let uidNormal: ObjectId;
+  let uidAdsFree: ObjectId;
+  let uidAdmin: ObjectId;
 
   beforeAll(async () => {
     app = await createApp();
@@ -16,19 +18,9 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
+    uidNormal = await insertMockUser(app.mongoClient);
+    uidAdsFree = await insertMockUser(app.mongoClient, {isAdsFree: true});
+    uidAdmin = await insertMockUser(app.mongoClient, {isAdmin: true});
   });
 
   afterAll(async () => {

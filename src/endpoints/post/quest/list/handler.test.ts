@@ -1,4 +1,4 @@
-
+import {ObjectId} from 'mongodb';
 
 import {
   ApiEndPoints,
@@ -8,19 +8,14 @@ import {
   QuestPostPublishPayload, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {UserController} from '../../../userControl/controller';
-import {User, UserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
+
 
 describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing endpoint`, () => {
   let app: Application;
 
-  const uidAdmin = '78787878887';
-  const uidNormal = '1234567890';
-  const uidAdsFree = '789123456';
-
   const payloadPost: QuestPostPublishPayload = {
-    uid: 'uid',
+    uid: new ObjectId().toHexString(),
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -62,19 +57,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
   });
 
   afterAll(async () => {
@@ -154,21 +136,5 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.success).toBe(true);
     expect(json.postCount).toBe(0);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
-  });
-
-  it('returns that the user is an admin', async () => {
-    for (let i = 0; i < 7; i++) {
-      await QuestPostController.publishPost(app.mongoClient, payloadPost);
-    }
-
-    const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
-      .query({...payloadList1, uid: uidAdmin});
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.postCount).toBe(7);
   });
 });

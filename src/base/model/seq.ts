@@ -1,10 +1,11 @@
 import {Collection, MongoClient} from 'mongodb';
 
+import {DocumentBase} from '../../api-def/models';
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
 import {NextSeqIdOptions} from '../controller/seq';
-import {Document, DocumentBase, DocumentConstructParams} from './base';
+import {Document, DocumentConstructParams} from './base';
 
 
 export enum SequentialDocumentKey {

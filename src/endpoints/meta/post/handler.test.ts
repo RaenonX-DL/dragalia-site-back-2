@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -12,15 +15,14 @@ import {Application, createApp} from '../../../app';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {AnalysisController} from '../../post/analysis/controller';
 import {QuestPostController} from '../../post/quest/controller';
-import {UserController} from '../../userControl/controller';
-import {User, UserDocumentKey} from '../../userControl/model';
+
 
 describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
   let app: Application;
 
-  const uidNormal = 'uidNormal';
-  const uidAdsFree = 'uidAdsFree';
-  const uidAdmin = 'uidAdmin';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdsFree = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const payloadQuest: QuestPostPublishPayload = {
     uid: 'uid',
@@ -74,19 +76,9 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadAnalysis);
     await QuestPostController.publishPost(app.mongoClient, payloadQuest);
   });

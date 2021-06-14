@@ -1,3 +1,5 @@
+import {ObjectId} from 'mongodb';
+
 import {
   AnalysisGetPayload,
   ApiEndPoints,
@@ -9,27 +11,21 @@ import {
   UnitType,
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
-import {UserController} from '../../../../userControl/controller';
-import {User, UserDocumentKey} from '../../../../userControl/model';
 import {AnalysisController} from '../../controller';
 
 
 describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => {
   let app: Application;
 
-  const uidAdmin = '78787878887';
-  const uidNormal = '1234567890';
-  const uidAdsFree = '789123456';
-
   const payloadGet: AnalysisGetPayload = {
     unitId: 10950101,
     incCount: true,
-    uid: uidNormal,
+    uid: new ObjectId().toHexString(),
     lang: SupportedLanguages.CHT,
   };
 
   const payloadPost: CharaAnalysisPublishPayload = {
-    uid: uidAdmin,
+    uid: new ObjectId().toHexString(),
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,
@@ -56,19 +52,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
   });
 
   afterAll(async () => {
@@ -178,32 +161,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
     expect(json.success).toBe(false);
-  });
-
-  it('indicates that the user has the admin privilege', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, uid: uidAdmin},
-    );
-    expect(result.statusCode).toBe(200);
-
-    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-  });
-
-  it('indicates that the user is ads-free', async () => {
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET).query(
-      {...payloadGet, uid: uidAdsFree},
-    );
-    expect(result.statusCode).toBe(200);
-
-    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
   });
 
   it('increments view count per request', async () => {

@@ -1,8 +1,8 @@
 import {Collection, Document} from 'mongodb';
 
 import {PostInfo, SupportedLanguages} from '../../../../api-def/api';
+import {DocumentBaseKey} from '../../../../api-def/models';
 import {UpdateResult} from '../../../../base/enum/updateResult';
-import {DocumentBaseKey} from '../../../../base/model/base';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';

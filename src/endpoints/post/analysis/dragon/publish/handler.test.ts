@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../../../test/data/user';
 import {
   AnalysisPublishResponse,
   ApiEndPoints,
@@ -9,7 +12,6 @@ import {
 } from '../../../../../api-def/api';
 import {Application, createApp} from '../../../../../app';
 import {MultiLingualDocumentKey} from '../../../../../base/model/multiLang';
-import {UserController} from '../../../../userControl/controller';
 import {DragonAnalysis, DragonAnalysisDocument} from '../../model/dragon';
 import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 
@@ -17,8 +19,8 @@ import {UnitAnalysisDocumentKey} from '../../model/unitAnalysis';
 describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish dragon analysis`, () => {
   let app: Application;
 
-  const uidNormal = '87878787877';
-  const uidAdmin = '78787878887';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const payload1: DragonAnalysisPublishPayload = {
     uid: uidNormal,
@@ -58,12 +60,8 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
   });
 
   afterAll(async () => {

@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -8,17 +11,15 @@ import {
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {UserController} from '../../../userControl/controller';
-import {User, UserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
 
 
 describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest post`, () => {
   let app: Application;
 
-  const uidAdmin = '78787878887';
-  const uidNormal = '1234567890';
-  const uidAdsFree = '789123456';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdsFree = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const payloadGet: QuestPostGetPayload = {
     seqId: 1,
@@ -55,19 +56,9 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
 
   beforeEach(async () => {
     await app.reset();
-    await UserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await UserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await User.getCollection(app.mongoClient).updateOne(
-      {[UserDocumentKey.userId]: uidAdsFree},
-      {$set: {[UserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
   });
 
   afterAll(async () => {

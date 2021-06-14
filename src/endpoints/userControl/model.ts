@@ -1,95 +1,68 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {AUTH_DB, AUTH_USER_COLLECTION, UserDocument, UserDocumentKey, DocumentBaseKey} from '../../api-def/models';
 import {CollectionInfo} from '../../base/controller/info';
-import {Document, DocumentBase, DocumentBaseKey} from '../../base/model/base';
+import {Document} from '../../base/model/base';
 
+
+type UserConstructOptions = UserDocument
 
 export const dbInfo: CollectionInfo = {
-  dbName: 'user',
-  collectionName: 'google',
+  dbName: AUTH_DB,
+  collectionName: AUTH_USER_COLLECTION,
 };
 
-export enum UserDocumentKey {
-  email = 'em',
-  userId = 'uid',
-  isAdmin = 'a',
-  adsFreeExpiry = 'ad',
-  loginCount = 'lc',
-  lastLogin = 'lr',
-}
-
-export type UserDocument = DocumentBase & {
-  [UserDocumentKey.email]: string,
-  [UserDocumentKey.userId]: string,
-  [UserDocumentKey.isAdmin]: boolean,
-  [UserDocumentKey.adsFreeExpiry]?: Date,
-  [UserDocumentKey.loginCount]: number,
-  [UserDocumentKey.lastLogin]: Date,
-}
-
 /**
- * A user data document.
+ * A user data.
  */
 export class User extends Document {
+  uid: ObjectId;
+
+  name: string;
   email: string;
-  uid: string;
+  image: string;
   isAdmin: boolean;
+
+  createdAt: Date;
+  updatedAt: Date;
   adsFreeExpiry?: Date;
-  loginCount: number;
-  lastLogin: Date;
 
   isAdsFree: boolean;
 
   /**
    * Construct a user data.
    *
-   * @param {string} email email of the account
-   * @param {string} uid unique user ID of the account
-   * @param {boolean} isAdmin if the user is a site admin
-   * @param {Date} adsFreeExpiry date of the ads-free service expiry
-   * @param {ObjectId} id document object ID
-   * @param {number} loginCount user login count, default to 0
-   * @param {Date} lastLogin last login time
+   * @param {UserConstructOptions} options options to construct a user data
    */
-  constructor(
-    email: string, uid: string, isAdmin: boolean, adsFreeExpiry?: Date,
-    id?: ObjectId, loginCount?: number, lastLogin?: Date,
-  ) {
-    super({id});
+  constructor(options: UserConstructOptions) {
+    super({id: options[DocumentBaseKey.id]});
 
-    this.email = email;
-    this.uid = uid;
-    this.isAdmin = isAdmin;
-    this.adsFreeExpiry = adsFreeExpiry;
-    this.loginCount = loginCount || 0;
-    this.lastLogin = lastLogin || new Date();
+    this.uid = this.id || new ObjectId();
 
-    this.isAdsFree = !!adsFreeExpiry;
+    this.name = options[UserDocumentKey.name];
+    this.email = options[UserDocumentKey.email];
+    this.image = options[UserDocumentKey.image];
+    this.isAdmin = options[UserDocumentKey.isAdmin];
+
+    this.createdAt = options[UserDocumentKey.createdAt];
+    this.updatedAt = options[UserDocumentKey.updatedAt];
+    this.adsFreeExpiry = options[UserDocumentKey.adsFreeExpiry];
+
+    this.isAdsFree = !!this.adsFreeExpiry;
   }
 
   /**
    * @inheritDoc
    */
   static fromDocument(doc: UserDocument): User {
-    return new User(
-      doc[UserDocumentKey.email],
-      doc[UserDocumentKey.userId],
-      doc[UserDocumentKey.isAdmin],
-      doc[UserDocumentKey.adsFreeExpiry],
-      doc[DocumentBaseKey.id],
-      doc[UserDocumentKey.loginCount],
-      doc[UserDocumentKey.lastLogin],
-    );
+    return new User(doc);
   }
 
   /**
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      collection.createIndex(UserDocumentKey.userId, {unique: true});
-      collection.createIndex(UserDocumentKey.adsFreeExpiry, {expireAfterSeconds: 1});
-    }));
+    return super.getCollectionWithInfo(mongoClient, dbInfo);
   }
 
   /**
@@ -98,12 +71,13 @@ export class User extends Document {
   toObject(): UserDocument {
     return {
       [DocumentBaseKey.id]: this.id,
+      [UserDocumentKey.name]: this.name,
       [UserDocumentKey.email]: this.email,
-      [UserDocumentKey.userId]: this.uid,
+      [UserDocumentKey.image]: this.image,
       [UserDocumentKey.isAdmin]: this.isAdmin,
+      [UserDocumentKey.createdAt]: this.createdAt,
+      [UserDocumentKey.updatedAt]: this.updatedAt,
       [UserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
-      [UserDocumentKey.loginCount]: this.loginCount,
-      [UserDocumentKey.lastLogin]: this.lastLogin,
     };
   }
 }
