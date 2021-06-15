@@ -3,7 +3,7 @@ import fastifyCors from 'fastify-cors';
 import fastifyHelmet from 'fastify-helmet';
 import {FastifyLoggerOptions} from 'fastify/types/logger';
 import {MongoClient, MongoClientOptions} from 'mongodb';
-import {MongoMemoryServer} from 'mongodb-memory-server-core';
+import {MongoMemoryServer} from 'mongodb-memory-server';
 
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
 import {corsOptions} from './middleware/cors';
