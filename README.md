@@ -1,7 +1,5 @@
 # dragalia-site-back-2
 
-### [Backend][back-2-repo]
-
 [![back-deployment]][back-site]
 [![back-ci]][back-ci-link]
 [![back-time-badge]][back-time-link]
@@ -49,8 +47,8 @@ CI | Optional | Specify this to `true` for CI-specific behavior.
 [back-ci-link]: https://github.com/RaenonX-DL/dragalia-site-back-2/actions?query=workflow%3A%22Node+CI%22
 [back-time-badge]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2.svg
 [back-time-link]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2
-[back-site-status]: https://badgen.net/uptime-robot/status/m787223687-0bc3d1f09f7bf2b07ed95c85&cache=300
-[back-site-response]: https://badgen.net/uptime-robot/response/m787223687-0bc3d1f09f7bf2b07ed95c85&cache=300
+[back-site-status]: https://badgen.net/uptime-robot/status/m787223687-0bc3d1f09f7bf2b07ed95c85?cache=300
+[back-site-response]: https://badgen.net/uptime-robot/response/m787223687-0bc3d1f09f7bf2b07ed95c85?cache=300
 [back-site-day]: https://badgen.net/uptime-robot/day/m787223687-0bc3d1f09f7bf2b07ed95c85?label=uptime%20in%2024%20hrs&cache=300
 [back-site-week]: https://badgen.net/uptime-robot/week/m787223687-0bc3d1f09f7bf2b07ed95c85?label=uptime%20in%207%20days&cache=300
 [back-site-month]: https://badgen.net/uptime-robot/month/m787223687-0bc3d1f09f7bf2b07ed95c85?label=uptime%20in%201%20month&cache=300
