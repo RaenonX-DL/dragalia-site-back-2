@@ -13,7 +13,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   let app: Application;
 
   const payloadChara: CharaAnalysisPublishPayload = {
-    googleUid: 'uid',
+    uid: 'uid',
     type: UnitType.CHARACTER,
     lang: SupportedLanguages.CHT,
     unitId: 10950101,

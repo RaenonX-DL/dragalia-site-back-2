@@ -14,8 +14,8 @@ export const handleAnalysisIdCheck = async (
     mongoClient,
     payload,
     (payload) => AnalysisController.isAnalysisIdAvailable(mongoClient, payload.lang, payload.unitId),
-    (isAdmin, isAvailable) => {
-      return new AnalysisIdCheckResponse(isAdmin, isAvailable);
+    (isAvailable) => {
+      return new AnalysisIdCheckResponse(isAvailable);
     },
   );
 };

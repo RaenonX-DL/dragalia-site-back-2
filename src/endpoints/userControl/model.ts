@@ -1,108 +1,83 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {AUTH_DB, AUTH_USER_COLLECTION, UserDocument, UserDocumentKey, DocumentBaseKey} from '../../api-def/models';
 import {CollectionInfo} from '../../base/controller/info';
-import {Document, DocumentBase, DocumentBaseKey} from '../../base/model/base';
+import {Document} from '../../base/model/base';
+
+
+type UserConstructOptions = UserDocument
 
 export const dbInfo: CollectionInfo = {
-  dbName: 'user',
-  collectionName: 'google',
+  dbName: AUTH_DB,
+  collectionName: AUTH_USER_COLLECTION,
 };
 
-export enum GoogleUserDocumentKey {
-  email = 'em',
-  userId = 'uid',
-  isAdmin = 'a',
-  adsFreeExpiry = 'ad',
-  loginCount = 'lc',
-  lastLogin = 'lr',
-}
-
-export type GoogleUserDocument = DocumentBase & {
-  [GoogleUserDocumentKey.email]: string,
-  [GoogleUserDocumentKey.userId]: string,
-  [GoogleUserDocumentKey.isAdmin]: boolean,
-  [GoogleUserDocumentKey.adsFreeExpiry]?: Date,
-  [GoogleUserDocumentKey.loginCount]: number,
-  [GoogleUserDocumentKey.lastLogin]: Date,
-}
-
 /**
- * A Google user document.
+ * A user data.
  */
-export class GoogleUser extends Document {
-  googleEmail: string;
-  googleUid: string;
+export class User extends Document {
+  uid: ObjectId;
+
+  name: string;
+  email: string;
+  image: string;
   isAdmin: boolean;
+
+  createdAt: Date;
+  updatedAt: Date;
   adsFreeExpiry?: Date;
-  loginCount: number;
-  lastLogin: Date;
 
   isAdsFree: boolean;
 
   /**
-   * Construct a Google user document data.
+   * Construct a user data.
    *
-   * @param {string} googleEmail email of the google account
-   * @param {string} googleUid unique user ID of the google account, this should consist of numbers
-   * @param {boolean} isAdmin if the user is a site admin
-   * @param {Date} adsFreeExpiry date of the ads-free service expiry
-   * @param {ObjectId} id document object ID
-   * @param {number} loginCount user login count, default to 0
-   * @param {Date} lastLogin last login time
+   * @param {UserConstructOptions} options options to construct a user data
    */
-  constructor(
-    googleEmail: string, googleUid: string, isAdmin: boolean, adsFreeExpiry?: Date,
-    id?: ObjectId, loginCount?: number, lastLogin?: Date,
-  ) {
-    super({id});
+  constructor(options: UserConstructOptions) {
+    super({id: options[DocumentBaseKey.id]});
 
-    this.googleEmail = googleEmail;
-    this.googleUid = googleUid;
-    this.isAdmin = isAdmin;
-    this.adsFreeExpiry = adsFreeExpiry;
-    this.loginCount = loginCount || 0;
-    this.lastLogin = lastLogin || new Date();
+    this.uid = this.id || new ObjectId();
 
-    this.isAdsFree = !!adsFreeExpiry;
+    this.name = options[UserDocumentKey.name];
+    this.email = options[UserDocumentKey.email];
+    this.image = options[UserDocumentKey.image];
+    this.isAdmin = options[UserDocumentKey.isAdmin];
+
+    this.createdAt = options[UserDocumentKey.createdAt];
+    this.updatedAt = options[UserDocumentKey.updatedAt];
+    this.adsFreeExpiry = options[UserDocumentKey.adsFreeExpiry];
+
+    this.isAdsFree = !!this.adsFreeExpiry;
   }
 
   /**
    * @inheritDoc
    */
-  static fromDocument(doc: GoogleUserDocument): GoogleUser {
-    return new GoogleUser(
-      doc[GoogleUserDocumentKey.email],
-      doc[GoogleUserDocumentKey.userId],
-      doc[GoogleUserDocumentKey.isAdmin],
-      doc[GoogleUserDocumentKey.adsFreeExpiry],
-      doc[DocumentBaseKey.id],
-      doc[GoogleUserDocumentKey.loginCount],
-      doc[GoogleUserDocumentKey.lastLogin],
-    );
+  static fromDocument(doc: UserDocument): User {
+    return new User(doc);
   }
 
   /**
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      collection.createIndex(GoogleUserDocumentKey.userId, {unique: true});
-      collection.createIndex(GoogleUserDocumentKey.adsFreeExpiry, {expireAfterSeconds: 1});
-    }));
+    return super.getCollectionWithInfo(mongoClient, dbInfo);
   }
 
   /**
    * @inheritDoc
    */
-  toObject(): GoogleUserDocument {
+  toObject(): UserDocument {
     return {
       [DocumentBaseKey.id]: this.id,
-      [GoogleUserDocumentKey.email]: this.googleEmail,
-      [GoogleUserDocumentKey.userId]: this.googleUid,
-      [GoogleUserDocumentKey.isAdmin]: this.isAdmin,
-      [GoogleUserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
-      [GoogleUserDocumentKey.loginCount]: this.loginCount,
-      [GoogleUserDocumentKey.lastLogin]: this.lastLogin,
+      [UserDocumentKey.name]: this.name,
+      [UserDocumentKey.email]: this.email,
+      [UserDocumentKey.image]: this.image,
+      [UserDocumentKey.isAdmin]: this.isAdmin,
+      [UserDocumentKey.createdAt]: this.createdAt,
+      [UserDocumentKey.updatedAt]: this.updatedAt,
+      [UserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
     };
   }
 }

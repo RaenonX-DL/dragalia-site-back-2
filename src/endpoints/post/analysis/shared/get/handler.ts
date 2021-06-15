@@ -18,9 +18,8 @@ export const handleGetAnalysis = async (
     (payload) => (
       AnalysisController.getAnalysis(mongoClient, payload.unitId, payload.lang, true)
     ),
-    (userData, getResult) => {
+    (getResult) => {
       return new AnalysisGetResponse(
-        userData ? userData.isAdmin : false,
         getResult.toResponseReady(),
       );
     },

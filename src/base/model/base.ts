@@ -1,16 +1,10 @@
-import {Collection, Document as MongoDocument, MongoClient, ObjectId} from 'mongodb';
+import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {DocumentBase, DocumentBaseKey} from '../../api-def/models';
 import {getCollection, IndexInitFunction} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
 import {NotImplementedError} from '../error';
 
-export enum DocumentBaseKey {
-  id = '_id'
-}
-
-export type DocumentBase = MongoDocument & {
-  [DocumentBaseKey.id]?: ObjectId,
-};
 
 export type DocumentConstructParams = {
   id?: ObjectId,

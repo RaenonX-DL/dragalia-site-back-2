@@ -1,5 +1,3 @@
-
-
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 

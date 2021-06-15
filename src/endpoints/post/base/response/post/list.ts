@@ -6,8 +6,6 @@ import {ApiResponse} from '../../../../../base/response';
  * API response class for a successful post listing.
  */
 export abstract class PostListResponse extends ApiResponse {
-  isAdmin: boolean;
-
   posts: Array<SequencedPostInfo>
 
   startIdx: number;
@@ -27,7 +25,6 @@ export abstract class PostListResponse extends ApiResponse {
   ) {
     super(ApiResponseCode.SUCCESS);
 
-    this.isAdmin = isAdmin;
     this.posts = posts;
     this.startIdx = startIdx;
     this.postCount = postCount;
@@ -39,7 +36,6 @@ export abstract class PostListResponse extends ApiResponse {
   toJson(): SequencedPostListResponse {
     return {
       ...super.toJson(),
-      isAdmin: this.isAdmin,
       posts: this.posts,
       startIdx: this.startIdx,
       postCount: this.postCount,

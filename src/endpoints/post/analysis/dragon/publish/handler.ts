@@ -3,7 +3,7 @@ import {ApiResponse} from '../../../../../base/response';
 import {processDragonAnalysisPublishPayload} from '../../../../../utils/payload';
 import {PayloadKeyDeprecatedError} from '../../../../error';
 import {HandlerParams} from '../../../../lookup';
-import {GoogleUserController} from '../../../../userControl/controller';
+import {UserController} from '../../../../userControl/controller';
 import {handlePublishPost} from '../../../base/handler/publish';
 import {ApiFailedResponse} from '../../../base/response/failed';
 import {AnalysisController} from '../../controller';
@@ -21,7 +21,7 @@ export const handlePublishDragonAnalysis = async (
   }
 
   // Check if the user has the admin privilege
-  if (!await GoogleUserController.isAdmin(mongoClient, payload.googleUid)) {
+  if (!await UserController.isAdmin(mongoClient, payload.uid)) {
     return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 

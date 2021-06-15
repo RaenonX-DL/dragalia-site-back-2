@@ -10,20 +10,17 @@ import {ApiResponse} from '../../../../../base/response';
  * or a post has already existed.
  */
 export abstract class PostIdCheckResponse extends ApiResponse {
-  isAdmin: boolean;
   isAvailable: boolean;
 
   /**
    * Construct a successful post ID check API response.
    *
-   * @param {boolean} isAdmin if the user requested this is an admin
    * @param {boolean} isAvailable if the post identity (Sequential ID & language) is available
    * @protected
    */
-  constructor(isAdmin: boolean, isAvailable: boolean) {
+  constructor(isAvailable: boolean) {
     super(ApiResponseCode.SUCCESS);
 
-    this.isAdmin = isAdmin;
     this.isAvailable = isAvailable;
   }
 
@@ -33,7 +30,6 @@ export abstract class PostIdCheckResponse extends ApiResponse {
   toJson(): PostIdCheckResponseApi {
     return {
       ...super.toJson(),
-      isAdmin: this.isAdmin,
       available: this.isAvailable,
     };
   }

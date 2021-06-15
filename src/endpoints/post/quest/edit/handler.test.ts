@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -8,19 +11,17 @@ import {
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {GoogleUserController} from '../../../userControl/controller';
-import {GoogleUser, GoogleUserDocumentKey} from '../../../userControl/model';
 import {QuestPostController} from '../controller';
+
 
 describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest post`, () => {
   let app: Application;
 
-  const uidAdmin = '78787878887';
-  const uidNormal = '1234567890';
-  const uidAdsFree = '789123456';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const payloadPost: QuestPostPublishPayload = {
-    googleUid: uidAdmin,
+    uid: uidAdmin,
     lang: SupportedLanguages.CHT,
     title: 'post',
     general: 'general',
@@ -57,19 +58,8 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidAdsFree, 'adsFree@email.com',
-    );
-    await GoogleUser.getCollection(app.mongoClient).updateOne(
-      {[GoogleUserDocumentKey.userId]: uidAdsFree},
-      {$set: {[GoogleUserDocumentKey.adsFreeExpiry]: new Date(new Date().getTime() + 20000)}},
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
     await QuestPostController.publishPost(app.mongoClient, payloadPost);
   });
 
@@ -135,7 +125,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
   it('fails when permission insufficient', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
-      .payload({...payloadEdit, googleUid: uidNormal});
+      .payload({...payloadEdit, uid: uidNormal});
     expect(result.statusCode).toBe(401);
 
     const json: FailedResponse = result.json() as FailedResponse;

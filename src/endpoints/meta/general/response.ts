@@ -1,6 +1,6 @@
 import {ApiResponseCode, PageMetaResponse as PageMetaResponseApi} from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
-import {UserIsAdminResponse} from '../../userControl/isAdmin/response';
+
 
 type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' | 'params'>;
 
@@ -8,7 +8,7 @@ type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' |
  * API response class for getting the generic page meta endpoint.
  */
 export class GenericPageMetaResponse extends ApiResponse {
-  isAdminResponse: UserIsAdminResponse;
+  isAdmin: boolean;
   showAds: boolean;
   params: { [key in string]: string };
 
@@ -22,7 +22,7 @@ export class GenericPageMetaResponse extends ApiResponse {
 
     super(responseCode);
 
-    this.isAdminResponse = new UserIsAdminResponse(options.isAdmin, responseCode);
+    this.isAdmin = options.isAdmin;
     this.showAds = options.showAds;
     this.params = options.params;
   }
@@ -33,7 +33,7 @@ export class GenericPageMetaResponse extends ApiResponse {
   toJson(): PageMetaResponseApi {
     return {
       ...super.toJson(),
-      ...this.isAdminResponse.toJson(),
+      isAdmin: this.isAdmin,
       showAds: this.showAds,
       params: this.params,
     };

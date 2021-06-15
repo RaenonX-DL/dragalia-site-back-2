@@ -1,5 +1,6 @@
 import {SupportedLanguages} from '../../api-def/api';
-import {DocumentBase} from './base';
+import {DocumentBase} from '../../api-def/models';
+
 
 export enum MultiLingualDocumentKey {
   language = '_lang'

@@ -1,8 +1,8 @@
 import {MongoClient} from 'mongodb';
 
 import {SequencedPostListPayload, SequencedPostInfo, SupportedLanguages} from '../../../../api-def/api';
-import {GoogleUserController} from '../../../userControl/controller';
-import {GoogleUser} from '../../../userControl/model';
+import {UserController} from '../../../userControl/controller';
+import {User} from '../../../userControl/model';
 import {PostListResult} from '../controller/list';
 import {PostListResponse} from '../response/post/list';
 
@@ -14,7 +14,7 @@ type FunctionGetPostList<E extends SequencedPostInfo> = (
 ) => Promise<PostListResult<E>>;
 
 type FunctionConstructResponse<R extends PostListResponse> = (
-  userData: GoogleUser | null, postUnits: Array<SequencedPostInfo>, startIdx: number, availableCount: number,
+  userData: User | null, postUnits: Array<SequencedPostInfo>, startIdx: number, availableCount: number,
 ) => R;
 
 export const handleListPost = async <P extends SequencedPostListPayload,
@@ -31,7 +31,7 @@ export const handleListPost = async <P extends SequencedPostListPayload,
   );
 
   // Get the data of the user who send this request
-  const userData = await GoogleUserController.getUserData(mongoClient, payload.googleUid);
+  const userData = await UserController.getUserData(mongoClient, payload.uid);
 
   return fnConstructResponse(userData, postListEntries, payload.start, totalAvailableCount);
 };

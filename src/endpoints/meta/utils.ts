@@ -1,4 +1,4 @@
-import {GoogleUser} from '../userControl/model';
+import {User} from '../userControl/model';
 import {GenericPageMetaResponse} from './general/response';
 
 type SharedResponseOptions = {
@@ -7,7 +7,7 @@ type SharedResponseOptions = {
 };
 
 export const generateResponse = <T extends GenericPageMetaResponse>(
-  userData: GoogleUser | null,
+  userData: User | null,
   generateResponseFn: (options: SharedResponseOptions) => T,
 ): T => {
   if (!userData) {

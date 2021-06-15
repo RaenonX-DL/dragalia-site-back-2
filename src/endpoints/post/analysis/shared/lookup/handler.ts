@@ -1,9 +1,9 @@
 import {AnalysisLookupPayload} from '../../../../../api-def/api';
 import {processLookupAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
-import {GoogleUserController} from '../../../../userControl/controller';
 import {AnalysisController} from '../../controller';
 import {AnalysisLookupResponse} from './response';
+
 
 export const handleLookupAnalysis = async (
   {payload, mongoClient}: HandlerParams<AnalysisLookupPayload>,
@@ -11,7 +11,6 @@ export const handleLookupAnalysis = async (
   payload = processLookupAnalysisPayload(payload);
 
   return new AnalysisLookupResponse({
-    isAdmin: await GoogleUserController.isAdmin(mongoClient, payload.googleUid),
     analyses: await AnalysisController.getAnalysisLookup(mongoClient, payload.lang),
   });
 };

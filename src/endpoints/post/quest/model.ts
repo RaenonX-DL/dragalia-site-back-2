@@ -1,14 +1,16 @@
 import {Collection, MongoClient} from 'mongodb';
 
 import {QuestPostBody} from '../../../api-def/api';
+import {DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
-import {Document, DocumentBaseKey} from '../../../base/model/base';
-import {EditableDocumentKey, EditNote} from '../../../base/model/editable';
+import {Document} from '../../../base/model/base';
+import {EditableDocumentKey, EditNote, EditNoteDocument} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {SequencedPost, SequencedPostConstructParams, PostDocumentBase, PostDocumentKey} from '../base/model';
 import {SeqIdMissingError} from '../error';
+
 
 export const dbInfo: CollectionInfo = {
   dbName: 'post',
@@ -157,11 +159,15 @@ export class QuestPost extends SequencedPost {
       title: doc[PostDocumentKey.title],
       generalInfo: doc[QuestPostDocumentKey.generalInfo],
       video: doc[QuestPostDocumentKey.video],
-      positionInfo: doc[QuestPostDocumentKey.positionInfo].map((doc) => QuestPosition.fromDocument(doc)),
+      positionInfo: doc[QuestPostDocumentKey.positionInfo].map(
+        (doc: QuestPositionDocument) => QuestPosition.fromDocument(doc),
+      ),
       addendum: doc[QuestPostDocumentKey.addendum],
       dateModifiedEpoch: doc[EditableDocumentKey.dateModifiedEpoch],
       datePublishedEpoch: doc[EditableDocumentKey.datePublishedEpoch],
-      editNotes: doc[EditableDocumentKey.editNotes].map((doc) => EditNote.fromDocument(doc)),
+      editNotes: doc[EditableDocumentKey.editNotes].map(
+        (doc: EditNoteDocument) => EditNote.fromDocument(doc),
+      ),
       viewCount: doc[ViewCountableDocumentKey.viewCount],
     });
   }

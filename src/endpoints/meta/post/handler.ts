@@ -2,7 +2,7 @@ import {ApiResponseCode, PostPageMetaPayload} from '../../../api-def/api';
 import {processPostMetaPayload} from '../../../utils/payload';
 import {HandlerParams} from '../../lookup';
 import {ApiFailedResponse} from '../../post/base/response/failed';
-import {GoogleUserController} from '../../userControl/controller';
+import {UserController} from '../../userControl/controller';
 import {generateResponse} from '../utils';
 import {ParamGetters} from './paramGetters';
 import {PostPageMetaResponse} from './response';
@@ -13,7 +13,7 @@ export const handlePostMeta = async ({
 }: HandlerParams<PostPageMetaPayload>): Promise<PostPageMetaResponse | ApiFailedResponse> => {
   payload = processPostMetaPayload(payload);
 
-  const userData = await GoogleUserController.getUserData(mongoClient, payload.googleUid);
+  const userData = await UserController.getUserData(mongoClient, payload.uid);
   const params = await ParamGetters[payload.postType](mongoClient, payload.postId, payload.lang);
 
   if (!params) {

@@ -1,127 +1,68 @@
-import {MongoClient} from 'mongodb';
+import {MongoClient, ObjectId} from 'mongodb';
 
-import {UserIdEmptyError, UserNotExistsError} from './error';
-import {GoogleUser, GoogleUserDocument, GoogleUserDocumentKey} from './model';
+import {DocumentBaseKey, UserDocument} from '../../api-def/models';
+import {UserNotExistsError} from './error';
+import {User} from './model';
+
 
 /**
- * Google user data controller.
+ * User data controller.
  */
-export class GoogleUserController {
+export class UserController {
   /**
    * Get the user data.
    *
    * This does not log that the user has logged in. To log such, call {@linkcode userLogin}() instead.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string | null} googleUid Google user ID
-   * @return {Promise<GoogleUser | null>} Google user object if found, null otherwise
+   * @param {string | null} uid user ID
+   * @return {Promise<User | null>} user object if found, null otherwise
    */
-  static async getUserData(mongoClient: MongoClient, googleUid?: string | null): Promise<GoogleUser | null> {
-    if (!googleUid) {
+  static async getUserData(mongoClient: MongoClient, uid: string | ObjectId): Promise<User | null> {
+    if (!uid) {
       return null;
     }
 
-    // `toString()` to prevent number being accidentally passed in
-    const data = await GoogleUser.getCollection(mongoClient).findOne({
-      [GoogleUserDocumentKey.userId]: googleUid.toString(),
+    const data = await User.getCollection(mongoClient).findOne({
+      // Ensure `uid` is converted to `ObjectId`
+      [DocumentBaseKey.id]: new ObjectId(uid),
     });
 
     if (!data) {
       return null;
     }
 
-    return GoogleUser.fromDocument(data as GoogleUserDocument);
+    return User.fromDocument(data as UserDocument);
   }
 
   /**
-   * Log that a user has logged in and return if the user is new.
+   * Check if the user is an admin.
    *
-   * If the user is new, a new user data will be created.
-   *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {string | null | undefined} googleUid Google user ID
-   * @param {string} googleEmail Google user email
-   * @param {boolean} isAdmin if the user is admin
-   * @throws {UserIdEmptyError} if `googleUid` is falsy
-   * @return {boolean} if the user is newly registered
-   */
-  static async userLogin(
-    mongoClient: MongoClient, googleUid: string | null | undefined, googleEmail: string, isAdmin = false,
-  ): Promise<boolean> {
-    if (!googleUid) {
-      throw new UserIdEmptyError();
-    }
-
-    const updateResult = await GoogleUser.getCollection(mongoClient).findOneAndUpdate(
-      {
-        [GoogleUserDocumentKey.userId]: googleUid,
-      },
-      {
-        $set: {
-          [GoogleUserDocumentKey.lastLogin]: new Date(),
-          [GoogleUserDocumentKey.email]: googleEmail,
-        },
-        $inc: {
-          [GoogleUserDocumentKey.loginCount]: 1,
-        },
-        $setOnInsert: {
-          [GoogleUserDocumentKey.isAdmin]: isAdmin,
-        },
-      },
-      {
-        upsert: true,
-      });
-
-    return !updateResult.value;
-  }
-
-  /**
-   * Check if the user is admin.
+   * This calls {@linkcode getUserData}() and extract `isAdmin` of the return,
+   * so if the other properties of the user data might be used after this,
+   * consider calling {@linkcode getUserData}() instead.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {string | null | undefined} googleUid Google user ID
+   * @param {string | ObjectId | null | undefined} uid user ID
    * @param {boolean} throwOnMissing if `UserNotExistsError` should be thrown if the user does not exist
    * @throws {UserNotExistsError} if `throwOnMissing` and the user does not exist
    * @return {Promise<boolean>} if the user is an admin
    */
   static async isAdmin(
     mongoClient: MongoClient,
-    googleUid: string | null | undefined,
+    uid: string | ObjectId | null | undefined,
     throwOnMissing = false,
   ): Promise<boolean> {
-    if (!googleUid) {
+    if (!uid) {
       return false;
     }
 
-    const userData = await GoogleUserController.getUserData(mongoClient, googleUid);
+    const userData = await UserController.getUserData(mongoClient, uid);
 
     if (!userData && throwOnMissing) {
-      throw new UserNotExistsError(googleUid);
+      throw new UserNotExistsError(uid);
     }
 
     return userData?.isAdmin || false;
-  }
-
-  /**
-   * Check if the user should have ads shown.
-   *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {string} googleUid Google user ID
-   * @param {boolean} throwOnMissing if `UserNotExistsError` should be thrown if the user does not exist
-   * @throws {UserNotExistsError} if `throwOnMissing` and the user does not exist
-   * @return {Promise<boolean>} if the user should have ads shown
-   */
-  static async showAds(
-    mongoClient: MongoClient,
-    googleUid: string | null | undefined,
-    throwOnMissing = false,
-  ): Promise<boolean> {
-    const userData = await GoogleUserController.getUserData(mongoClient, googleUid);
-
-    if (!userData && throwOnMissing) {
-      throw new UserNotExistsError(googleUid || '(empty UID)');
-    }
-
-    return !userData?.isAdsFree;
   }
 }

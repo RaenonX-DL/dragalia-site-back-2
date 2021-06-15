@@ -1,10 +1,11 @@
 import {Collection, MongoClient} from 'mongodb';
 
+import {DocumentBase} from '../../api-def/models';
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
 import {CollectionInfo} from '../controller/info';
 import {NextSeqIdOptions} from '../controller/seq';
-import {Document, DocumentBase, DocumentConstructParams} from './base';
+import {Document, DocumentConstructParams} from './base';
 
 
 export enum SequentialDocumentKey {
@@ -64,7 +65,9 @@ export class SequentialDocument extends Document {
   static async getNextSeqId(
     mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase}: NextSeqIdOptions,
   ): Promise<number> {
-    if (increase == null) { // `==` to check for both `null` and `undefined`
+    // explicit check because `increase` is `bool`
+    // `==` to check for both `null` and `undefined`
+    if (increase == null) {
       increase = true;
     }
 
@@ -88,14 +91,16 @@ export class SequentialDocument extends Document {
       updateOps = {$inc: {[SequenceCounterKeys.counter]: increase ? 1 : 0}};
     }
 
-    return (await this.seqCollection.findOneAndUpdate(
+    const updateResult = await this.seqCollection.findOneAndUpdate(
       filter,
       updateOps,
       {
         upsert: true,
-        returnOriginal: false,
+        returnDocument: 'after',
       },
-    )).value[SequenceCounterKeys.counter];
+    );
+
+    return (updateResult.value as SequentialDocumentBase)[SequenceCounterKeys.counter];
   }
 
   /**

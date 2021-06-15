@@ -22,11 +22,11 @@ import {PostController} from '../base/controller/main';
 import {AnalysisBodyWithInfo} from './base/response/types';
 import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {
-  CharaAnalysis,
+  CharaAnalysis, CharaAnalysisDocument,
   CharaAnalysisDocumentKey,
   CharaAnalysisSkillDocument,
   CharaAnalysisSkillDocumentKey,
-  DragonAnalysis,
+  DragonAnalysis, DragonAnalysisDocument,
   DragonAnalysisDocumentKey,
   UnitAnalysis,
   UnitAnalysisDocumentKey,
@@ -68,25 +68,29 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
     };
 
     if (base.type === UnitType.CHARACTER) {
+      const post = this.post as CharaAnalysisDocument;
+
       return {
         ...base,
-        forceStrikes: this.post[CharaAnalysisDocumentKey.forceStrike],
-        skills: this.post[CharaAnalysisDocumentKey.skills].map((doc: CharaAnalysisSkillDocument) => ({
+        forceStrikes: post[CharaAnalysisDocumentKey.forceStrike],
+        skills: post[CharaAnalysisDocumentKey.skills].map((doc: CharaAnalysisSkillDocument) => ({
           name: doc[CharaAnalysisSkillDocumentKey.name],
           info: doc[CharaAnalysisSkillDocumentKey.info],
           rotations: doc[CharaAnalysisSkillDocumentKey.rotations],
           tips: doc[CharaAnalysisSkillDocumentKey.tips],
         })),
-        tipsBuilds: this.post[CharaAnalysisDocumentKey.tipsBuilds],
+        tipsBuilds: post[CharaAnalysisDocumentKey.tipsBuilds],
       };
     }
 
     if (base.type === UnitType.DRAGON) {
+      const post = this.post as DragonAnalysisDocument;
+
       return {
         ...base,
-        ultimate: this.post[DragonAnalysisDocumentKey.ultimate],
-        notes: this.post[DragonAnalysisDocumentKey.notes],
-        suitableCharacters: this.post[DragonAnalysisDocumentKey.suitableCharacters],
+        ultimate: post[DragonAnalysisDocumentKey.ultimate],
+        notes: post[DragonAnalysisDocumentKey.notes],
+        suitableCharacters: post[DragonAnalysisDocumentKey.suitableCharacters],
       };
     }
 
@@ -311,14 +315,26 @@ export class AnalysisController extends PostController {
   static async getAnalysis(
     mongoClient: MongoClient, unitId: number, lang: SupportedLanguages, incCount = true,
   ): Promise<AnalysisGetResult | null> {
+    // Tries to get the analysis using `unitId` (indexed)
+    const result = await super.getPost<AnalysisDocument, AnalysisGetResult>(
+      UnitAnalysis.getCollection(mongoClient),
+      {[UnitAnalysisDocumentKey.unitId]: unitId},
+      lang,
+      incCount,
+      (post, isAltLang, otherLangs) => (
+        new AnalysisGetResult(post, isAltLang, otherLangs)
+      ),
+    );
+
+    // Early return if found
+    if (result) {
+      return result;
+    }
+
+    // Otherwise, use sequential ID to get the analysis instead
     return super.getPost<AnalysisDocument, AnalysisGetResult>(
       UnitAnalysis.getCollection(mongoClient),
-      {
-        $or: [
-          {[UnitAnalysisDocumentKey.unitId]: unitId},
-          {[SequentialDocumentKey.sequenceId]: unitId},
-        ],
-      },
+      {[SequentialDocumentKey.sequenceId]: unitId},
       lang,
       incCount,
       (post, isAltLang, otherLangs) => (

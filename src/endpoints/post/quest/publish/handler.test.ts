@@ -1,3 +1,6 @@
+import {ObjectId} from 'mongodb';
+
+import {insertMockUser} from '../../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -9,15 +12,15 @@ import {
 import {Application, createApp} from '../../../../app';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
-import {GoogleUserController} from '../../../userControl/controller';
 import {PostDocumentKey} from '../../base/model';
 import {QuestPosition, QuestPost, QuestPostDocument} from '../model';
+
 
 describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing endpoint`, () => {
   let app: Application;
 
-  const uidNormal = '87878787877';
-  const uidAdmin = '78787878887';
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
 
   const questPayload1: QuestPostPublishPayload = {
     lang: SupportedLanguages.CHT,
@@ -39,7 +42,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add1',
-    googleUid: uidNormal,
+    uid: uidNormal,
   };
 
   const questPayload2: QuestPostPublishPayload = {
@@ -56,12 +59,12 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add2',
-    googleUid: uidAdmin,
+    uid: uidAdmin,
   };
 
   const questPayload3: QuestPostPublishPayload = {
     ...questPayload2,
-    googleUid: uidNormal,
+    uid: uidNormal,
   };
 
   const questPayload4: QuestPostPublishPayload = {
@@ -90,12 +93,8 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   beforeEach(async () => {
     await app.reset();
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidNormal, 'normal@email.com',
-    );
-    await GoogleUserController.userLogin(
-      app.mongoClient, uidAdmin, 'admin@email.com', true,
-    );
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
   });
 
   afterAll(async () => {
@@ -125,7 +124,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   it('publishes a new quest post given a valid unused sequential ID', async () => {
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_PUBLISH)
-      .payload({...questPayload1, googleUid: uidAdmin});
+      .payload({...questPayload1, uid: uidAdmin});
     expect(result.statusCode).toBe(200);
 
     const json: QuestPostPublishResponse = result.json() as QuestPostPublishResponse;

@@ -11,11 +11,10 @@ export class AnalysisGetResponse extends PostGetResponse {
   /**
    * Construct an analysis get response.
    *
-   * @param {boolean} isAdmin if the user is an admin
    * @param {AnalysisBodyWithInfo} params params for constructing an analysis get response
    */
-  constructor(isAdmin: boolean, params: AnalysisBodyWithInfo) {
-    super(isAdmin, params);
+  constructor(params: AnalysisBodyWithInfo) {
+    super(params);
 
     this.body = params;
   }

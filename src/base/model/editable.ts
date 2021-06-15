@@ -1,4 +1,6 @@
-import {Document, DocumentBase} from './base';
+import {DocumentBase} from '../../api-def/models';
+import {Document} from './base';
+
 
 export enum EditableDocumentKey {
   datePublishedEpoch = '_dtPub',
