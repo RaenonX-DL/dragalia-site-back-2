@@ -30,7 +30,9 @@ export abstract class Document {
    *
    * @param {DocumentBase} doc document to be converted
    */
-  static fromDocument(doc: DocumentBase): Document { // eslint-disable-line @typescript-eslint/no-unused-vars
+  static fromDocument(
+    doc: DocumentBase, // eslint-disable-line @typescript-eslint/no-unused-vars
+  ): Document {
     throw new NotImplementedError('`fromDocument()` must be overridden');
   }
 
@@ -39,7 +41,9 @@ export abstract class Document {
    *
    * @param {MongoClient} mongoClient mongo client instance
    */
-  static getCollection(mongoClient: MongoClient): Collection { // eslint-disable-line @typescript-eslint/no-unused-vars
+  static getCollection(
+    mongoClient: MongoClient, // eslint-disable-line @typescript-eslint/no-unused-vars
+  ): Collection<any> {
     throw new NotImplementedError('`getCollection()` must be overridden');
   }
 
@@ -58,9 +62,9 @@ export abstract class Document {
   }
 
   /**
-   * Convert the current document to an object.
+   * Convert the current instance to a document object.
    *
-   * @return {DocumentBase} document as object
+   * @return {DocumentBase} document object
    */
   toObject(): DocumentBase {
     return {

@@ -30,6 +30,9 @@ rules:
       argsIgnorePattern: "^[_]+$"
       ignoreRestSiblings: true
 
+  "@typescript-eslint/no-explicit-any":
+    - off
+
   indent:
     - error
     - 2

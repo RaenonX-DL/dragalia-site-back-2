@@ -5,6 +5,7 @@ import {UserController} from '../../userControl/controller';
 import {generateResponse} from '../utils';
 import {GenericPageMetaResponse} from './response';
 
+
 export const handleGeneralMeta = async ({
   payload,
   mongoClient,
@@ -13,7 +14,9 @@ export const handleGeneralMeta = async ({
 
   const userData = await UserController.getUserData(mongoClient, payload.uid);
 
-  return generateResponse(
+  return await generateResponse(
+    payload,
+    mongoClient,
     userData,
     (options) => new GenericPageMetaResponse({
       ...options,

@@ -12,6 +12,7 @@ import {
 import {IndexInitFunction} from '../../../../utils/mongodb';
 import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from './postNoTitle';
 
+
 export enum PostDocumentKey {
   title = 't',
 }

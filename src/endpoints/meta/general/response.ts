@@ -1,8 +1,8 @@
-import {ApiResponseCode, PageMetaResponse as PageMetaResponseApi} from '../../../api-def/api';
+import {AlertEntry, ApiResponseCode, BaseResponse, PageMetaResponse as PageMetaResponseApi} from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
 
 
-type PageMetaResponseOptions = Pick<PageMetaResponseApi, 'isAdmin' | 'showAds' | 'params'>;
+type PageMetaResponseOptions = Omit<PageMetaResponseApi, keyof BaseResponse>;
 
 /**
  * API response class for getting the generic page meta endpoint.
@@ -11,6 +11,7 @@ export class GenericPageMetaResponse extends ApiResponse {
   isAdmin: boolean;
   showAds: boolean;
   params: { [key in string]: string };
+  alerts: Array<AlertEntry>;
 
   /**
    * Construct a page meta endpoint API response.
@@ -25,6 +26,7 @@ export class GenericPageMetaResponse extends ApiResponse {
     this.isAdmin = options.isAdmin;
     this.showAds = options.showAds;
     this.params = options.params;
+    this.alerts = options.alerts;
   }
 
   /**
@@ -36,6 +38,7 @@ export class GenericPageMetaResponse extends ApiResponse {
       isAdmin: this.isAdmin,
       showAds: this.showAds,
       params: this.params,
+      alerts: this.alerts,
     };
   }
 }
