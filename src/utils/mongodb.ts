@@ -1,20 +1,21 @@
-import {Collection, Db, MongoClient} from 'mongodb';
+import {Collection, Db, Document, MongoClient} from 'mongodb';
 
 import {CollectionInfo} from '../base/controller/info';
+
 
 const dbPool: Record<string, Db> = {};
 const colIndicesInit: Set<CollectionInfo> = new Set<CollectionInfo>();
 
-export type IndexInitFunction = (collection: Collection) => void;
+export type IndexInitFunction = <T extends Document = Document>(collection: Collection<T>) => void;
 
-export const getCollection = (
+export const getCollection = <T extends Document = Document>(
   mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunction?: IndexInitFunction,
-): Collection => {
+): Collection<T> => {
   if (!(dbInfo.dbName in dbPool)) {
     dbPool[dbInfo.dbName] = mongoClient.db(dbInfo.dbName);
   }
 
-  const collection = dbPool[dbInfo.dbName].collection(dbInfo.collectionName);
+  const collection = dbPool[dbInfo.dbName].collection<T>(dbInfo.collectionName);
 
   if (!colIndicesInit.has(dbInfo) && indexInitFunction) {
     indexInitFunction(collection);

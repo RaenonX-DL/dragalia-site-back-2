@@ -7,6 +7,7 @@ import {generateResponse} from '../utils';
 import {ParamGetters} from './paramGetters';
 import {PostPageMetaResponse} from './response';
 
+
 export const handlePostMeta = async ({
   payload,
   mongoClient,
@@ -20,7 +21,9 @@ export const handlePostMeta = async ({
     return new ApiFailedResponse(ApiResponseCode.FAILED_POST_NOT_EXISTS);
   }
 
-  return generateResponse(
+  return await generateResponse(
+    payload,
+    mongoClient,
     userData,
     (options) => new PostPageMetaResponse({
       ...options,

@@ -12,9 +12,11 @@ import {
   UnitType,
 } from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
+import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {AnalysisController} from '../../post/analysis/controller';
 import {QuestPostController} from '../../post/quest/controller';
+import {AlertEntry, AlertEntryKey} from '../alert/model';
 
 
 describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
@@ -70,12 +72,31 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     keywords: 'kw1',
   };
 
+  const dummyAlerts = [
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
+      [AlertEntryKey.message]: 'Alert 1',
+      [AlertEntryKey.variant]: 'info',
+    },
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
+      [AlertEntryKey.message]: 'Alert 2',
+      [AlertEntryKey.variant]: 'warning',
+    },
+  ];
+
+  const insertDummyAlerts = async () => {
+    const col = AlertEntry.getCollection(app.mongoClient);
+    await col.insertMany(dummyAlerts);
+  };
+
   beforeAll(async () => {
     app = await createApp();
   });
 
   beforeEach(async () => {
     await app.reset();
+    await insertDummyAlerts();
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
@@ -101,6 +122,10 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(true);
     expect(json.showAds).toBe(true);
+    expect(json.alerts).toStrictEqual(dummyAlerts
+      .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
+      .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
+    );
   });
 
   test('the return is correct for ads-free users', async () => {
@@ -117,6 +142,10 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);
     expect(json.showAds).toBe(false);
+    expect(json.alerts).toStrictEqual(dummyAlerts
+      .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
+      .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
+    );
   });
 
   test('the return is correct for normal users', async () => {
@@ -133,6 +162,10 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);
     expect(json.showAds).toBe(true);
+    expect(json.alerts).toStrictEqual(dummyAlerts
+      .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
+      .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
+    );
   });
 
   test('the return is correct without user ID', async () => {
@@ -149,6 +182,10 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.success).toBe(true);
     expect(json.isAdmin).toBe(false);
     expect(json.showAds).toBe(true);
+    expect(json.alerts).toStrictEqual(dummyAlerts
+      .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
+      .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
+    );
   });
 
   it('returns unit name as analysis meta if unit info exists', async () => {

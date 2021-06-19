@@ -1,7 +1,8 @@
-import {PostPageMetaResponse as PostPageMetaResponseApi} from '../../../api-def/api';
+import {BaseResponse, PostPageMetaResponse as PostPageMetaResponseApi} from '../../../api-def/api';
 import {GenericPageMetaResponse} from '../general/response';
 
-type PostMetaResponseOptions = Pick<PostPageMetaResponseApi, 'isAdmin' | 'showAds' | 'params'>;
+
+type PostMetaResponseOptions = Omit<PostPageMetaResponseApi, keyof BaseResponse>;
 
 /**
  * API response class for the post meta endpoint.
