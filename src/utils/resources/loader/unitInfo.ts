@@ -16,7 +16,7 @@ type UnitInfo = UnitInfoDataBase & {
   type: UnitType,
 };
 
-const cache: ResourceCache<UnitInfoMap> = {
+const cache: ResourceCache<UnitInfoMap<number>> = {
   lastFetchedEpoch: 0,
   data: new Map(),
 };
@@ -36,7 +36,7 @@ export const getUnitInfo = async (unitId: number): Promise<UnitInfo | undefined>
       .then((response) => response.json()) as unknown as DragonInfo;
 
     cache.lastFetchedEpoch = currentEpoch;
-    cache.data = toUnitInfoMap(charaInfo, dragonInfo);
+    cache.data = toUnitInfoMap(charaInfo, dragonInfo, (info) => info.id);
   }
 
   return cache.data.get(unitId);
