@@ -40,7 +40,7 @@ const server = setupServer(
 );
 
 // Enable API mocking
-beforeAll(() => server.listen());
+beforeAll(() => server.listen({onUnhandledRequest: 'error'}));
 
 // Reset any runtime request handlers added during single test case
 afterEach(() => server.resetHandlers());

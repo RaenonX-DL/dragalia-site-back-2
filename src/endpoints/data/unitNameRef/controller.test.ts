@@ -28,7 +28,7 @@ describe('Unit name reference data controller', () => {
   it('returns an object filtered by language', async () => {
     const dataArray = [
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
-      new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10950101}),
+      new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10750101}),
       new UnitNameRefEntry({lang: SupportedLanguages.JP, name: 'Unit 3', unitId: 10850101}),
     ].map((entry) => entry.toObject());
     await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
@@ -41,7 +41,7 @@ describe('Unit name reference data controller', () => {
   it('returns empty object if no data in the requested lang', async () => {
     const dataArray = [
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
-      new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10950101}),
+      new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10850101}),
     ].map((entry) => entry.toObject());
     await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
