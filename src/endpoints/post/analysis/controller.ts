@@ -304,7 +304,7 @@ export class AnalysisController extends PostController {
    *
    * Returns ``null`` if the post with the given unit ID is not found.
    *
-   * The analysis which sequential ID matches ``unitId`` will also be returned for legacy purpose.
+   * The analysis which sequential ID matches ``unitId`` will also be returned for legacy usages.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {number} unitId unit ID of the post
