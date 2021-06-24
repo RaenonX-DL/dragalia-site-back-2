@@ -43,7 +43,7 @@ export abstract class Document {
    */
   static getCollection(
     mongoClient: MongoClient, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Collection<any> {
+  ): Collection {
     throw new NotImplementedError('`getCollection()` must be overridden');
   }
 

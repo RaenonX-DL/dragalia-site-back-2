@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleDataUnitNameRef} from './data/unitNameRef/handler';
 import {handleGeneralMeta} from './meta/general/handler';
 import {handlePostMeta} from './meta/post/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
@@ -59,6 +60,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
+  [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(
