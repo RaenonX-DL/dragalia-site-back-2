@@ -11,7 +11,7 @@ export const processPageMetaPayload = <T extends PageMetaPayload>(payload: T): T
 export const processPostMetaPayload = <T extends PostPageMetaPayload>(payload: T): T => {
   payload = processPageMetaPayload(payload);
 
-  payload.postId = +payload.postId;
+  payload.postIdentifier = Number(payload.postIdentifier) || payload.postIdentifier;
 
   return payload;
 };
