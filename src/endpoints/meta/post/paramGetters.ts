@@ -1,20 +1,19 @@
-import {MongoClient} from 'mongodb';
-
-import {AnalysisMetaParams, QuestMetaParams, PostMetaParams, PostType, SupportedLanguages} from '../../../api-def/api';
+import {PostType} from '../../../api-def/api';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {trim} from '../../../utils/string';
 import {AnalysisController} from '../../post/analysis/controller';
 import {UnitAnalysisDocumentKey} from '../../post/analysis/model/unitAnalysis';
 import {PostDocumentKey} from '../../post/base/model';
 import {QuestPostController} from '../../post/quest/controller';
+import {ParamGetterFunction} from './types';
 
 
-const getAnalysisMeta = async (
-  mongoClient: MongoClient,
-  pid: number,
-  lang: SupportedLanguages,
-): Promise<AnalysisMetaParams | null> => {
-  const analysis = await AnalysisController.getAnalysis(mongoClient, pid, lang, false);
+const getAnalysisMeta: ParamGetterFunction = async ({
+  mongoClient,
+  postIdentifier,
+  lang,
+}) => {
+  const analysis = await AnalysisController.getAnalysis(mongoClient, postIdentifier, lang, false);
 
   if (!analysis) {
     return null;
@@ -29,12 +28,16 @@ const getAnalysisMeta = async (
   };
 };
 
-const getQuestGuideMeta = async (
-  mongoClient: MongoClient,
-  pid: number,
-  lang: SupportedLanguages,
-): Promise<QuestMetaParams | null> => {
-  const quest = await QuestPostController.getQuestPost(mongoClient, pid, lang, false);
+const getQuestGuideMeta: ParamGetterFunction = async ({
+  mongoClient,
+  postIdentifier,
+  lang,
+}) => {
+  if (typeof postIdentifier === 'string') {
+    return null;
+  }
+
+  const quest = await QuestPostController.getQuestPost(mongoClient, postIdentifier, lang, false);
 
   if (!quest) {
     return null;
@@ -49,14 +52,7 @@ const getMiscMeta = async (): Promise<null> => {
   return null;
 };
 
-export const ParamGetters: {
-  [type in PostType]:
-  (
-    mongoClient: MongoClient,
-    pid: number,
-    lang: SupportedLanguages,
-  ) => Promise<PostMetaParams | null>
-} = {
+export const ParamGetters: { [type in PostType]: ParamGetterFunction } = {
   [PostType.ANALYSIS]: getAnalysisMeta,
   [PostType.QUEST]: getQuestGuideMeta,
   [PostType.MISC]: getMiscMeta,

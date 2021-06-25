@@ -5,7 +5,7 @@ import {ApiResponse} from '../../../base/response';
 type PageMetaResponseOptions = Omit<PageMetaResponseApi, keyof BaseResponse>;
 
 /**
- * API response class for getting the generic page meta endpoint.
+ * API response class for generic page meta endpoint.
  */
 export class GenericPageMetaResponse extends ApiResponse {
   isAdmin: boolean;

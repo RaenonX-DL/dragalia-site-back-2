@@ -14,13 +14,17 @@ import {PayloadKeyDeprecatedError} from '../../../endpoints/error';
 import {processPayloadBase} from '../base';
 
 
-const processAnalysisMetaPayload = <T extends AnalysisMeta>(payload: T): T => {
-  payload.unitId = +payload.unitId;
-
+const checkPayloadDeprecatedKey = (payload: {[key: string]: any}) => {
   // Prevent manual SEQ ID insertion
   if ('seqId' in payload) {
     throw new PayloadKeyDeprecatedError('seqId');
   }
+};
+
+const processAnalysisMetaPayload = <T extends AnalysisMeta>(payload: T): T => {
+  payload.unitId = +payload.unitId;
+
+  checkPayloadDeprecatedKey(payload);
 
   return payload;
 };
@@ -64,7 +68,9 @@ export const processDragonAnalysisPublishPayload = (
 };
 
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
-  payload = processAnalysisMetaPayload(payload);
+  payload.unitId = Number(payload.unitId) || payload.unitId;
+
+  checkPayloadDeprecatedKey(payload);
 
   return payload;
 };

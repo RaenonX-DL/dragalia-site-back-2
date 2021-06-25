@@ -14,6 +14,8 @@ import {
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {resetCache} from '../../../utils/resources/loader/cache/main';
+import {UnitNameRefEntry} from '../../data/unitNameRef/model';
 import {AnalysisController} from '../../post/analysis/controller';
 import {QuestPostController} from '../../post/quest/controller';
 import {AlertEntry, AlertEntryKey} from '../alert/model';
@@ -102,17 +104,18 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadAnalysis);
     await QuestPostController.publishPost(app.mongoClient, payloadQuest);
+    resetCache();
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  test('the return is correct for admin users', async () => {
+  it('returns correctly for admin users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: uidAdmin,
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -128,11 +131,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     );
   });
 
-  test('the return is correct for ads-free users', async () => {
+  it('returns correctly for ads-free users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: uidAdsFree,
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -148,11 +151,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     );
   });
 
-  test('the return is correct for normal users', async () => {
+  it('returns correctly for normal users', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: uidNormal,
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -168,11 +171,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     );
   });
 
-  test('the return is correct without user ID', async () => {
+  it('returns correctly without user ID', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -192,7 +195,61 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      name: 'Gala Leonidas',
+      summary: payloadAnalysis.summary,
+    });
+  });
+
+  it('returns correct analysis meta using official unit name', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: 'Gala_Leonidas',
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      name: 'Gala Leonidas',
+      summary: payloadAnalysis.summary,
+    });
+  });
+
+  it('returns correct analysis meta using cross-language official unit name', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: '雷歐尼特（龍絆日Ver.）',
+      postType: PostType.ANALYSIS,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      name: 'Gala Leonidas',
+      summary: payloadAnalysis.summary,
+    });
+  });
+
+  it('returns correct analysis meta using manual unit name reference', async () => {
+    await UnitNameRefEntry.getCollection(app.mongoClient)
+      .insertOne(new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}).toObject());
+
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: 'Unit',
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -209,7 +266,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: 888,
+      postIdentifier: 888,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -219,11 +276,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.success).toBeFalsy();
   });
 
-  test('getting analysis does not increase view count', async () => {
+  it('does not increase view count for getting an analysis', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: payloadAnalysis.unitId,
+      postIdentifier: payloadAnalysis.unitId,
       postType: PostType.ANALYSIS,
     });
     expect(response.statusCode).toBe(200);
@@ -239,7 +296,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postIdentifier: 1,
       postType: PostType.QUEST,
     });
     expect(response.statusCode).toBe(200);
@@ -251,11 +308,11 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     });
   });
 
-  test('getting quest does not increase view count', async () => {
+  it('does not increase view count for getting a quest post', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: 1,
+      postIdentifier: 1,
       postType: PostType.QUEST,
     });
     expect(response.statusCode).toBe(200);
@@ -269,7 +326,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.EN,
-      postId: 88888888,
+      postIdentifier: 88888888,
       postType: PostType.QUEST,
     });
     expect(response.statusCode).toBe(200);
@@ -283,7 +340,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
       uid: '',
       lang: SupportedLanguages.CHT,
-      postId: 1,
+      postIdentifier: 1,
       postType: PostType.QUEST,
     });
     expect(response.statusCode).toBe(200);

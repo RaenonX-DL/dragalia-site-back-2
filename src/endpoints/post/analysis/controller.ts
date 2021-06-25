@@ -1,8 +1,9 @@
-import {MongoClient, FindCursor} from 'mongodb';
+import {FindCursor, MongoClient} from 'mongodb';
 
 import {
   AnalysisBody,
-  AnalysisLookupAnalyses, AnalysisLookupEntry,
+  AnalysisLookupAnalyses,
+  AnalysisLookupEntry,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
@@ -17,16 +18,19 @@ import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
+import {getUnitIdByName} from '../../../utils/resources/loader/unitName2Id';
 import {PostGetResult} from '../base/controller/get';
 import {PostController} from '../base/controller/main';
 import {AnalysisBodyWithInfo} from './base/response/types';
 import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {
-  CharaAnalysis, CharaAnalysisDocument,
+  CharaAnalysis,
+  CharaAnalysisDocument,
   CharaAnalysisDocumentKey,
   CharaAnalysisSkillDocument,
   CharaAnalysisSkillDocumentKey,
-  DragonAnalysis, DragonAnalysisDocument,
+  DragonAnalysis,
+  DragonAnalysisDocument,
   DragonAnalysisDocumentKey,
   UnitAnalysis,
   UnitAnalysisDocumentKey,
@@ -297,6 +301,8 @@ export class AnalysisController extends PostController {
    * If this is called for analysis displaying purpose,
    * `incCount` should be `true`. Otherwise, it should be `false`.
    *
+   * If `unitIdentifier` is a `string`, underscores will be treated as spaces.
+   *
    * Returns the alternative language version
    * if the analysis of the given unit ID
    * in the specified language is not available,
@@ -304,21 +310,34 @@ export class AnalysisController extends PostController {
    *
    * Returns ``null`` if the post with the given unit ID is not found.
    *
-   * The analysis which sequential ID matches ``unitId`` will also be returned for legacy purpose.
+   * The analysis which sequential ID matches ``unitIdentifier`` will also be returned for legacy usages.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {number} unitId unit ID of the post
+   * @param {string | number} unitIdentifier unit identifier of the post
    * @param {SupportedLanguages} lang language code of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @return {Promise<PostGetResult<QuestPostDocument>>} result of getting a quest post
    */
   static async getAnalysis(
-    mongoClient: MongoClient, unitId: number, lang: SupportedLanguages, incCount = true,
+    mongoClient: MongoClient, unitIdentifier: string | number, lang: SupportedLanguages, incCount = true,
   ): Promise<AnalysisGetResult | null> {
-    // Tries to get the analysis using `unitId` (indexed)
+    // Convert string identifier to unit ID, if possible
+    if (typeof unitIdentifier === 'string') {
+      unitIdentifier = unitIdentifier.replace('_', ' ');
+
+      const unitId = await getUnitIdByName(unitIdentifier, mongoClient);
+
+      if (!unitId) {
+        return null;
+      }
+
+      unitIdentifier = unitId;
+    }
+
+    // Tries to get the analysis using `unitIdentifier` (indexed)
     const result = await super.getPost<AnalysisDocument, AnalysisGetResult>(
       UnitAnalysis.getCollection(mongoClient),
-      {[UnitAnalysisDocumentKey.unitId]: unitId},
+      {[UnitAnalysisDocumentKey.unitId]: unitIdentifier},
       lang,
       incCount,
       (post, isAltLang, otherLangs) => (
@@ -334,7 +353,7 @@ export class AnalysisController extends PostController {
     // Otherwise, use sequential ID to get the analysis instead
     return super.getPost<AnalysisDocument, AnalysisGetResult>(
       UnitAnalysis.getCollection(mongoClient),
-      {[SequentialDocumentKey.sequenceId]: unitId},
+      {[SequentialDocumentKey.sequenceId]: unitIdentifier},
       lang,
       incCount,
       (post, isAltLang, otherLangs) => (

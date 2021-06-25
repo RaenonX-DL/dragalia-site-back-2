@@ -2,7 +2,9 @@ import * as fetch from 'node-fetch';
 
 import {UnitType} from '../../../api-def/api/other/unit';
 import {CACHE_LIFE_SECS} from '../const';
-import {getUnitInfo, resetCache} from './unitInfo';
+import {resetCache} from './cache/main';
+import {getUnitInfo} from './unitInfo';
+
 
 describe('Unit info loader', () => {
   let fetchFunc: jest.SpyInstance;
@@ -39,15 +41,13 @@ describe('Unit info loader', () => {
     const now = Date.now();
     jest
       .spyOn(Date, 'now')
-      .mockImplementation(() => now + CACHE_LIFE_SECS * 1000 + 10000);
+      .mockImplementation(() => now + CACHE_LIFE_SECS * 1000 + 100000);
 
     await getUnitInfo(10100101);
     expect(fetchFunc).toHaveBeenCalledTimes(4);
-
-    jest.restoreAllMocks();
   });
 
-  test('fetched data correctly recorded its type', async () => {
+  it('records unit data type correctly', async () => {
     expect((await getUnitInfo(10950101))?.type).toBe(UnitType.CHARACTER);
     expect((await getUnitInfo(20040405))?.type).toBe(UnitType.DRAGON);
   });
