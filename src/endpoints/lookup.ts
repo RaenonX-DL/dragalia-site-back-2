@@ -20,6 +20,8 @@ import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
 import {handleListQuestPost} from './post/quest/list/handler';
 import {handlePublishQuestPost} from './post/quest/publish/handler';
+import {handleGetAtkSkillPreset} from './preset/atkSkill/get/handler';
+import {handleSetAtkSkillPreset} from './preset/atkSkill/set/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 
@@ -61,6 +63,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
+  [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(
