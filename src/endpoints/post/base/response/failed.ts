@@ -6,7 +6,6 @@ type ApiFailedResponseOptions = ApiResponseOptions & {
   message?: string,
 }
 
-
 /**
  * API response class for a failed API request.
  */
@@ -31,6 +30,7 @@ export class ApiFailedResponse extends ApiResponse {
   toJson(): FailedResponse {
     return {
       ...super.toJson(),
+      success: false,
       message: this.message,
     };
   }

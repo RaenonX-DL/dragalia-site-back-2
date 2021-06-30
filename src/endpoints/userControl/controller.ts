@@ -23,16 +23,23 @@ export class UserController {
       return null;
     }
 
-    const data = await User.getCollection(mongoClient).findOne({
-      // Ensure `uid` is converted to `ObjectId`
-      [DocumentBaseKey.id]: new ObjectId(uid),
-    });
+    try {
+      const data = await User.getCollection(mongoClient).findOne({
+        // Ensure `uid` is converted to `ObjectId`
+        [DocumentBaseKey.id]: new ObjectId(uid),
+      });
 
-    if (!data) {
-      return null;
+      if (!data) {
+        return null;
+      }
+
+      return User.fromDocument(data as UserDocument);
+    } catch (e) {
+      if (e instanceof TypeError) {
+        return null;
+      }
+      throw e;
     }
-
-    return User.fromDocument(data as UserDocument);
   }
 
   /**
