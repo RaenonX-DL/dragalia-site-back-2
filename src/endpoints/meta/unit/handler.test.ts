@@ -71,7 +71,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_UNIT} - unit page meta`, () => {
       .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
       .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
     );
-    expect(json.params).toStrictEqual({unitName: 'Gala Leonidas'});
+    expect(json.params).toStrictEqual({unitName: 'Gala Leonidas', unitId: 10950101});
   });
 
   it('returns correct unit name via unit identifier', async () => {
@@ -89,7 +89,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_UNIT} - unit page meta`, () => {
       .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
       .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
     );
-    expect(json.params).toStrictEqual({unitName: 'Gala Leonidas'});
+    expect(json.params).toStrictEqual({unitName: 'Gala Leonidas', unitId: 10950101});
   });
 
   it('returns unit not found using non-existing unit ID', async () => {

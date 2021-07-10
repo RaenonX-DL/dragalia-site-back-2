@@ -39,7 +39,7 @@ export const handleUnitMeta = async ({
     userData,
     (options) => new UnitPageMetaResponse({
       ...options,
-      params: {unitName: unitInfo.name[payload.lang]},
+      params: {unitName: unitInfo.name[payload.lang], unitId: unitId},
     }),
   );
 };
