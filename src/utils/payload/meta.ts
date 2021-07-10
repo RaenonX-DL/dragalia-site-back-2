@@ -1,16 +1,6 @@
 import {PageMetaPayload, PostPageMetaPayload, UnitPageMetaPayload} from '../../api-def/api';
 import {processPayloadBase} from './base';
-
-
-const processIdentifier = (identifier: number | string): number | string => {
-  let ret = Number(identifier) || identifier;
-
-  if (typeof ret === 'string') {
-    ret = ret.replace('_', ' ');
-  }
-
-  return ret;
-};
+import {processUnitIdentifier} from './identifier';
 
 
 export const processPageMetaPayload = <T extends PageMetaPayload>(payload: T): T => {
@@ -22,7 +12,7 @@ export const processPageMetaPayload = <T extends PageMetaPayload>(payload: T): T
 export const processPostMetaPayload = <T extends PostPageMetaPayload>(payload: T): T => {
   payload = processPageMetaPayload(payload);
 
-  payload.postIdentifier = processIdentifier(payload.postIdentifier);
+  payload.postIdentifier = processUnitIdentifier(payload.postIdentifier);
 
   return payload;
 };
@@ -30,7 +20,7 @@ export const processPostMetaPayload = <T extends PostPageMetaPayload>(payload: T
 export const processUnitMetaPayload = <T extends UnitPageMetaPayload>(payload: T): T => {
   payload = processPageMetaPayload(payload);
 
-  payload.unitIdentifier = processIdentifier(payload.unitIdentifier);
+  payload.unitIdentifier = processUnitIdentifier(payload.unitIdentifier);
 
   return payload;
 };

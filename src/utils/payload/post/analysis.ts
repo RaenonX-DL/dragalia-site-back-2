@@ -12,6 +12,7 @@ import {
 } from '../../../api-def/api';
 import {PayloadKeyDeprecatedError} from '../../../endpoints/error';
 import {processPayloadBase} from '../base';
+import {processUnitIdentifier} from '../identifier';
 
 
 const checkPayloadDeprecatedKey = (payload: {[key: string]: any}) => {
@@ -68,7 +69,7 @@ export const processDragonAnalysisPublishPayload = (
 };
 
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
-  payload.unitId = Number(payload.unitId) || payload.unitId;
+  payload.unitId = processUnitIdentifier(payload.unitId);
 
   checkPayloadDeprecatedKey(payload);
 
