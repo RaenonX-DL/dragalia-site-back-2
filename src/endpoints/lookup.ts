@@ -7,6 +7,7 @@ import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/handler';
 import {handleGeneralMeta} from './meta/general/handler';
 import {handlePostMeta} from './meta/post/handler';
+import {handleUnitMeta} from './meta/unit/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
 import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
@@ -49,6 +50,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
+  [ApiEndPoints.PAGE_META_UNIT]: {GET: handleUnitMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},

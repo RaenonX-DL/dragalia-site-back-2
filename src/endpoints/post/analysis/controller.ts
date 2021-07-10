@@ -323,8 +323,6 @@ export class AnalysisController extends PostController {
   ): Promise<AnalysisGetResult | null> {
     // Convert string identifier to unit ID, if possible
     if (typeof unitIdentifier === 'string') {
-      unitIdentifier = unitIdentifier.replace('_', ' ');
-
       const unitId = await getUnitIdByName(unitIdentifier, mongoClient);
 
       if (!unitId) {
