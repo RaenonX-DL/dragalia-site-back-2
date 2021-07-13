@@ -1,19 +1,19 @@
 import {ObjectId} from 'mongodb';
 
 import {
-  AnalysisLookupLandingPayload,
-  AnalysisLookupLandingResponse,
   ApiEndPoints,
   ApiResponseCode,
   CharaAnalysisPublishPayload,
   SupportedLanguages,
+  UnitInfoLookupLandingPayload,
+  UnitInfoLookupLandingResponse,
   UnitType,
-} from '../../../../../api-def/api';
-import {Application, createApp} from '../../../../../app';
-import {AnalysisController} from '../../controller';
+} from '../../../../api-def/api';
+import {Application, createApp} from '../../../../app';
+import {AnalysisController} from '../../../post/analysis/controller';
 
 
-describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis lookup landing`, () => {
+describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis lookup landing`, () => {
   let app: Application;
 
   const payloadPost: CharaAnalysisPublishPayload = {
@@ -38,7 +38,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     keywords: 'keyword',
   };
 
-  const payloadLookup: AnalysisLookupLandingPayload = {
+  const payloadLookup: UnitInfoLookupLandingPayload = {
     uid: '',
     lang: SupportedLanguages.CHT,
   };
@@ -59,10 +59,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
 
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING).query(payloadLookup);
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING).query(payloadLookup);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId))
@@ -76,10 +76,10 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
 
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING).query(payloadLookup);
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING).query(payloadLookup);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId))
@@ -88,11 +88,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
 
   it('returns an empty result if no analyses exist yet', async () => {
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING)
+      .get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING)
       .query({...payloadLookup, lang: SupportedLanguages.EN});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
@@ -103,11 +103,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING} - analysis l
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING)
+      .get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING)
       .query({...payloadLookup, lang: 'non-existent'});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupLandingResponse = result.json() as AnalysisLookupLandingResponse;
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);

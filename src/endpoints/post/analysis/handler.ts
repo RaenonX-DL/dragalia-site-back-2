@@ -1,7 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {AnalysisEditPayload} from '../../../api-def/api/post/analysis/payload';
-import {ApiResponseCode} from '../../../api-def/api/responseCode';
+import {AnalysisEditPayload, ApiResponseCode} from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
 import {handleEditPost} from '../base/handler/edit/base';
 import {FunctionConstructResponse, FunctionEditPost} from '../base/handler/edit/types';

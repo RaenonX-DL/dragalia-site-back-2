@@ -1,7 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {UnitNameRefData} from '../../../api-def/api/data/unitNameRef/elements';
-import {SupportedLanguages} from '../../../api-def/api/other/lang';
+import {UnitNameRefData, SupportedLanguages} from '../../../api-def/api';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {UnitNameRefEntry, UnitNameRefEntryDocumentKey} from './model';
 

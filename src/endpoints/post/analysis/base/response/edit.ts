@@ -1,4 +1,4 @@
-import {AnalysisEditResponse as AnalysisEditResponseApi} from '../../../../../api-def/api/post/analysis/response';
+import {AnalysisEditResponse as AnalysisEditResponseApi} from '../../../../../api-def/api';
 import {PostEditResponse} from '../../../base/response/post/edit/common';
 
 /**

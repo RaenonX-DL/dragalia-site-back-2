@@ -1,20 +1,20 @@
 import {
   ApiResponseCode,
-  AnalysisLookupLandingResponse as AnalysisLookupLandingResponseApi,
-  AnalysisLookupEntry,
-} from '../../../../../api-def/api';
-import {ApiResponse} from '../../../../../base/response';
+  UnitInfoLookupLandingResponse as UnitInfoLookupLandingResponseApi,
+  UnitInfoLookupEntry,
+} from '../../../../api-def/api';
+import {ApiResponse} from '../../../../base/response';
 
 
 type ConstructOptions = {
-  analyses: Array<AnalysisLookupEntry>
+  analyses: Array<UnitInfoLookupEntry>
 }
 
 /**
  * API response class for getting the info to be used upon landing on analysis lookup.
  */
-export class AnalysisLookupLandingResponse extends ApiResponse {
-  analyses: Array<AnalysisLookupEntry>;
+export class UnitInfoLookupLandingResponse extends ApiResponse {
+  analyses: Array<UnitInfoLookupEntry>;
 
   /**
    * Construct an analysis lookup landing info API response.
@@ -30,7 +30,7 @@ export class AnalysisLookupLandingResponse extends ApiResponse {
   /**
    * @inheritDoc
    */
-  toJson(): AnalysisLookupLandingResponseApi {
+  toJson(): UnitInfoLookupLandingResponseApi {
     return {
       ...super.toJson(),
       analyses: this.analyses,

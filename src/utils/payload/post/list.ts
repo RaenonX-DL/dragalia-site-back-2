@@ -1,4 +1,4 @@
-import {SequencedPostListPayload} from '../../../api-def/api/post/base/payload/sequenced';
+import {SequencedPostListPayload} from '../../../api-def/api';
 import {processPayloadBase} from '../base';
 
 export const processPostListPayload = <T extends SequencedPostListPayload>(payload: T): T => {

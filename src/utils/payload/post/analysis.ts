@@ -1,7 +1,7 @@
 import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
-  AnalysisLookupPayload,
+  UnitInfoLookupPayload,
   AnalysisMeta,
   CharaAnalysisEditPayload,
   CharaAnalysisPayload,
@@ -76,7 +76,7 @@ export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload:
   return payload;
 };
 
-export const processLookupAnalysisPayload = <T extends AnalysisLookupPayload>(payload: T): T => {
+export const processLookupAnalysisPayload = <T extends UnitInfoLookupPayload>(payload: T): T => {
   payload = processPayloadBase(payload);
 
   return payload;

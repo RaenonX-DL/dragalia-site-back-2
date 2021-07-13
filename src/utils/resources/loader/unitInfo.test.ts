@@ -1,6 +1,6 @@
 import * as fetch from 'node-fetch';
 
-import {UnitType} from '../../../api-def/api/other/unit';
+import {UnitType} from '../../../api-def/api';
 import {CACHE_LIFE_SECS} from '../const';
 import {resetCache} from './cache/main';
 import {getUnitInfo} from './unitInfo';

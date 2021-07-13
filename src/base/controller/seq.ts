@@ -1,6 +1,6 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {SupportedLanguages} from '../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../api-def/api';
 import {MultiLingualDocumentKey} from '../model/multiLang';
 import {SequentialDocumentKey} from '../model/seq';
 

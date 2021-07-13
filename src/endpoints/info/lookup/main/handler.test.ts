@@ -1,19 +1,19 @@
 import {ObjectId} from 'mongodb';
 
 import {
-  AnalysisLookupPayload,
-  AnalysisLookupResponse,
+  UnitInfoLookupPayload,
+  UnitInfoLookupResponse,
   ApiEndPoints,
   ApiResponseCode,
   CharaAnalysisPublishPayload,
   SupportedLanguages,
   UnitType,
-} from '../../../../../api-def/api';
-import {Application, createApp} from '../../../../../app';
-import {AnalysisController} from '../../controller';
+} from '../../../../api-def/api';
+import {Application, createApp} from '../../../../app';
+import {AnalysisController} from '../../../post/analysis/controller';
 
 
-describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup info`, () => {
+describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP} - unit info lookup`, () => {
   let app: Application;
 
   const payloadPost: CharaAnalysisPublishPayload = {
@@ -38,7 +38,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     keywords: 'keyword',
   };
 
-  const payloadList1: AnalysisLookupPayload = {
+  const payloadList1: UnitInfoLookupPayload = {
     uid: '',
     lang: SupportedLanguages.CHT,
   };
@@ -59,20 +59,20 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_LOOKUP).query(payloadList1);
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP).query(payloadList1);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
+    const json: UnitInfoLookupResponse = result.json() as UnitInfoLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([10950101, 10950201]);
   });
 
   it('returns an empty result if no post exists yet', async () => {
-    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_LOOKUP).query(payloadList1);
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP).query(payloadList1);
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
+    const json: UnitInfoLookupResponse = result.json() as UnitInfoLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
@@ -83,11 +83,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_ANALYSIS_LOOKUP)
+      .get(ApiEndPoints.INFO_UNIT_LOOKUP)
       .query({...payloadList1, lang: SupportedLanguages.EN});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
+    const json: UnitInfoLookupResponse = result.json() as UnitInfoLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
@@ -98,11 +98,11 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_LOOKUP} - analysis lookup in
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
 
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_ANALYSIS_LOOKUP)
+      .get(ApiEndPoints.INFO_UNIT_LOOKUP)
       .query({...payloadList1, lang: 'non-existent'});
     expect(result.statusCode).toBe(200);
 
-    const json: AnalysisLookupResponse = result.json() as AnalysisLookupResponse;
+    const json: UnitInfoLookupResponse = result.json() as UnitInfoLookupResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
