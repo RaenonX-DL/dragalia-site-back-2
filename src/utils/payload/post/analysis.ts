@@ -1,7 +1,7 @@
 import {
   AnalysisGetPayload,
   AnalysisIdCheckPayload,
-  AnalysisLookupPayload,
+  UnitInfoLookupPayload,
   AnalysisMeta,
   CharaAnalysisEditPayload,
   CharaAnalysisPayload,
@@ -12,6 +12,7 @@ import {
 } from '../../../api-def/api';
 import {PayloadKeyDeprecatedError} from '../../../endpoints/error';
 import {processPayloadBase} from '../base';
+import {processUnitIdentifier} from '../identifier';
 
 
 const checkPayloadDeprecatedKey = (payload: {[key: string]: any}) => {
@@ -68,14 +69,14 @@ export const processDragonAnalysisPublishPayload = (
 };
 
 export const processGetAnalysisPayload = <T extends AnalysisGetPayload>(payload: T): T => {
-  payload.unitId = Number(payload.unitId) || payload.unitId;
+  payload.unitId = processUnitIdentifier(payload.unitId);
 
   checkPayloadDeprecatedKey(payload);
 
   return payload;
 };
 
-export const processLookupAnalysisPayload = <T extends AnalysisLookupPayload>(payload: T): T => {
+export const processLookupAnalysisPayload = <T extends UnitInfoLookupPayload>(payload: T): T => {
   payload = processPayloadBase(payload);
 
   return payload;

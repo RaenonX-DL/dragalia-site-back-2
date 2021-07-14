@@ -10,7 +10,7 @@ type PageMetaResponseOptions = Omit<PageMetaResponseApi, keyof BaseResponse>;
 export class GenericPageMetaResponse extends ApiResponse {
   isAdmin: boolean;
   showAds: boolean;
-  params: { [key in string]: string };
+  params: PageMetaResponseApi['params'];
   alerts: Array<AlertEntry>;
 
   /**

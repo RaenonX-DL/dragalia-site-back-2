@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {PostEditPayload} from '../../../../../api-def/api/post/base/payload/common';
+import {PostEditPayload} from '../../../../../api-def/api';
 import {UpdateResult} from '../../../../../base/enum/updateResult';
 import {PostEditResponse} from '../../response/post/edit/common';
 

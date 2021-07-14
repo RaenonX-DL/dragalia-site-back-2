@@ -1,4 +1,4 @@
-import {SupportedLanguages} from '../../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {UnitNameRefController} from './controller';
 import {UnitNameRefEntry} from './model';

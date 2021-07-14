@@ -1,9 +1,7 @@
-import {FindCursor, MongoClient} from 'mongodb';
+import {MongoClient} from 'mongodb';
 
 import {
   AnalysisBody,
-  AnalysisLookupAnalyses,
-  AnalysisLookupEntry,
   CharaAnalysisEditPayload,
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
@@ -13,10 +11,8 @@ import {
   UnitType,
 } from '../../../api-def/api';
 import {UpdateResult} from '../../../base/enum/updateResult';
-import {EditableDocumentKey} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
-import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {getUnitIdByName} from '../../../utils/resources/loader/unitName2Id';
 import {PostGetResult} from '../base/controller/get';
@@ -215,87 +211,6 @@ export class AnalysisController extends PostController {
   }
 
   /**
-   * Get the lookup info of all analyses.
-   *
-   * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {SupportedLanguages} lang language code of the analyses
-   * @return {Promise<PostListResult>} post listing result
-   */
-  static async getAnalysisLookup(
-    mongoClient: MongoClient, lang: SupportedLanguages,
-  ): Promise<AnalysisLookupAnalyses> {
-    const analysisInfo = await AnalysisController.getAnalysisInfo(mongoClient, lang);
-
-    return Object.fromEntries(
-      analysisInfo.map((analysisInfo) => [analysisInfo.unitId, analysisInfo]),
-    );
-  }
-
-  /**
-   * Get the info of most recently modified analyses.
-   *
-   * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {SupportedLanguages} lang language code of the analyses
-   * @param {number} maxCount maximum number of the analyses to get
-   * @return {Promise<PostListResult>} post listing result
-   */
-  static async getAnalysisLookupLanding(
-    mongoClient: MongoClient, lang: SupportedLanguages, maxCount = 3,
-  ): Promise<Array<AnalysisLookupEntry>> {
-    return AnalysisController.getAnalysisInfo(mongoClient, lang, (cursor) => {
-      return cursor
-        // Sort by last modified epoch DESC
-        .sort([EditableDocumentKey.dateModifiedEpoch, -1])
-        // Limit the count to return
-        .limit(maxCount);
-    });
-  }
-
-  /**
-   * Get all analyses info.
-   *
-   * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {SupportedLanguages} lang language code of the analyses
-   * @param {FindCursor} postFindProcess function to be executed after `find()` but before `toArray()`
-   * @return {Promise<PostListResult>} post listing result
-   */
-  private static async getAnalysisInfo(
-    mongoClient: MongoClient,
-    lang: SupportedLanguages,
-    postFindProcess: (cursor: FindCursor) => FindCursor = (cursor) => cursor,
-  ): Promise<Array<AnalysisLookupEntry>> {
-    const query = {[MultiLingualDocumentKey.language]: lang};
-
-    const analyses = UnitAnalysis.getCollection(mongoClient)
-      .find(
-        query,
-        {
-          projection: {
-            [UnitAnalysisDocumentKey.type]: 1,
-            [SequentialDocumentKey.sequenceId]: 1,
-            [UnitAnalysisDocumentKey.unitId]: 1,
-            [MultiLingualDocumentKey.language]: 1,
-            [EditableDocumentKey.dateModifiedEpoch]: 1,
-            [EditableDocumentKey.datePublishedEpoch]: 1,
-            [ViewCountableDocumentKey.viewCount]: 1,
-          },
-        });
-    const analysisArray = await postFindProcess(analyses).toArray();
-
-    return analysisArray.map((post) => (
-      {
-        type: post[UnitAnalysisDocumentKey.type],
-        seqId: post[SequentialDocumentKey.sequenceId],
-        unitId: post[UnitAnalysisDocumentKey.unitId],
-        lang: post[MultiLingualDocumentKey.language],
-        viewCount: post[ViewCountableDocumentKey.viewCount],
-        modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
-        publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],
-      }
-    ));
-  }
-
-  /**
    * Get a specific analysis.
    *
    * If this is called for analysis displaying purpose,
@@ -323,8 +238,6 @@ export class AnalysisController extends PostController {
   ): Promise<AnalysisGetResult | null> {
     // Convert string identifier to unit ID, if possible
     if (typeof unitIdentifier === 'string') {
-      unitIdentifier = unitIdentifier.replace('_', ' ');
-
       const unitId = await getUnitIdByName(unitIdentifier, mongoClient);
 
       if (!unitId) {

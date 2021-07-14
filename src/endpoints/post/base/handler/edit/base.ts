@@ -1,12 +1,12 @@
 import {MongoClient} from 'mongodb';
 
-import {PostEditPayload} from '../../../../../api-def/api/post/base/payload/common';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
+import {ApiResponseCode, PostEditPayload} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 import {UserController} from '../../../../userControl/controller';
 import {ApiFailedResponse} from '../../response/failed';
 import {PostEditResponse} from '../../response/post/edit/common';
 import {FunctionConstructResponse, FunctionEditPost} from './types';
+
 
 export const handleEditPost = async <P extends PostEditPayload, R extends PostEditResponse>(
   mongoClient: MongoClient,

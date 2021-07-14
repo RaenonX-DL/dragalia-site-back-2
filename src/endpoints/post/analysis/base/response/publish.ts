@@ -1,4 +1,4 @@
-import {AnalysisPublishResponse as AnalysisPublishResponseApi} from '../../../../../api-def/api/post/analysis/response';
+import {AnalysisPublishResponse as AnalysisPublishResponseApi} from '../../../../../api-def/api';
 import {PostPublishResponse} from '../../../base/response/post/publish/common';
 
 /**

@@ -1,7 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {SequencedPostEditPayload} from '../../../../../api-def/api/post/base/payload/sequenced';
-import {ApiResponseCode} from '../../../../../api-def/api/responseCode';
+import {SequencedPostEditPayload, ApiResponseCode} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 import {ApiFailedResponse} from '../../response/failed';
 import {SequencedPostEditResponse} from '../../response/post/edit/sequenced';

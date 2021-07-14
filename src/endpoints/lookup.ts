@@ -5,16 +5,17 @@ import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/handler';
+import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
+import {handleUnitInfoLookup} from './info/lookup/main/handler';
 import {handleGeneralMeta} from './meta/general/handler';
 import {handlePostMeta} from './meta/post/handler';
+import {handleUnitMeta} from './meta/unit/handler';
 import {handleEditCharacterAnalysis} from './post/analysis/character/edit/handler';
 import {handlePublishCharacterAnalysis} from './post/analysis/character/publish/handler';
 import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
-import {handleLookupAnalysis} from './post/analysis/shared/lookup/handler';
-import {handleLookupAnalysisLanding} from './post/analysis/shared/lookupLanding/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
@@ -49,6 +50,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
+  [ApiEndPoints.PAGE_META_UNIT]: {GET: handleUnitMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
@@ -56,8 +58,8 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
-  [ApiEndPoints.POST_ANALYSIS_LOOKUP]: {GET: handleLookupAnalysis},
-  [ApiEndPoints.POST_ANALYSIS_LOOKUP_LANDING]: {GET: handleLookupAnalysisLanding},
+  [ApiEndPoints.INFO_UNIT_LOOKUP]: {GET: handleUnitInfoLookup},
+  [ApiEndPoints.INFO_UNIT_LOOKUP_LANDING]: {GET: handleUnitInfoLookupLanding},
   [ApiEndPoints.POST_ANALYSIS_GET]: {GET: handleGetAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},

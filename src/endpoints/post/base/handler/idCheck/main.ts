@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {PostIdCheckPayload} from '../../../../../api-def/api/post/base/payload/common';
+import {PostIdCheckPayload} from '../../../../../api-def/api';
 import {PostIdCheckResponse} from '../../response/post/idCheck';
 import {FunctionCheckIdAvailability, FunctionConstructResponse} from './types';
 

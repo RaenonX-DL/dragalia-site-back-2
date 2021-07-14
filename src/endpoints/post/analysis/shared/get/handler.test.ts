@@ -69,7 +69,24 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     expect(json.success).toBe(true);
     expect(json.isAltLang).toBe(false);
     expect(json.lang).toBe(SupportedLanguages.CHT);
-    // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
+    // Weird syntax on checking the value is a number - https://stackoverflow.com/a/56133391/11571888
+    expect(json.publishedEpoch).toEqual(expect.any(Number));
+    expect(json.modifiedEpoch).toEqual(expect.any(Number));
+  });
+
+  it('gets an analysis using its unit name', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadPost);
+
+    const result = await app.app.inject().get(ApiEndPoints.POST_ANALYSIS_GET)
+      .query({...payloadGet, unitId: 'Gala_Leonidas'});
+    expect(result.statusCode).toBe(200);
+
+    const json: CharaAnalysisGetResponse = result.json() as CharaAnalysisGetResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.isAltLang).toBe(false);
+    expect(json.lang).toBe(SupportedLanguages.CHT);
+    // Weird syntax on checking the value is a number - https://stackoverflow.com/a/56133391/11571888
     expect(json.publishedEpoch).toEqual(expect.any(Number));
     expect(json.modifiedEpoch).toEqual(expect.any(Number));
   });
