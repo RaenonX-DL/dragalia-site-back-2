@@ -43,8 +43,8 @@ CI | Optional | Specify this to `true` for CI-specific behavior.
 [back-repo]: https://github.com/RaenonX-DL/dragalia-site-back
 [back-deployment]: https://pyheroku-badge.herokuapp.com/?app=dragalia-site-back
 [back-site]: https://dl.raenonx.cc
-[back-ci]: https://github.com/RaenonX-DL/dragalia-site-back-2/workflows/Node%20CI/badge.svg
-[back-ci-link]: https://github.com/RaenonX-DL/dragalia-site-back-2/actions?query=workflow%3A%22Node+CI%22
+[back-ci]: https://github.com/RaenonX-DL/dragalia-site-back-2/workflows/CI%20%26%20CD/badge.svg
+[back-ci-link]: https://github.com/RaenonX-DL/dragalia-site-back-2/actions/workflows/nodejs.yml
 [back-time-badge]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2.svg
 [back-time-link]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2
 [back-site-status]: https://badgen.net/uptime-robot/status/m787223687-0bc3d1f09f7bf2b07ed95c85?cache=300
