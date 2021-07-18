@@ -1,6 +1,5 @@
 # dragalia-site-back-2
 
-[![back-deployment]][back-site]
 [![back-ci]][back-ci-link]
 [![back-time-badge]][back-time-link]
 
@@ -41,7 +40,6 @@ CI | Optional | Specify this to `true` for CI-specific behavior.
 [fastify]: https://www.fastify.io/
 
 [back-repo]: https://github.com/RaenonX-DL/dragalia-site-back
-[back-deployment]: https://pyheroku-badge.herokuapp.com/?app=dragalia-site-back
 [back-site]: https://dl.raenonx.cc
 [back-ci]: https://github.com/RaenonX-DL/dragalia-site-back-2/workflows/CI%20%26%20CD/badge.svg
 [back-ci-link]: https://github.com/RaenonX-DL/dragalia-site-back-2/actions/workflows/nodejs.yml
