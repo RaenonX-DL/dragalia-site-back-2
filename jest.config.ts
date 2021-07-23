@@ -28,7 +28,11 @@ const config: Config.InitialOptions = {
     '!./src/api-def/**/*.ts',
   ],
   coverageDirectory: '.',
-  coverageReporters: ['clover'],
+  coverageReporters: [
+    'clover',
+    'cobertura',
+  ],
 };
+
 // noinspection JSUnusedGlobalSymbols
 export default config;
