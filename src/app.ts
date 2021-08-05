@@ -3,7 +3,7 @@ import fastifyCors from 'fastify-cors';
 import fastifyHelmet from 'fastify-helmet';
 import {FastifyLoggerOptions} from 'fastify/types/logger';
 import {MongoClient, MongoClientOptions} from 'mongodb';
-import {MongoMemoryServer} from 'mongodb-memory-server';
+import {MongoMemoryReplSet} from 'mongodb-memory-server';
 
 import {handleEndpoint, handleResponse, handlerLookup} from './endpoints/lookup';
 import {corsOptions} from './middleware/cors';
@@ -11,25 +11,26 @@ import {handleInternalError} from './statuses/internalError/handler';
 import {handleNotExists} from './statuses/notExists/handler';
 import {clearServer} from './utils/mongodb';
 
+
 /**
  * A class holding the application related instances.
  */
 export class Application {
   app: FastifyInstance;
   mongoClient: MongoClient;
-  mongoServer?: MongoMemoryServer;
+  mongoReplSet?: MongoMemoryReplSet;
 
   /**
    * Construct the application.
    *
    * @param {FastifyInstance} app fastify app instance
    * @param {MongoClient} mongoClient mongo client
-   * @param {MongoMemoryServer} mongoServer mongo in-memory server
+   * @param {MongoMemoryReplSet} mongoReplSet mongo in-memory replica set
    */
-  constructor(app: FastifyInstance, mongoClient: MongoClient, mongoServer?: MongoMemoryServer) {
+  constructor(app: FastifyInstance, mongoClient: MongoClient, mongoReplSet?: MongoMemoryReplSet) {
     this.app = app;
     this.mongoClient = mongoClient;
-    this.mongoServer = mongoServer;
+    this.mongoReplSet = mongoReplSet;
   }
 
   /**
@@ -40,7 +41,7 @@ export class Application {
   async close(): Promise<void> {
     try {
       await this.mongoClient.close();
-      await this.mongoServer?.stop();
+      await this.mongoReplSet?.stop();
     } catch (e) {
       console.error(`Error on application close: ${e.message}`);
     }
@@ -74,13 +75,14 @@ export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Prom
 
   // --- Initialize mongo connection & server
   let mongoClient: MongoClient;
-  let server: MongoMemoryServer | undefined = undefined;
+  let server: MongoMemoryReplSet | undefined = undefined;
   const options: MongoClientOptions = {
     appName: 'dragalia-site-back-2',
   };
   if (!mongoUri) {
-    server = new MongoMemoryServer();
-    mongoClient = await MongoClient.connect(await server.getUri(), options);
+    // Only wired tiger supports transaction
+    server = await MongoMemoryReplSet.create({replSet: {count: 1, storageEngine: 'wiredTiger'}});
+    mongoClient = await MongoClient.connect(server.getUri(), options);
   } else {
     mongoClient = await MongoClient.connect(mongoUri, options);
   }

@@ -60,6 +60,7 @@ export const execTransaction = async (mongoClient: MongoClient, fn: WithTransact
 
   try {
     await session.withTransaction(fn);
+    await session.commitTransaction();
   } catch (e) {
     throw e;
   } finally {
