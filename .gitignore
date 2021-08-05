@@ -13,6 +13,7 @@ dist/
 
 # Coverage
 clover.xml
+cobertura-coverage.xml
 junit.xml
 
 # MongoDB local instance
