@@ -6,13 +6,33 @@ import {setupServer} from 'msw/node';
 
 import {ResourcePaths} from '../src/api-def/resources';
 
-// Console behavior override
+// Console behavior overriding
+const originalErrorFn = console.error;
 global.console = {
   ...global.console,
   // Override default behavior
   log: jest.fn(),
   info: jest.fn(),
   debug: jest.fn(),
+  error: (...data: any[]) => {
+    // Skips displaying some error messages
+    //  - Attempted to use a session that has ended - mostly happens when cleaning up the tests
+    const errorMessage = data[0];
+    if (typeof errorMessage !== 'string') {
+      originalErrorFn(...data);
+      return;
+    }
+
+    if (errorMessage.startsWith('MongoDriverError: Attempted to use a session that has ended')) {
+      return;
+    }
+    // The error that causes this error should be printed out
+    if (errorMessage.startsWith('Unhandled error')) {
+      return;
+    }
+
+    originalErrorFn(...data);
+  },
 };
 
 // Setup mock server
