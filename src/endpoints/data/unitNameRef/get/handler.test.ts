@@ -5,7 +5,6 @@ import {
   UnitNameRefResponse,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {UnitNameRefController} from '../controller';
 import {UnitNameRefEntry} from '../model';
 
 
@@ -64,8 +63,15 @@ describe('Unit name reference data handler', () => {
     ].map((entry) => entry.toObject());
     await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
-    const data = await UnitNameRefController.getData(app.mongoClient, SupportedLanguages.JP);
+    const response = await app.app.inject().get(ApiEndPoints.DATA_UNIT_NAME_REF).query({
+      uid: '',
+      lang: SupportedLanguages.JP,
+    });
+    expect(response.statusCode).toBe(200);
 
-    expect(data).toStrictEqual({});
+    const json: UnitNameRefResponse = response.json() as UnitNameRefResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.data).toStrictEqual({});
   });
 });
