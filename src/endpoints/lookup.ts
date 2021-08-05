@@ -4,7 +4,9 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
-import {handleDataUnitNameRef} from './data/unitNameRef/handler';
+import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
+import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
+import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
 import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
 import {handleUnitInfoLookup} from './info/lookup/main/handler';
 import {handleGeneralMeta} from './meta/general/handler';
@@ -65,6 +67,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
+  [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
 };
 
