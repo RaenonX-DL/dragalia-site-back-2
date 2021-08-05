@@ -1,11 +1,11 @@
 import {MongoClient} from 'mongodb';
 
-import {AnalysisEditPayload, ApiResponseCode} from '../../../api-def/api';
-import {ApiResponse} from '../../../base/response';
-import {handleEditPost} from '../base/handler/edit/base';
-import {FunctionConstructResponse, FunctionEditPost} from '../base/handler/edit/types';
-import {ApiFailedResponse} from '../base/response/failed';
-import {AnalysisEditResponse} from './base/response/edit';
+import {AnalysisEditPayload, ApiResponseCode} from '../../../../../api-def/api';
+import {ApiResponse} from '../../../../../base/response';
+import {handleEditPost} from '../../../base/handler/edit/base';
+import {FunctionConstructResponse, FunctionEditPost} from '../../../base/handler/edit/types';
+import {ApiFailedResponse} from '../../../base/response/failed';
+import {AnalysisEditResponse} from '../../base/response/edit';
 
 
 export const handleEditAnalysis = async <P extends AnalysisEditPayload, R extends AnalysisEditResponse>(

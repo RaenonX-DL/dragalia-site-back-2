@@ -3,8 +3,9 @@ import {ApiResponse} from '../../../../../base/response';
 import {processEditDragonAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {AnalysisController} from '../../controller';
-import {handleEditAnalysis} from '../../handler';
+import {handleEditAnalysis} from '../../shared/edit/handler';
 import {DragonAnalysisEditResponse} from './response';
+
 
 export const handleEditDragonAnalysis = async (
   {payload, mongoClient}: HandlerParams<DragonAnalysisEditPayload>,
