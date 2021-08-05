@@ -1,7 +1,7 @@
-import {UnitNameRefPayload} from '../../../api-def/api';
-import {processPageMetaPayload} from '../../../utils/payload/meta';
-import {HandlerParams} from '../../lookup';
-import {UnitNameRefController} from './controller';
+import {UnitNameRefPayload} from '../../../../api-def/api';
+import {processPageMetaPayload} from '../../../../utils/payload/meta';
+import {HandlerParams} from '../../../lookup';
+import {UnitNameRefController} from '../controller';
 import {UnitNameRefResponse} from './response';
 
 

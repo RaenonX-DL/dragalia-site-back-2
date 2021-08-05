@@ -3,8 +3,8 @@ import {
   BaseResponse,
   UnitNameRefData,
   UnitNameRefResponse as UnitNameRefResponseApi,
-} from '../../../api-def/api';
-import {ApiResponse} from '../../../base/response';
+} from '../../../../api-def/api';
+import {ApiResponse} from '../../../../base/response';
 
 
 type UnitNameRefResponseOptions = Omit<UnitNameRefResponseApi, keyof BaseResponse>;
@@ -16,9 +16,9 @@ export class UnitNameRefResponse extends ApiResponse {
   data: UnitNameRefData;
 
   /**
-   * Construct a page meta endpoint API response.
+   * Construct an unit name reference endpoint API response.
    *
-   * @param {UnitNameRefResponseOptions} options options to construct an unit name ref response
+   * @param {UnitNameRefResponseOptions} options options to construct the response
    */
   constructor(options: UnitNameRefResponseOptions) {
     const responseCode = ApiResponseCode.SUCCESS;

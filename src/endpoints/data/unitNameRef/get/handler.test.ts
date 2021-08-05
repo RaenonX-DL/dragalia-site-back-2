@@ -3,10 +3,10 @@ import {
   ApiResponseCode,
   SupportedLanguages,
   UnitNameRefResponse,
-} from '../../../api-def/api';
-import {Application, createApp} from '../../../app';
-import {UnitNameRefController} from './controller';
-import {UnitNameRefEntry} from './model';
+} from '../../../../api-def/api';
+import {Application, createApp} from '../../../../app';
+import {UnitNameRefController} from '../controller';
+import {UnitNameRefEntry} from '../model';
 
 
 describe('Unit name reference data handler', () => {
