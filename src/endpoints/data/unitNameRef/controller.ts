@@ -1,8 +1,10 @@
-import {MongoClient} from 'mongodb';
+import {MongoClient, MongoError} from 'mongodb';
 
 import {UnitNameRefData, UnitNameRefEntry as UnitNameRefEntryApi, SupportedLanguages} from '../../../api-def/api';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
-import {UnitNameRefEntry, UnitNameRefEntryDocumentKey} from './model';
+import {execTransaction} from '../../../utils/mongodb';
+import {DuplicatedNamesError} from './error';
+import {UnitNameRefEntry, UnitNameRefEntryDocument, UnitNameRefEntryDocumentKey} from './model';
 
 
 /**
@@ -46,5 +48,51 @@ export class UnitNameRefController {
         name: data[UnitNameRefEntryDocumentKey.name],
       }))
       .toArray();
+  }
+
+  /**
+   * Update all unit name references in the given ``lang``.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the unit name references to update
+   * @param {Array<UnitNameRefEntryApi>} refs list of unit name references to use in the given language
+   * @return {Promise<Array<UnitNameRefEntryApi>>} list of unit name references
+   */
+  static async updateRefs(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    refs: Array<UnitNameRefEntryApi>,
+  ): Promise<void> {
+    await execTransaction(
+      mongoClient,
+      async (session) => {
+        const collection = UnitNameRefEntry.getCollection(mongoClient);
+
+        await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
+
+        if (!refs.length) {
+          // No references to add
+          return;
+        }
+
+        try {
+          await collection.insertMany(
+            refs.map((entry) => ({
+              [UnitNameRefEntryDocumentKey.name]: entry.name,
+              [UnitNameRefEntryDocumentKey.unitId]: entry.unitId,
+              [MultiLingualDocumentKey.language]: lang,
+            } as UnitNameRefEntryDocument)),
+            {session},
+          );
+        } catch (e) {
+          if (e instanceof MongoError && e.code === 11000) {
+            // E11000 for duplicated key
+            throw new DuplicatedNamesError(e.errmsg);
+          } else {
+            throw e; // let other type of error bubble up
+          }
+        }
+      },
+    );
   }
 }

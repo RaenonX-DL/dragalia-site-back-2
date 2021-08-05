@@ -54,14 +54,10 @@ export class UnitNameRefEntry extends Document {
    */
   static getCollection(mongoClient: MongoClient): Collection {
     return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+      // For getting the unit references
       collection.createIndex(MultiLingualDocumentKey.language);
-      collection.createIndex(
-        [
-          {[MultiLingualDocumentKey.language]: 1},
-          {[UnitNameRefEntryDocumentKey.name]: 1},
-        ],
-        {unique: true},
-      );
+      // For preventing duplicated entries
+      collection.createIndex(UnitNameRefEntryDocumentKey.name, {unique: true});
     }));
   }
 
