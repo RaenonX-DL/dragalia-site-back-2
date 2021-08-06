@@ -13,9 +13,10 @@ dist/
 
 # Coverage
 clover.xml
+cobertura-coverage.xml
 junit.xml
 
-# MongoDB local instance
+# MongoDB local files
 .mongodb
 
 # Environment variables

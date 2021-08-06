@@ -45,6 +45,14 @@ Name | Required/Optional | Description
 MONGO_URL | Required | Connection string of MongoDB database.
 CI | Optional | Specify this to `true` for CI-specific behavior.
 
+## Deployments
+
+To make the application works properly,
+the MongoDB instance **MUST** be deployed in the following configuration:
+
+- Storage Engine: WiredTiger
+- Cluster: Replica Set
+
 [express]: https://expressjs.com/
 [fastify]: https://www.fastify.io/
 

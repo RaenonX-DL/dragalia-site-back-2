@@ -1,4 +1,4 @@
-import {Collection, Db, Document, MongoClient} from 'mongodb';
+import {Collection, Db, Document, MongoClient, WithTransactionCallback} from 'mongodb';
 
 import {CollectionInfo} from '../base/controller/info';
 
@@ -23,7 +23,6 @@ export const getCollection = <T extends Document = Document>(
 
   return collection;
 };
-
 
 type DatabaseInfo = {
   name: string,
@@ -53,5 +52,18 @@ export const clearServer = async (client: MongoClient, skipDatabaseNames?: Array
     for (const collection of await client.db(database.name).collections()) {
       await collection.deleteMany({});
     }
+  }
+};
+
+export const execTransaction = async (mongoClient: MongoClient, fn: WithTransactionCallback): Promise<void> => {
+  const session = mongoClient.startSession();
+
+  try {
+    await session.withTransaction(fn);
+    await session.commitTransaction();
+  } catch (e) {
+    throw e;
+  } finally {
+    await session.endSession();
   }
 };

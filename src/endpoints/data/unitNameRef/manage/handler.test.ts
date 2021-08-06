@@ -2,14 +2,13 @@ import {
   ApiEndPoints,
   ApiResponseCode,
   SupportedLanguages,
-  UnitNameRefResponse,
-} from '../../../api-def/api';
-import {Application, createApp} from '../../../app';
-import {UnitNameRefController} from './controller';
-import {UnitNameRefEntry} from './model';
+  UnitNameRefManageResponse,
+} from '../../../../api-def/api';
+import {Application, createApp} from '../../../../app';
+import {UnitNameRefEntry} from '../model';
 
 
-describe('Unit name reference data handler', () => {
+describe('Unit name reference manage handler', () => {
   let app: Application;
 
   beforeAll(async () => {
@@ -25,19 +24,19 @@ describe('Unit name reference data handler', () => {
   });
 
   it('returns empty response if no data', async () => {
-    const response = await app.app.inject().get(ApiEndPoints.DATA_UNIT_NAME_REF).query({
+    const response = await app.app.inject().get(ApiEndPoints.MANAGE_UNIT_NAME_REF).query({
       uid: '',
       lang: SupportedLanguages.EN,
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefResponse = response.json() as UnitNameRefResponse;
+    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.data).toStrictEqual({});
+    expect(json.refs).toStrictEqual([]);
   });
 
-  it('returns data filtered by language', async () => {
+  it('returns entries in the given language only', async () => {
     const dataArray = [
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10950101}),
@@ -45,27 +44,34 @@ describe('Unit name reference data handler', () => {
     ].map((entry) => entry.toObject());
     await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
-    const response = await app.app.inject().get(ApiEndPoints.DATA_UNIT_NAME_REF).query({
+    const response = await app.app.inject().get(ApiEndPoints.MANAGE_UNIT_NAME_REF).query({
       uid: '',
       lang: SupportedLanguages.EN,
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefResponse = response.json() as UnitNameRefResponse;
+    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(Object.keys(json.data).length).toBe(2);
+    expect(Object.keys(json.refs).length).toBe(2);
   });
 
-  it('returns empty response if no data in the requested lang', async () => {
+  it('returns empty response if no entries is in the given language', async () => {
     const dataArray = [
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10950101}),
     ].map((entry) => entry.toObject());
     await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
-    const data = await UnitNameRefController.getData(app.mongoClient, SupportedLanguages.JP);
+    const response = await app.app.inject().get(ApiEndPoints.MANAGE_UNIT_NAME_REF).query({
+      uid: '',
+      lang: SupportedLanguages.JP,
+    });
+    expect(response.statusCode).toBe(200);
 
-    expect(data).toStrictEqual({});
+    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.refs).toStrictEqual([]);
   });
 });

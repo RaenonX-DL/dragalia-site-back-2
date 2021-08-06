@@ -3,8 +3,9 @@ import {ApiResponse} from '../../../../../base/response';
 import {processEditCharaAnalysisPayload} from '../../../../../utils/payload';
 import {HandlerParams} from '../../../../lookup';
 import {AnalysisController} from '../../controller';
-import {handleEditAnalysis} from '../../handler';
+import {handleEditAnalysis} from '../../shared/edit/handler';
 import {CharaAnalysisEditResponse} from './response';
+
 
 export const handleEditCharacterAnalysis = async (
   {payload, mongoClient}: HandlerParams<CharaAnalysisEditPayload>,
