@@ -6,7 +6,7 @@ import {CustomError} from '../../../base/error';
  */
 export class DuplicatedNamesError extends CustomError {
   /**
-   * Construct an duplicated names error.
+   * Construct a duplicated names error.
    *
    * @param {string} msg other error message to be displayed to help debugging
    */
