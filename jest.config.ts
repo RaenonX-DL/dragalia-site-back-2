@@ -12,7 +12,6 @@ const config: Config.InitialOptions = {
   setupFilesAfterEnv: ['./test/setupAfterEnv.ts'],
   globalTeardown: './test/teardown.ts',
   // Coverage
-  collectCoverage: true,
   collectCoverageFrom: [
     // Source files
     './src/**/*.ts',

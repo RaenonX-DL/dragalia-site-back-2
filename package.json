@@ -13,7 +13,7 @@
     "build": "tsc -p .",
     "start": "pm2-runtime start pm2.yml --env production",
     "test": "jest --maxWorkers=50% --colors",
-    "test:ci-jest": "npm run test -- --reporters=default --reporters=jest-junit",
+    "test:ci-jest": "npm run test -- --reporters=default --reporters=jest-junit --coverage",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix"
   },
