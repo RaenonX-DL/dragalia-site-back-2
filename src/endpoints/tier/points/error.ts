@@ -15,3 +15,15 @@ export class DescriptionTraversalError extends CustomError {
     super(`Failed to get the description from the object: ${JSON.stringify(description)}`);
   }
 }
+
+/**
+ * Error to be thrown if there are duplicated descriptions.
+ */
+export class DuplicatedDescriptionsError extends CustomError {
+  /**
+   * Construct a duplicated descriptions error.
+   */
+  constructor() {
+    super('There are duplicated descriptions.');
+  }
+}

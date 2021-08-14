@@ -1,6 +1,10 @@
-import {MongoClient} from 'mongodb';
+import {MongoClient, ObjectId} from 'mongodb';
 
-import {KeyPointEntry, KeyPointEntryDocument} from './model';
+import {KeyPointEntryUpdate, SupportedLanguages} from '../../../api-def/api';
+import {DocumentBaseKey} from '../../../api-def/models';
+import {execTransaction} from '../../../utils/mongodb';
+import {DuplicatedDescriptionsError} from './error';
+import {KeyPointEntry, KeyPointEntryDocument, KeyPointEntryDocumentKey} from './model';
 
 
 /**
@@ -15,5 +19,83 @@ export class KeyPointController {
    */
   static async getAllEntries(mongoClient: MongoClient): Promise<Array<KeyPointEntryDocument>> {
     return await KeyPointEntry.getCollection(mongoClient).find().toArray();
+  }
+
+  /**
+   * Update all given `entries` in `lang`.
+   *
+   * Entries that exists in the database but not in `entries` will be removed.
+   *
+   * Entries that does not exist in the database but exists in `entries` will be added.
+   *
+   * Entries that exists both in the database and `entries` will be updated.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang target language to update
+   * @param {Array<KeyPointEntryUpdate>} entries entries to be added or updated
+   * @return {Promise<void>}
+   * @throws {DuplicatedDescriptionsError} if there are duplicated descriptions in `entries`
+   */
+  static async updateEntries(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    entries: Array<KeyPointEntryUpdate>,
+  ): Promise<void> {
+    // Check for duplicated descriptions
+    if (new Set(entries.map((entry) => entry.description)).size !== entries.length) {
+      throw new DuplicatedDescriptionsError();
+    }
+
+    await execTransaction(
+      mongoClient,
+      async (session) => {
+        const collection = KeyPointEntry.getCollection(mongoClient);
+
+        if (!entries.length) {
+          // Nothing to add but delete all
+          await collection.deleteMany({});
+          return;
+        }
+
+        const entriesHasId = entries.filter((entry) => !!entry.id);
+        const entriesNoId = entries.filter((entry) => !entry.id);
+
+        // Delete IDs that exist in the database but not `entries`
+        const idsInDatabase = await collection.find().map((doc) => doc[DocumentBaseKey.id].toString()).toArray();
+        const idsInEntries = entriesHasId.map((entry) => entry.id);
+        const idsToDelete = idsInDatabase.filter((id) => !idsInEntries.includes(id));
+        if (idsToDelete.length) {
+          await collection.deleteMany(
+            {$or: idsToDelete.map((id) => ({[DocumentBaseKey.id]: new ObjectId(id)}))},
+            {session},
+          );
+        }
+
+        // Insert entries without IDs (new entries)
+        if (entriesNoId.length) {
+          await collection.insertMany(entriesNoId.map((entry) => ({
+            [KeyPointEntryDocumentKey.type]: entry.type,
+            [KeyPointEntryDocumentKey.description]: {[lang]: entry.description},
+          }) as KeyPointEntryDocument));
+        }
+
+        // Update entries
+        if (entriesHasId.length) {
+          await collection.bulkWrite(entriesHasId.map((entry) => ({
+            updateOne: {
+              filter: {
+                [DocumentBaseKey.id]: new ObjectId(entry.id),
+              },
+              update: {
+                $set: {
+                  [KeyPointEntryDocumentKey.type]: entry.type,
+                  [`${KeyPointEntryDocumentKey.description}.${lang}`]: entry.description,
+                },
+              },
+            },
+          })), {session});
+        }
+      },
+    );
   }
 }

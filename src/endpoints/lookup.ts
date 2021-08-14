@@ -28,6 +28,7 @@ import {handleSetAtkSkillPreset} from './preset/atkSkill/set/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
+import {handleTierPointsUpdate} from './tier/points/update/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -69,7 +70,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
   [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
-  [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage},
+  [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
 };
 
