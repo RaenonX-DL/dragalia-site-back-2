@@ -27,6 +27,7 @@ import {handleGetAtkSkillPreset} from './preset/atkSkill/get/handler';
 import {handleSetAtkSkillPreset} from './preset/atkSkill/set/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
+import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
 
@@ -68,6 +69,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
+  [ApiEndPoints.TIER_KEY_POINTS]: {GET: handleTierPointsGet},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
   [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
