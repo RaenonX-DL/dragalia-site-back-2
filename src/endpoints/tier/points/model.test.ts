@@ -1,4 +1,5 @@
 import {SupportedLanguages} from '../../../api-def/api';
+import {DescriptionTraversalError} from './error';
 import {KeyPointEntry} from './model';
 
 
@@ -25,5 +26,18 @@ describe('Key point entry model', () => {
     });
 
     expect(model.getDescription(SupportedLanguages.EN)).toBe('C');
+  });
+
+  it('throws error if no available description', async () => {
+    const model = new KeyPointEntry({
+      type: 'strength',
+      description: {},
+    });
+
+    const fn = async () => {
+      model.getDescription(SupportedLanguages.CHT);
+    };
+
+    await expect(fn).rejects.toThrow(DescriptionTraversalError);
   });
 });
