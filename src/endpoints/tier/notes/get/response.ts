@@ -18,7 +18,7 @@ export class UnitTierNoteGetResponse extends ApiResponse {
   /**
    * Construct a unit tier notes fetching endpoint API response.
    *
-   * @param {KeyPointManageResponseOptions} options options to construct a unit tier notes fetching response
+   * @param {UnitTierNoteGetResponseOptions} options options to construct a unit tier notes fetching response
    */
   constructor(options: UnitTierNoteGetResponseOptions) {
     const responseCode = ApiResponseCode.SUCCESS;
