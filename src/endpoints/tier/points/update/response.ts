@@ -1,4 +1,4 @@
-import {ApiResponseCode, KeyPointUpdateResponse as KeyPointUpdateResponseApi} from '../../../../api-def/api';
+import {ApiResponseCode} from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 
 
@@ -13,12 +13,5 @@ export class KeyPointUpdateResponse extends ApiResponse {
    */
   constructor() {
     super(ApiResponseCode.SUCCESS);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  toJson(): KeyPointUpdateResponseApi {
-    return {...super.toJson()};
   }
 }
