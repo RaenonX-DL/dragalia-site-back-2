@@ -64,6 +64,27 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(false);
   });
 
+  it('does not change the stored data after 403 request', async () => {
+    const dataArray = [
+      new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 1'}}),
+      new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
+      new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
+    ].map((entry) => entry.toObject());
+    await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
+
+    const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
+      uid: '',
+      lang: SupportedLanguages.CHT,
+      points: [
+        {type: 'strength', description: 'CHT 4'},
+        {type: 'strength', description: 'CHT 5'},
+      ],
+    });
+    expect(response.statusCode).toBe(403);
+
+    expect(await KeyPointEntry.getCollection(app.mongoClient).find().toArray()).toHaveLength(3);
+  });
+
   it('adds new entries', async () => {
     const dataArray = [
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 1'}}),
