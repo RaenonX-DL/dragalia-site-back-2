@@ -1,5 +1,6 @@
 import {ObjectId} from 'mongodb';
 
+import {insertMockUser} from '../../../../../test/data/user';
 import {mongoExecInTransaction} from '../../../../../test/utils/mongo';
 import {
   ApiEndPoints,
@@ -16,12 +17,15 @@ import {KeyPointEntry, KeyPointEntryDocumentKey} from '../model';
 describe('Key point updating handler', () => {
   let app: Application;
 
+  const uidAdmin = new ObjectId();
+
   beforeAll(async () => {
     app = await createApp();
   });
 
   beforeEach(async () => {
     await app.reset();
+    await insertMockUser(app.mongoClient, {id: uidAdmin, isAdmin: true});
   });
 
   afterAll(async () => {
@@ -30,7 +34,7 @@ describe('Key point updating handler', () => {
 
   it('fails to update if the descriptions are duplicated', async () => {
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [
         {type: 'strength', description: 'CHT 1'},
@@ -41,6 +45,22 @@ describe('Key point updating handler', () => {
 
     const json: FailedResponse = response.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_DESCRIPTION_DUPLICATED);
+    expect(json.success).toBe(false);
+  });
+
+  it('fails to update if the user is not an admin', async () => {
+    const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
+      uid: '',
+      lang: SupportedLanguages.CHT,
+      points: [
+        {type: 'strength', description: 'CHT 1'},
+        {type: 'strength', description: 'CHT 1'},
+      ],
+    });
+    expect(response.statusCode).toBe(401);
+
+    const json: FailedResponse = response.json() as FailedResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
     expect(json.success).toBe(false);
   });
 
@@ -55,7 +75,7 @@ describe('Key point updating handler', () => {
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [
         {id: insertIds[0], type: 'strength', description: 'CHT 1'},
@@ -85,7 +105,7 @@ describe('Key point updating handler', () => {
     await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [
         {type: 'strength', description: 'CHT 1'},
@@ -112,7 +132,7 @@ describe('Key point updating handler', () => {
     await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [],
     });
@@ -139,7 +159,7 @@ describe('Key point updating handler', () => {
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [
         {id: insertIds[0], type: 'strength', description: 'CHT 4'},
@@ -174,7 +194,7 @@ describe('Key point updating handler', () => {
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
-      uid: '',
+      uid: uidAdmin.toHexString(),
       lang: SupportedLanguages.CHT,
       points: [
         {id: insertIds[0], type: 'strength', description: 'CHT 4'},
