@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {SupportedLanguages, UnitTierData} from '../../../api-def/api';
+import {SupportedLanguages, UnitTierData, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
 import {UnitTierNote, UnitTierNoteDocument, UnitTierNoteDocumentKey} from './model';
 
 
@@ -25,5 +25,26 @@ export class TierNoteController {
         ])
         .toArray(),
     );
+  }
+
+  /**
+   * Get the unit tier note of a certain unit for editing.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the tier note
+   * @param {number} unitId unit ID of the tier note to be edited
+   * @return {Promise<UnitTierNoteApi>}
+   */
+  static async getUnitTierNoteEdit(
+    mongoClient: MongoClient, lang: SupportedLanguages, unitId: number,
+  ): Promise<UnitTierNoteApi | null> {
+    const tierNoteDoc = await UnitTierNote.getCollection(mongoClient)
+      .findOne({[UnitTierNoteDocumentKey.unitId]: unitId});
+
+    if (!tierNoteDoc) {
+      return null;
+    }
+
+    return UnitTierNote.fromDocument(tierNoteDoc as UnitTierNoteDocument).toUnitTierNote(lang);
   }
 }
