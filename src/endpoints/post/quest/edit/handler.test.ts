@@ -126,7 +126,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_QUEST_EDIT)
       .payload({...payloadEdit, uid: uidNormal});
-    expect(result.statusCode).toBe(401);
+    expect(result.statusCode).toBe(403);
 
     const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);

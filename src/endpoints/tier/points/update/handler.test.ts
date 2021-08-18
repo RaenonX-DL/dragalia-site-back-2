@@ -57,7 +57,7 @@ describe('Key point updating handler', () => {
         {type: 'strength', description: 'CHT 1'},
       ],
     });
-    expect(response.statusCode).toBe(401);
+    expect(response.statusCode).toBe(403);
 
     const json: FailedResponse = response.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);

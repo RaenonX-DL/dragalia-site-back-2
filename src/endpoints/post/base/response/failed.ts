@@ -19,6 +19,10 @@ export class ApiFailedResponse extends ApiResponse {
    * @param {ApiFailedResponseOptions} options options of the api failed response
    */
   constructor(responseCode: ApiResponseCode, options: ApiFailedResponseOptions = {}) {
+    if (responseCode === ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION) {
+      options.httpCode = 403;
+    }
+
     super(responseCode, {httpCode: options.httpCode});
 
     this.message = options.message || ApiResponseCode[responseCode];

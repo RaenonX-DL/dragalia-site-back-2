@@ -15,7 +15,7 @@ export const handleTierPointsUpdate = async ({
   payload = processPayloadBase(payload);
 
   if (!await UserController.isAdmin(mongoClient, payload.uid)) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, {httpCode: 401});
+    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 
   try {
