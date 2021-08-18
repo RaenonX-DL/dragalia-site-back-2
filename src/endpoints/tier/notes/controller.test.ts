@@ -87,4 +87,51 @@ describe('Tier note data controller', () => {
       });
     });
   });
+
+  describe('getUnitTierNoteEdit()', () => {
+    it('returns `null` if no existing tier note available', async () => {
+      const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
+
+      expect(data).toStrictEqual({
+        points: [],
+        tier: {
+          conAi: {ranking: 'S', note: 'A', isCompDependent: true},
+        },
+        lastUpdateEpoch: 0,
+      });
+    });
+
+    it('returns the requested tier note', async () => {
+      const dataArray = [
+        new UnitTierNote({
+          unitId: 10950101,
+          points: [],
+          tier: {
+            conAi: {
+              ranking: 'S',
+              note: {
+                [SupportedLanguages.CHT]: 'A',
+                [SupportedLanguages.EN]: 'B',
+              },
+              isCompDependent: true,
+            },
+          },
+          lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+      const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
+
+      expect(data).toStrictEqual({
+        10950101: {
+          points: [],
+          tier: {
+            conAi: {ranking: 'S', note: 'A', isCompDependent: true},
+          },
+          lastUpdateEpoch: 0,
+        },
+      });
+    });
+  });
 });
