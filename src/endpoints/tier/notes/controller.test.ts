@@ -1,5 +1,5 @@
 import {SupportedLanguages} from '../../../api-def/api';
-import {DocumentBaseKey} from '../../../api-def/models/base';
+import {DocumentBaseKey} from '../../../api-def/models';
 import {Application, createApp} from '../../../app';
 import * as utils from '../../../utils/misc';
 import {TierNoteController} from './controller';
@@ -227,6 +227,51 @@ describe('Tier note data controller', () => {
             [TierNoteEntryDocumentKey.ranking]: 'A',
             [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'C', [SupportedLanguages.EN]: 'B'},
             [TierNoteEntryDocumentKey.isCompDependent]: true,
+          },
+        },
+        [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
+      });
+    });
+
+    it('adds new tier note dimension', async () => {
+      const dataArray = [
+        new UnitTierNote({
+          unitId: 10950101,
+          points: [],
+          tier: {
+            conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.EN]: 'B'}, isCompDependent: true}),
+          },
+          lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        {
+          points: ['idA'],
+          tier: {conSolo: {ranking: 'A', note: 'C', isCompDependent: false}},
+        },
+      );
+
+      const doc = await UnitTierNote.getCollection(app.mongoClient)
+        .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+      delete doc[DocumentBaseKey.id];
+
+      expect(doc).toStrictEqual({
+        [UnitTierNoteDocumentKey.unitId]: 10950101,
+        [UnitTierNoteDocumentKey.points]: ['idA'],
+        [UnitTierNoteDocumentKey.tier]: {
+          conAi: {
+            [TierNoteEntryDocumentKey.ranking]: 'S',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.EN]: 'B'},
+            [TierNoteEntryDocumentKey.isCompDependent]: true,
+          },
+          conSolo: {
+            [TierNoteEntryDocumentKey.ranking]: 'A',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'C'},
+            [TierNoteEntryDocumentKey.isCompDependent]: false,
           },
         },
         [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,

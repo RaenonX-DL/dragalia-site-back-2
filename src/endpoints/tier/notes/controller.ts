@@ -129,7 +129,7 @@ export class TierNoteController {
           return [dimensionKey, dimensionOriginalDoc] as [string, TierNoteEntryDocument];
         })
         // Add newly added entries in `tierNote`
-        .concat(...newTierNoteEntries),
+        .concat(newTierNoteEntries),
       ),
       [UnitTierNoteDocumentKey.lastUpdateEpoch]: lastUpdateEpoch,
     };
