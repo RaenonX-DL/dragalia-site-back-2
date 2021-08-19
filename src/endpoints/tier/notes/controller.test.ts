@@ -7,12 +7,15 @@ import {UnitTierNote} from './model';
 describe('Tier note data controller', () => {
   let app: Application;
 
+  const epoch = 100000;
+
   beforeAll(async () => {
     app = await createApp();
   });
 
   beforeEach(async () => {
     await app.reset();
+    jest.spyOn(utils, 'getCurrentEpoch').mockReturnValue(epoch);
   });
 
   afterAll(async () => {

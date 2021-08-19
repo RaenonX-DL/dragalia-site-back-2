@@ -10,6 +10,7 @@ import {
 import {DocumentBase, DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
+import {getCurrentEpoch} from '../../../utils/misc';
 import {TierNoteTraversalError} from './error';
 
 
@@ -202,7 +203,7 @@ export class UnitTierNote extends Document {
           new TierNote({...tierNote, note: {[lang]: tierNote.note}}),
         ]),
       ),
-      lastUpdateEpoch: new Date().valueOf(),
+      lastUpdateEpoch: getCurrentEpoch(),
     });
   }
 
