@@ -67,8 +67,11 @@ export abstract class Document {
    * @return {DocumentBase} document object
    */
   toObject(): DocumentBase {
-    return {
-      [DocumentBaseKey.id]: this.id,
-    };
+    if (!this.id) {
+      // Only attach `_id` if it's not undefined
+      return {};
+    }
+
+    return {[DocumentBaseKey.id]: this.id};
   }
 }

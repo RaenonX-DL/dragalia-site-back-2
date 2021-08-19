@@ -5,7 +5,7 @@ import {
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {UnitTierNote} from '../model';
+import {TierNote, UnitTierNote} from '../model';
 
 
 describe('Tier note getting handler', () => {
@@ -42,9 +42,9 @@ describe('Tier note getting handler', () => {
         unitId: 10950101,
         points: [],
         tier: {
-          conAi: {
+          conAi: new TierNote({
             ranking: 'S', note: {[SupportedLanguages.CHT]: 'A', [SupportedLanguages.EN]: 'B'}, isCompDependent: true,
-          },
+          }),
         },
         lastUpdateEpoch: 0,
       }),
@@ -52,9 +52,9 @@ describe('Tier note getting handler', () => {
         unitId: 10950102,
         points: ['idA'],
         tier: {
-          conAi: {
+          conAi: new TierNote({
             ranking: 'A', note: {[SupportedLanguages.CHT]: 'C'}, isCompDependent: false,
-          },
+          }),
         },
         lastUpdateEpoch: 1,
       }),
@@ -91,9 +91,9 @@ describe('Tier note getting handler', () => {
         unitId: 10950101,
         points: [],
         tier: {
-          conAi: {
+          conAi: new TierNote({
             ranking: 'S', note: {[SupportedLanguages.CHT]: 'A', [SupportedLanguages.EN]: 'B'}, isCompDependent: true,
-          },
+          }),
         },
         lastUpdateEpoch: 0,
       }),
@@ -101,9 +101,9 @@ describe('Tier note getting handler', () => {
         unitId: 10950102,
         points: ['idA'],
         tier: {
-          conAi: {
+          conAi: new TierNote({
             ranking: 'A', note: {[SupportedLanguages.CHT]: 'C'}, isCompDependent: false,
-          },
+          }),
         },
         lastUpdateEpoch: 1,
       }),

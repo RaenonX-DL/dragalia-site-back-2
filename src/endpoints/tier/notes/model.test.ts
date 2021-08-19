@@ -1,6 +1,6 @@
 import {SupportedLanguages} from '../../../api-def/api';
 import {TierNoteTraversalError} from './error';
-import {UnitTierNote} from './model';
+import {TierNote, UnitTierNote} from './model';
 
 
 describe('Unit tier note model', () => {
@@ -9,13 +9,7 @@ describe('Unit tier note model', () => {
       unitId: 10950101,
       points: ['idA'],
       tier: {
-        conAi: {
-          isCompDependent: false,
-          note: {
-            [SupportedLanguages.CHT]: 'Note CHT',
-          },
-          ranking: 'S',
-        },
+        conAi: new TierNote({isCompDependent: false, note: {[SupportedLanguages.CHT]: 'Note CHT'}, ranking: 'S'}),
       },
       lastUpdateEpoch: 0,
     });
@@ -29,13 +23,7 @@ describe('Unit tier note model', () => {
       unitId: 10950101,
       points: ['idA'],
       tier: {
-        conAi: {
-          isCompDependent: false,
-          note: {
-            [SupportedLanguages.CHT]: 'Note CHT',
-          },
-          ranking: 'S',
-        },
+        conAi: new TierNote({isCompDependent: false, note: {[SupportedLanguages.CHT]: 'Note CHT'}, ranking: 'S'}),
       },
       lastUpdateEpoch: 0,
     });
@@ -49,11 +37,7 @@ describe('Unit tier note model', () => {
       unitId: 10950101,
       points: ['idA'],
       tier: {
-        conAi: {
-          isCompDependent: false,
-          note: {},
-          ranking: 'S',
-        },
+        conAi: new TierNote({isCompDependent: false, note: {}, ranking: 'S'}),
       },
       lastUpdateEpoch: 0,
     });

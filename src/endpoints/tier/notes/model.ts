@@ -1,6 +1,12 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {DimensionKey, Ranking, SupportedLanguages, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
+import {
+  DimensionKey,
+  Ranking,
+  SupportedLanguages,
+  UnitTierNote as UnitTierNoteApi,
+  TierNote as TierNoteApi,
+} from '../../../api-def/api';
 import {DocumentBase, DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
@@ -30,6 +36,77 @@ export type TierNoteConstructParams = {
   isCompDependent: boolean,
 }
 
+/**
+ * Tier note for a single dimension.
+ */
+export class TierNote extends Document {
+  ranking: TierNoteConstructParams['ranking'];
+  note: TierNoteConstructParams['note'];
+  isCompDependent: TierNoteConstructParams['isCompDependent'];
+
+  /**
+   * Construct a tier note for a single dimension.
+   *
+   * @param {TierNoteConstructParams} params parameters to construct a single-dimension tier note
+   */
+  constructor(params: TierNoteConstructParams) {
+    super();
+
+    this.ranking = params.ranking;
+    this.note = params.note;
+    this.isCompDependent = params.isCompDependent;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  static fromDocument(doc: TierNoteEntryDocument): TierNote {
+    return new TierNote({
+      ranking: doc[TierNoteEntryDocumentKey.ranking],
+      note: doc[TierNoteEntryDocumentKey.note],
+      isCompDependent: doc[TierNoteEntryDocumentKey.isCompDependent],
+    });
+  }
+
+  /**
+   * Convert this model to the format compliant with the API definition.
+   *
+   * @param {SupportedLanguages} lang language of the desired tier note
+   * @return {TierNoteApi}
+   */
+  toApiFormat(lang: SupportedLanguages): TierNoteApi | null {
+    let note;
+
+    [lang, SupportedLanguages.CHT, SupportedLanguages.EN, SupportedLanguages.JP]
+      .find((lang) => {
+        note = this.note[lang];
+        return !!note;
+      });
+
+    if (!note) {
+      return null;
+    }
+
+    return {
+      ranking: this.ranking,
+      note,
+      isCompDependent: this.isCompDependent,
+    };
+  }
+
+  /**
+   * @inheritDoc
+   */
+  toObject(): TierNoteEntryDocument {
+    return {
+      ...super.toObject(),
+      [TierNoteEntryDocumentKey.ranking]: this.ranking,
+      [TierNoteEntryDocumentKey.note]: this.note,
+      [TierNoteEntryDocumentKey.isCompDependent]: this.isCompDependent,
+    };
+  }
+}
+
 export enum UnitTierNoteDocumentKey {
   unitId = 'u',
   points = 'p',
@@ -47,7 +124,7 @@ export type UnitTierNoteDocument = DocumentBase & {
 export type UnitTierNoteConstructParams = DocumentConstructParams & {
   unitId: number,
   points: Array<string>,
-  tier: { [dim in DimensionKey]?: TierNoteConstructParams },
+  tier: { [dim in DimensionKey]?: TierNote },
   lastUpdateEpoch: number,
 }
 
@@ -85,23 +162,47 @@ export class UnitTierNote extends Document {
    * @inheritDoc
    */
   static fromDocument(doc: UnitTierNoteDocument): UnitTierNote {
-    return new UnitTierNote({
-      id: doc[DocumentBaseKey.id],
+    const constructParams: UnitTierNoteConstructParams = {
       unitId: doc[UnitTierNoteDocumentKey.unitId],
       points: doc[UnitTierNoteDocumentKey.points],
       tier: Object.fromEntries(
         Object.entries(doc[UnitTierNoteDocumentKey.tier])
-          .map(([key, doc]) => {
-            const tierNote: TierNoteConstructParams = {
-              note: doc[TierNoteEntryDocumentKey.note],
-              ranking: doc[TierNoteEntryDocumentKey.ranking],
-              isCompDependent: doc[TierNoteEntryDocumentKey.isCompDependent],
-            };
-
-            return [key, tierNote];
-          }),
+          .map(([key, doc]) => [key, TierNote.fromDocument(doc as TierNoteEntryDocument)]),
       ),
       lastUpdateEpoch: doc[UnitTierNoteDocumentKey.lastUpdateEpoch],
+    };
+
+    // Only attach ID if needed
+    if (doc[DocumentBaseKey.id]) {
+      constructParams.id = doc[DocumentBaseKey.id];
+    }
+
+    return new UnitTierNote(constructParams);
+  }
+
+  /**
+   * Create a unit tier note model from `tierNote`.
+   *
+   * @param {number} unitId unit ID of the tier note
+   * @param {Omit<UnitTierNoteApi, 'lastUpdateEpoch'>} tierNote tier note data to construct the model
+   * @param {SupportedLanguages} lang language of the tier note
+   * @return {UnitTierNote}
+   */
+  static fromTierNote(
+    unitId: number,
+    tierNote: Omit<UnitTierNoteApi, 'lastUpdateEpoch'>,
+    lang: SupportedLanguages,
+  ): UnitTierNote {
+    return new UnitTierNote({
+      ...tierNote,
+      unitId,
+      tier: Object.fromEntries(Object.entries(tierNote.tier)
+        .map(([dimension, tierNote]) => [
+          dimension,
+          new TierNote({...tierNote, note: {[lang]: tierNote.note}}),
+        ]),
+      ),
+      lastUpdateEpoch: new Date().valueOf(),
     });
   }
 
@@ -115,19 +216,13 @@ export class UnitTierNote extends Document {
     return {
       points: this.points,
       tier: Object.fromEntries(Object.entries(this.tier).map(([key, tierNote]) => {
-        let note;
-
-        [lang, SupportedLanguages.CHT, SupportedLanguages.EN, SupportedLanguages.JP]
-          .find((lang) => {
-            note = tierNote.note[lang];
-            return !!note;
-          });
+        const note = tierNote.toApiFormat(lang);
 
         if (!note) {
           throw new TierNoteTraversalError(key as DimensionKey, tierNote.note);
         }
 
-        return [key, {...tierNote, note}];
+        return [key, note];
       })),
       lastUpdateEpoch: this.lastUpdateEpoch,
     };
@@ -142,15 +237,7 @@ export class UnitTierNote extends Document {
       [UnitTierNoteDocumentKey.unitId]: this.unitId,
       [UnitTierNoteDocumentKey.points]: this.points,
       [UnitTierNoteDocumentKey.tier]: Object.fromEntries(
-        Object.entries(this.tier).map(([key, value]) => {
-          const tierNoteDoc: TierNoteEntryDocument = {
-            [TierNoteEntryDocumentKey.note]: value.note,
-            [TierNoteEntryDocumentKey.ranking]: value.ranking,
-            [TierNoteEntryDocumentKey.isCompDependent]: value.isCompDependent,
-          };
-
-          return [key, tierNoteDoc];
-        }),
+        Object.entries(this.tier).map(([key, value]) => [key, value.toObject()]),
       ),
       [UnitTierNoteDocumentKey.lastUpdateEpoch]: this.lastUpdateEpoch,
     };

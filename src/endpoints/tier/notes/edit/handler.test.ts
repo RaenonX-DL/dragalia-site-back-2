@@ -5,7 +5,7 @@ import {
   UnitTierNoteEditResponse,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {UnitTierNote} from '../model';
+import {TierNote, UnitTierNote} from '../model';
 
 
 describe('Tier note editing handler', () => {
@@ -42,7 +42,7 @@ describe('Tier note editing handler', () => {
       new UnitTierNote({
         unitId: 10950101,
         points: [],
-        tier: {conAi: {ranking: 'S', note: {[SupportedLanguages.CHT]: 'A'}, isCompDependent: true}},
+        tier: {conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.CHT]: 'A'}, isCompDependent: true})},
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
@@ -70,7 +70,7 @@ describe('Tier note editing handler', () => {
       new UnitTierNote({
         unitId: 10950101,
         points: [],
-        tier: {conAi: {ranking: 'S', note: {[SupportedLanguages.CHT]: 'A'}, isCompDependent: true}},
+        tier: {conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.CHT]: 'A'}, isCompDependent: true})},
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
