@@ -26,6 +26,7 @@ export enum TierNoteEntryDocumentKey {
 }
 
 export type TierNoteEntryDocument = {
+  [DocumentBaseKey.id]?: never,
   [TierNoteEntryDocumentKey.ranking]: Ranking,
   [TierNoteEntryDocumentKey.note]: { [lang in SupportedLanguages]?: string },
   [TierNoteEntryDocumentKey.isCompDependent]: boolean,
@@ -100,7 +101,6 @@ export class TierNote extends Document {
    */
   toObject(): TierNoteEntryDocument {
     return {
-      ...super.toObject(),
       [TierNoteEntryDocumentKey.ranking]: this.ranking,
       [TierNoteEntryDocumentKey.note]: this.note,
       [TierNoteEntryDocumentKey.isCompDependent]: this.isCompDependent,

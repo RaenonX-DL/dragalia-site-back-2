@@ -25,6 +25,7 @@ export enum QuestPositionDocumentKey {
 }
 
 export type QuestPositionDocument = {
+  [DocumentBaseKey.id]?: never,
   [QuestPositionDocumentKey.position]: string,
   [QuestPositionDocumentKey.builds]: string,
   [QuestPositionDocumentKey.rotations]: string,

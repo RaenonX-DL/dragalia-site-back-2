@@ -184,7 +184,7 @@ export abstract class PostController {
       ViewCountableDocumentKey.viewCount, // Post view count should not be changed
       ...Object.keys(filterCondition), // Any keys that is used as the post selecting criteria
     ];
-    omitKeys.forEach((key) => delete update[key]);
+    omitKeys.forEach((key) => delete (update as Document)[key]);
 
     const updateResult = await collection.updateOne(filter, {$set: update});
 
