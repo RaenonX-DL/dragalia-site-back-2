@@ -29,6 +29,7 @@ import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleTierNoteEdit} from './tier/notes/edit/handler';
 import {handleTierNoteGet} from './tier/notes/get/handler';
+import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
@@ -75,7 +76,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.TIER_KEY_POINTS]: {GET: handleTierPointsGet},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
   [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
-  [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit},
+  [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
 };

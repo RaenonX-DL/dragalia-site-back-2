@@ -1,7 +1,9 @@
 import {SupportedLanguages} from '../../../api-def/api';
+import {DocumentBaseKey} from '../../../api-def/models/base';
 import {Application, createApp} from '../../../app';
+import * as utils from '../../../utils/misc';
 import {TierNoteController} from './controller';
-import {UnitTierNote} from './model';
+import {TierNote, TierNoteEntryDocumentKey, UnitTierNote, UnitTierNoteDocument, UnitTierNoteDocumentKey} from './model';
 
 
 describe('Tier note data controller', () => {
@@ -33,14 +35,11 @@ describe('Tier note data controller', () => {
           unitId: 10950101,
           points: [],
           tier: {
-            conAi: {
+            conAi: new TierNote({
               ranking: 'S',
-              note: {
-                [SupportedLanguages.CHT]: 'A',
-                [SupportedLanguages.EN]: 'B',
-              },
+              note: {[SupportedLanguages.CHT]: 'A', [SupportedLanguages.EN]: 'B'},
               isCompDependent: true,
-            },
+            }),
           },
           lastUpdateEpoch: 0,
         }),
@@ -52,9 +51,7 @@ describe('Tier note data controller', () => {
       expect(data).toStrictEqual({
         10950101: {
           points: [],
-          tier: {
-            conAi: {ranking: 'S', note: 'A', isCompDependent: true},
-          },
+          tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
           lastUpdateEpoch: 0,
         },
       });
@@ -66,11 +63,7 @@ describe('Tier note data controller', () => {
           unitId: 10950101,
           points: [],
           tier: {
-            conAi: {
-              ranking: 'S',
-              note: {[SupportedLanguages.CHT]: 'A'},
-              isCompDependent: true,
-            },
+            conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.CHT]: 'A'}, isCompDependent: true}),
           },
           lastUpdateEpoch: 0,
         }),
@@ -95,13 +88,7 @@ describe('Tier note data controller', () => {
     it('returns `null` if no existing tier note available', async () => {
       const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
 
-      expect(data).toStrictEqual({
-        points: [],
-        tier: {
-          conAi: {ranking: 'S', note: 'A', isCompDependent: true},
-        },
-        lastUpdateEpoch: 0,
-      });
+      expect(data).toStrictEqual(null);
     });
 
     it('returns the requested tier note', async () => {
@@ -110,14 +97,11 @@ describe('Tier note data controller', () => {
           unitId: 10950101,
           points: [],
           tier: {
-            conAi: {
+            conAi: new TierNote({
               ranking: 'S',
-              note: {
-                [SupportedLanguages.CHT]: 'A',
-                [SupportedLanguages.EN]: 'B',
-              },
+              note: {[SupportedLanguages.CHT]: 'A', [SupportedLanguages.EN]: 'B'},
               isCompDependent: true,
-            },
+            }),
           },
           lastUpdateEpoch: 0,
         }),
@@ -127,13 +111,125 @@ describe('Tier note data controller', () => {
       const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
 
       expect(data).toStrictEqual({
-        10950101: {
+        points: [],
+        tier: {
+          conAi: {ranking: 'S', note: 'A', isCompDependent: true},
+        },
+        lastUpdateEpoch: 0,
+      });
+    });
+  });
+
+  describe('updateUnitTierNote()', () => {
+    it('adds new tier note if not available before', async () => {
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        {
+          points: ['idA'],
+          tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
+        },
+      );
+
+      const doc = await UnitTierNote.getCollection(app.mongoClient)
+        .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+      delete doc[DocumentBaseKey.id];
+
+      expect(doc).toStrictEqual({
+        [UnitTierNoteDocumentKey.unitId]: 10950101,
+        [UnitTierNoteDocumentKey.points]: ['idA'],
+        [UnitTierNoteDocumentKey.tier]: {
+          conAi: {
+            [TierNoteEntryDocumentKey.ranking]: 'S',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'A'},
+            [TierNoteEntryDocumentKey.isCompDependent]: true,
+          },
+        },
+        [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
+      });
+    });
+
+    it('updates tier note if the given language already have one', async () => {
+      const dataArray = [
+        new UnitTierNote({
+          unitId: 10950101,
           points: [],
           tier: {
-            conAi: {ranking: 'S', note: 'A', isCompDependent: true},
+            conAi: new TierNote({
+              ranking: 'S', note: {[SupportedLanguages.CHT]: 'A', [SupportedLanguages.EN]: 'B'}, isCompDependent: true,
+            }),
           },
           lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        {
+          points: ['idA'],
+          tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
         },
+      );
+
+      const doc = await UnitTierNote.getCollection(app.mongoClient)
+        .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+      delete doc[DocumentBaseKey.id];
+
+      expect(doc).toStrictEqual({
+        [UnitTierNoteDocumentKey.unitId]: 10950101,
+        [UnitTierNoteDocumentKey.points]: ['idA'],
+        [UnitTierNoteDocumentKey.tier]: {
+          conAi: {
+            [TierNoteEntryDocumentKey.ranking]: 'A',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'C', [SupportedLanguages.EN]: 'B'},
+            [TierNoteEntryDocumentKey.isCompDependent]: true,
+          },
+        },
+        [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
+      });
+    });
+
+    it('adds tier note in given language if necessary', async () => {
+      const dataArray = [
+        new UnitTierNote({
+          unitId: 10950101,
+          points: [],
+          tier: {
+            conAi: new TierNote({
+              ranking: 'S', note: {[SupportedLanguages.EN]: 'B'}, isCompDependent: true,
+            }),
+          },
+          lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        {
+          points: ['idA'],
+          tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
+        },
+      );
+
+      const doc = await UnitTierNote.getCollection(app.mongoClient)
+        .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+      delete doc[DocumentBaseKey.id];
+
+      expect(doc).toStrictEqual({
+        [UnitTierNoteDocumentKey.unitId]: 10950101,
+        [UnitTierNoteDocumentKey.points]: ['idA'],
+        [UnitTierNoteDocumentKey.tier]: {
+          conAi: {
+            [TierNoteEntryDocumentKey.ranking]: 'A',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'C', [SupportedLanguages.EN]: 'B'},
+            [TierNoteEntryDocumentKey.isCompDependent]: true,
+          },
+        },
+        [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
       });
     });
   });

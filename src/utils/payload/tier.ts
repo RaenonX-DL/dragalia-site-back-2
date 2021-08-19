@@ -14,3 +14,7 @@ const processPayloadHasUnitId = <P extends PayloadHasUnitId>(payload: P): P => {
 export const processTierNoteEditPayload = <P extends UnitTierNoteEditPayload>(payload: P): P => {
   return processPayloadHasUnitId(payload);
 };
+
+export const processTierNoteUpdatePayload = <P extends UnitTierNoteUpdatePayload>(payload: P): P => {
+  return processPayloadHasUnitId(payload);
+};
