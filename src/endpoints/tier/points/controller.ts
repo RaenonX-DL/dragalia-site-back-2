@@ -1,8 +1,9 @@
-import {MongoClient, ObjectId} from 'mongodb';
+import {Collection, MongoClient, ObjectId} from 'mongodb';
 
 import {KeyPointEntryUpdate, SupportedLanguages} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models';
 import {execTransaction} from '../../../utils/mongodb';
+import {UnitTierNote, UnitTierNoteDocument, UnitTierNoteDocumentKey} from '../notes/model';
 import {DuplicatedDescriptionsError} from './error';
 import {KeyPointEntry, KeyPointEntryDocument, KeyPointEntryDocumentKey} from './model';
 
@@ -61,13 +62,21 @@ export class KeyPointController {
         const entriesNoId = entries.filter((entry) => !entry.id);
 
         // Delete IDs that exist in the database but not `entries`
-        const idsInDatabase = await collection.find().map((doc) => doc[DocumentBaseKey.id].toString()).toArray();
+        const idsInDatabase: Array<string> = await collection.find()
+          .map((doc) => doc[DocumentBaseKey.id].toString()).toArray();
         const idsInEntries = entriesHasId.map((entry) => entry.id);
         const idsToDelete = idsInDatabase.filter((id) => !idsInEntries.includes(id));
         if (idsToDelete.length) {
+          // Delete key point entry itself
           await collection.deleteMany(
             {$or: idsToDelete.map((id) => ({[DocumentBaseKey.id]: new ObjectId(id)}))},
             {session},
+          );
+
+          // Remove unit tier note references
+          await (UnitTierNote.getCollection(mongoClient) as unknown as Collection<UnitTierNoteDocument>).updateMany(
+            {},
+            {$pullAll: {[UnitTierNoteDocumentKey.points]: idsToDelete}},
           );
         }
 
@@ -83,9 +92,7 @@ export class KeyPointController {
         if (entriesHasId.length) {
           await collection.bulkWrite(entriesHasId.map((entry) => ({
             updateOne: {
-              filter: {
-                [DocumentBaseKey.id]: new ObjectId(entry.id),
-              },
+              filter: {[DocumentBaseKey.id]: new ObjectId(entry.id)},
               update: {
                 $set: {
                   [KeyPointEntryDocumentKey.type]: entry.type,
