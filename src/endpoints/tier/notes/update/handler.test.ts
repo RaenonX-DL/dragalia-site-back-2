@@ -224,6 +224,54 @@ describe('Tier note updating handler', () => {
     });
   });
 
+  it('removes tier note dimension', async () => {
+    const dataArray = [
+      new UnitTierNote({
+        unitId: 10950101,
+        points: [],
+        tier: {
+          conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.CHT]: 'B'}, isCompDependent: true}),
+          conSolo: new TierNote({ranking: 'A', note: {[SupportedLanguages.CHT]: 'C'}, isCompDependent: true}),
+        },
+        lastUpdateEpoch: 0,
+      }),
+    ].map((entry) => entry.toObject());
+    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+    const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
+      uid: uidAdmin,
+      lang: SupportedLanguages.CHT,
+      unitId: 10950101,
+      data: {
+        points: ['idA'],
+        tier: {conSolo: {ranking: 'A', note: 'B', isCompDependent: false}},
+      },
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: UnitTierNoteUpdateResponse = response.json() as UnitTierNoteUpdateResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+
+    const doc = await UnitTierNote.getCollection(app.mongoClient)
+      .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+    delete doc[DocumentBaseKey.id];
+
+    expect(doc).toStrictEqual({
+      [UnitTierNoteDocumentKey.unitId]: 10950101,
+      [UnitTierNoteDocumentKey.points]: ['idA'],
+      [UnitTierNoteDocumentKey.tier]: {
+        conSolo: {
+          [TierNoteEntryDocumentKey.ranking]: 'A',
+          [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'B'},
+          [TierNoteEntryDocumentKey.isCompDependent]: false,
+        },
+      },
+      [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
+    });
+  });
+
   it('does not allow non-admin to update', async () => {
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: '',

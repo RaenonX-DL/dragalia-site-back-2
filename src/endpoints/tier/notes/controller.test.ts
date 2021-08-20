@@ -277,5 +277,46 @@ describe('Tier note data controller', () => {
         [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
       });
     });
+
+    it('removes tier note dimension', async () => {
+      const dataArray = [
+        new UnitTierNote({
+          unitId: 10950101,
+          points: [],
+          tier: {
+            conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.CHT]: 'B'}, isCompDependent: true}),
+            conSolo: new TierNote({ranking: 'A', note: {[SupportedLanguages.CHT]: 'C'}, isCompDependent: true}),
+          },
+          lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        {
+          points: ['idA'],
+          tier: {conSolo: {ranking: 'A', note: 'B', isCompDependent: false}},
+        },
+      );
+
+      const doc = await UnitTierNote.getCollection(app.mongoClient)
+        .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
+
+      delete doc[DocumentBaseKey.id];
+
+      expect(doc).toStrictEqual({
+        [UnitTierNoteDocumentKey.unitId]: 10950101,
+        [UnitTierNoteDocumentKey.points]: ['idA'],
+        [UnitTierNoteDocumentKey.tier]: {
+          conSolo: {
+            [TierNoteEntryDocumentKey.ranking]: 'A',
+            [TierNoteEntryDocumentKey.note]: {[SupportedLanguages.CHT]: 'B'},
+            [TierNoteEntryDocumentKey.isCompDependent]: false,
+          },
+        },
+        [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
+      });
+    });
   });
 });

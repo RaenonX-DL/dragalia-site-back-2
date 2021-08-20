@@ -1,11 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {
-  DimensionKey,
-  SupportedLanguages,
-  UnitTierData,
-  UnitTierNote as UnitTierNoteApi,
-} from '../../../api-def/api';
+import {DimensionKey, SupportedLanguages, UnitTierData, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models/base';
 import {getCurrentEpoch} from '../../../utils/misc';
 import {
@@ -78,8 +73,8 @@ export class TierNoteController {
     tierNote: Omit<UnitTierNoteApi, 'lastUpdateEpoch'>,
   ): Promise<void> {
     // Get the original document
-    const original = await UnitTierNote.getCollection(mongoClient)
-      .findOne({[UnitTierNoteDocumentKey.unitId]: unitId});
+    const original: UnitTierNoteDocument = await UnitTierNote.getCollection(mongoClient)
+      .findOne({[UnitTierNoteDocumentKey.unitId]: unitId}) as UnitTierNoteDocument;
 
     if (!original) {
       // Original not available - create one and insert it
@@ -103,34 +98,53 @@ export class TierNoteController {
         new TierNote({...tierNote, note: {[lang]: tierNote.note}}).toObject(),
       ]);
 
+    // Get original tier note entries
+    const originalTierNoteEntries = Object.entries(original[UnitTierNoteDocumentKey.tier])
+      // Filter out notes to be removed because it exist in `original` in `lang` but not `tierNote`
+      .filter(([key, originalDoc]) => {
+        const dimension = key as DimensionKey;
+        const noteLanguages = Object.keys(originalDoc[TierNoteEntryDocumentKey.note]) as Array<SupportedLanguages>;
+
+        // Dimension note has more than 1 language, should keep for override
+        if (noteLanguages.length > 1) {
+          return true;
+        }
+
+        // Remove dimension note if both of the conditions meet:
+        // - original note only has it in the update language
+        // - updated tier note doesn't contain it
+        return !(noteLanguages[0] === lang && !tierNote.tier[dimension]);
+      });
+
+    const tierNoteEntries = originalTierNoteEntries
+      .map(([key, value]) => {
+        const dimensionKey = key as DimensionKey;
+        let dimensionOriginalDoc = value as TierNoteEntryDocument;
+
+        const dimensionNoteOverride = tierNote.tier[dimensionKey];
+        if (!dimensionNoteOverride) {
+          // No corresponding dimension note to override
+          return [dimensionKey, dimensionOriginalDoc] as [string, TierNoteEntryDocument];
+        }
+
+        // Override tier note of a dimension in `lang`
+        dimensionOriginalDoc = new TierNote({
+          ...dimensionNoteOverride,
+          note: {
+            ...dimensionOriginalDoc[TierNoteEntryDocumentKey.note],
+            [lang]: dimensionNoteOverride.note,
+          },
+        }).toObject();
+
+        return [dimensionKey, dimensionOriginalDoc] as [string, TierNoteEntryDocument];
+      })
+      // Add newly added entries in `tierNote`
+      .concat(newTierNoteEntries);
+
     const updateDoc: UnitTierNoteDocument = {
       [UnitTierNoteDocumentKey.unitId]: unitId,
       [UnitTierNoteDocumentKey.points]: tierNote.points,
-      [UnitTierNoteDocumentKey.tier]: Object.fromEntries(Object.entries(original[UnitTierNoteDocumentKey.tier])
-        .map(([key, value]) => {
-          const dimensionKey = key as DimensionKey;
-          let dimensionOriginalDoc = value as TierNoteEntryDocument;
-
-          const dimensionNoteOverride = tierNote.tier[dimensionKey];
-          if (!dimensionNoteOverride) {
-            // No corresponding dimension note to override
-            return [dimensionKey, dimensionOriginalDoc] as [string, TierNoteEntryDocument];
-          }
-
-          // Override tier note of a dimension in `lang`
-          dimensionOriginalDoc = new TierNote({
-            ...dimensionNoteOverride,
-            note: {
-              ...dimensionOriginalDoc[TierNoteEntryDocumentKey.note],
-              [lang]: dimensionNoteOverride.note,
-            },
-          }).toObject();
-
-          return [dimensionKey, dimensionOriginalDoc] as [string, TierNoteEntryDocument];
-        })
-        // Add newly added entries in `tierNote`
-        .concat(newTierNoteEntries),
-      ),
+      [UnitTierNoteDocumentKey.tier]: Object.fromEntries(tierNoteEntries),
       [UnitTierNoteDocumentKey.lastUpdateEpoch]: lastUpdateEpoch,
     };
 
