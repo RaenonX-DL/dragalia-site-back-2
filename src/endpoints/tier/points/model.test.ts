@@ -20,9 +20,7 @@ describe('Key point entry model', () => {
   it('gets the description in alternative language if it does not exist', async () => {
     const model = new KeyPointEntry({
       type: 'strength',
-      description: {
-        [SupportedLanguages.CHT]: 'C',
-      },
+      description: {[SupportedLanguages.CHT]: 'C'},
     });
 
     expect(model.getDescription(SupportedLanguages.EN)).toBe('C');
@@ -39,5 +37,19 @@ describe('Key point entry model', () => {
     };
 
     await expect(fn).rejects.toThrow(DescriptionTraversalError);
+  });
+
+  it('converts the entry model class to an API-compliant object', async () => {
+    const model = new KeyPointEntry({
+      type: 'strength',
+      description: {[SupportedLanguages.CHT]: 'C'},
+    });
+
+    const fnGetDescription = jest.spyOn(model, 'getDescription').mockReturnValue('DESC');
+
+    const entry = model.toEntry(SupportedLanguages.EN);
+
+    expect(fnGetDescription).toHaveBeenCalled();
+    expect(entry).toStrictEqual({type: 'strength', description: 'DESC'});
   });
 });

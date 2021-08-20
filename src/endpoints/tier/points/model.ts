@@ -1,6 +1,6 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {KeyPointType, SupportedLanguages} from '../../../api-def/api';
+import {KeyPointType, KeyPointEntry as KeyPointEntryApi, SupportedLanguages} from '../../../api-def/api';
 import {DocumentBase, DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
@@ -62,6 +62,21 @@ export class KeyPointEntry extends Document {
       type: doc[KeyPointEntryDocumentKey.type],
       description: doc[KeyPointEntryDocumentKey.description],
     });
+  }
+
+  /**
+   * Convert this entry model to an API-compliant object.
+   *
+   * Description will be in the given language.
+   *
+   * @param {SupportedLanguages} lang language of the description
+   * @return {KeyPointEntry} transformed object
+   */
+  toEntry(lang: SupportedLanguages): KeyPointEntryApi {
+    return {
+      type: this.type,
+      description: this.getDescription(lang),
+    };
   }
 
   /**
