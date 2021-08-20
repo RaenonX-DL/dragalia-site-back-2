@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
 import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
@@ -77,6 +78,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.TIER_NOTES]: {GET: handleTierNoteGet},
   [ApiEndPoints.TIER_KEY_POINTS]: {GET: handleTierPointsGet},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
+  [ApiEndPoints.DATA_KEY_POINT]: {GET: handleGetKeyPointData},
   [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
   [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},

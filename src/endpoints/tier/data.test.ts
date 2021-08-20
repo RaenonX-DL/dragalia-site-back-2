@@ -64,4 +64,49 @@ describe('Tier note data control', () => {
       expect(notes).toStrictEqual([[]]);
     });
   });
+
+  describe('Key point references', () => {
+    let pointIds: Array<string>;
+
+    beforeEach(async () => {
+      const pointArray = [
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 1'}}),
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
+      ].map((entry) => entry.toObject());
+      pointIds = Object
+        .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(pointArray)).insertedIds)
+        .map((id) => id.toHexString());
+
+      const noteArray = [
+        new UnitTierNote({
+          unitId: 10950101,
+          points: [pointIds[2]],
+          tier: {
+            conAi: new TierNote({ranking: 'S', note: {[SupportedLanguages.EN]: 'B'}, isCompDependent: true}),
+          },
+          lastUpdateEpoch: 0,
+        }),
+        new UnitTierNote({
+          unitId: 10950102,
+          points: [pointIds[0], pointIds[2]],
+          tier: {
+            conAi: new TierNote({ranking: 'A', note: {[SupportedLanguages.EN]: 'B'}, isCompDependent: true}),
+          },
+          lastUpdateEpoch: 0,
+        }),
+      ].map((entry) => entry.toObject());
+      await UnitTierNote.getCollection(app.mongoClient).insertMany(noteArray);
+    });
+
+    it('returns unit IDs that references a certain key point', async () => {
+      const unitIds = await KeyPointController.getReferencedUnitIds(app.mongoClient, pointIds[2]);
+      expect(unitIds.sort()).toStrictEqual([10950101, 10950102]);
+    });
+
+    it('returns an empty list if no units are linked to a certain key point', async () => {
+      const unitIds = await KeyPointController.getReferencedUnitIds(app.mongoClient, pointIds[1]);
+      expect(unitIds.sort()).toStrictEqual([]);
+    });
+  });
 });

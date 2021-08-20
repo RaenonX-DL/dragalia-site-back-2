@@ -37,14 +37,47 @@ export class KeyPointController {
       return null;
     }
 
-    const entry = await KeyPointEntry.getCollection(mongoClient)
+    const entry = await KeyPointController.getEntry(mongoClient, id);
+
+    if (!entry) {
+      return null;
+    }
+
+    return entry.getDescription(lang);
+  }
+
+  /**
+   * Get an entry by its ID.
+   *
+   * Returns `null` if not found.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} id id of the key point entry to find the reference
+   * @return {Array<number>} unit IDs that shares the requested key point
+   */
+  static async getEntry(mongoClient: MongoClient, id: string): Promise<KeyPointEntry | null> {
+    const entry = await (KeyPointEntry.getCollection(mongoClient) as unknown as Collection<KeyPointEntryDocument>)
       .findOne({[DocumentBaseKey.id]: new ObjectId(id)});
 
     if (!entry) {
       return null;
     }
 
-    return KeyPointEntry.fromDocument(entry as KeyPointEntryDocument).getDescription(lang);
+    return KeyPointEntry.fromDocument(entry);
+  }
+
+  /**
+   * Get a list of unit IDs that referenced a certain key point.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} id id of the key point entry to find the reference
+   * @return {Array<number>} unit IDs that shares the requested key point
+   */
+  static async getReferencedUnitIds(mongoClient: MongoClient, id: string): Promise<Array<number>> {
+    return (await UnitTierNote.getCollection(mongoClient) as unknown as Collection<UnitTierNoteDocument>)
+      .find({[UnitTierNoteDocumentKey.points]: id})
+      .map((doc) => doc[UnitTierNoteDocumentKey.unitId])
+      .toArray();
   }
 
   /**
