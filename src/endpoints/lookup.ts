@@ -9,6 +9,7 @@ import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
 import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
 import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
 import {handleUnitInfoLookup} from './info/lookup/main/handler';
+import {handleDataMeta} from './meta/data/handler';
 import {handleGeneralMeta} from './meta/general/handler';
 import {handlePostMeta} from './meta/post/handler';
 import {handleUnitMeta} from './meta/unit/handler';
@@ -59,6 +60,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
   [ApiEndPoints.PAGE_META_UNIT]: {GET: handleUnitMeta},
+  [ApiEndPoints.PAGE_META_DATA]: {GET: handleDataMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},

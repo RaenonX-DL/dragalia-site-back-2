@@ -23,6 +23,31 @@ export class KeyPointController {
   }
 
   /**
+   * Get the description of a key point entry.
+   *
+   * Returns `null` if none of the key point entry has ID of `id`.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the description
+   * @param {string} id ID of the key point entry
+   * @return {Promise<string | null>} description of the entry, `null` if not found
+   */
+  static async getDescription(mongoClient: MongoClient, lang: SupportedLanguages, id: string): Promise<string | null> {
+    if (!ObjectId.isValid(id)) {
+      return null;
+    }
+
+    const entry = await KeyPointEntry.getCollection(mongoClient)
+      .findOne({[DocumentBaseKey.id]: new ObjectId(id)});
+
+    if (!entry) {
+      return null;
+    }
+
+    return KeyPointEntry.fromDocument(entry as KeyPointEntryDocument).getDescription(lang);
+  }
+
+  /**
    * Update all given `entries` in `lang`.
    *
    * Entries that exists in the database but not in `entries` will be removed.

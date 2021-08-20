@@ -1,4 +1,4 @@
-import {PageMetaPayload, PostPageMetaPayload, UnitPageMetaPayload} from '../../api-def/api';
+import {DataPageMetaPayload, PageMetaPayload, PostPageMetaPayload, UnitPageMetaPayload} from '../../api-def/api';
 import {processPayloadBase} from './base';
 import {processUnitIdentifier} from './identifier';
 
@@ -21,6 +21,12 @@ export const processUnitMetaPayload = <T extends UnitPageMetaPayload>(payload: T
   payload = processPageMetaPayload(payload);
 
   payload.unitIdentifier = processUnitIdentifier(payload.unitIdentifier);
+
+  return payload;
+};
+
+export const processDataMetaPayload = <T extends DataPageMetaPayload>(payload: T): T => {
+  payload = processPageMetaPayload(payload);
 
   return payload;
 };

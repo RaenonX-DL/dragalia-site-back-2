@@ -234,4 +234,46 @@ describe('Key point entry data controller', () => {
       });
     });
   });
+
+  describe('getDescription()', () => {
+    it('gets the description in the desired language', async () => {
+      const dataArray = [
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 1'}}),
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
+      ].map((entry) => entry.toObject());
+      const ids = Object.values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+        .map((id) => id.toHexString());
+
+      const description = await KeyPointController.getDescription(app.mongoClient, SupportedLanguages.CHT, ids[1]);
+
+      expect(description).toBe('CHT 2');
+    });
+
+    it('gets the description in the alternative language', async () => {
+      const dataArray = [
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.EN]: 'EN 1'}}),
+        new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.EN]: 'EN 2'}}),
+      ].map((entry) => entry.toObject());
+      const ids = Object.values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+        .map((id) => id.toHexString());
+
+      const description = await KeyPointController.getDescription(app.mongoClient, SupportedLanguages.CHT, ids[1]);
+
+      expect(description).toBe('EN 2');
+    });
+
+    it('returns `null` if not found', async () => {
+      const description = await KeyPointController.getDescription(
+        app.mongoClient, SupportedLanguages.CHT, new ObjectId().toHexString(),
+      );
+
+      expect(description).toBeNull();
+    });
+
+    it('returns `null` if ID is malformed', async () => {
+      const description = await KeyPointController.getDescription(app.mongoClient, SupportedLanguages.CHT, 'id');
+
+      expect(description).toBeNull();
+    });
+  });
 });
