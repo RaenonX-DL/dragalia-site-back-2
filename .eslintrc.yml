@@ -33,10 +33,20 @@ rules:
   "@typescript-eslint/no-explicit-any":
     - off
 
-  indent:
+  # Needs to disable local no-unused-vars for this rule to work properly
+  no-unused-vars:
+    - off
+
+  "@typescript-eslint/indent":
     - error
     - 2
-    - MemberExpression: 1
+    - ignoredNodes:
+        - TSTypeParameterInstantiation
+      MemberExpression: 1
+
+  # Needs to disable local indent for this rule to work properly
+  indent:
+    - off
 
   import/order:
     - error
@@ -52,5 +62,3 @@ rules:
   max-len:
     - 2
     - code: 120
-
-  no-unused-vars: 'off'

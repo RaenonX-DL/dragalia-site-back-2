@@ -7,13 +7,17 @@ import {ApiFailedResponse} from '../response/failed';
 import {PostGetResponse} from '../response/post/get';
 
 
-type FunctionGetPost<T extends PostDocumentBaseNoTitle,
+type FunctionGetPost<
+  T extends PostDocumentBaseNoTitle,
   P extends PostGetPayload,
-  G extends PostGetResult<T>> = (payload: P) => Promise<G | null>;
+  G extends PostGetResult<T>
+> = (payload: P) => Promise<G | null>;
 
-type FunctionConstructResponse<T extends PostDocumentBaseNoTitle,
+type FunctionConstructResponse<
+  T extends PostDocumentBaseNoTitle,
   R extends PostGetResponse,
-  G extends PostGetResult<T>> = (
+  G extends PostGetResult<T>
+> = (
   getResult: G,
 ) => R;
 
