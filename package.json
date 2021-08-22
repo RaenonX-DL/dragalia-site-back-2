@@ -2,7 +2,7 @@
   "author": "RaenonX",
   "name": "dragalia-site-back-2",
   "description": "Renewed backend for Dragalia Lost info website by OM.",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "engines": {
     "node": "14.x",
     "npm": "^7.12.0"
@@ -13,7 +13,7 @@
     "build": "tsc -p .",
     "start": "pm2-runtime start pm2.yml --env production",
     "test": "jest --maxWorkers=50% --colors",
-    "test:ci-jest": "npm run test -- --reporters=default --reporters=jest-junit",
+    "test:ci-jest": "npm run test -- --reporters=default --reporters=jest-junit --coverage",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix"
   },

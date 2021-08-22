@@ -1,5 +1,6 @@
 import {Collection, MongoClient} from 'mongodb';
 
+import {DocumentBaseKey} from '../../../../api-def/models';
 import {Document} from '../../../../base/model/base';
 import {dbInfo} from './config';
 
@@ -12,6 +13,7 @@ export enum CharaAnalysisSkillDocumentKey {
 }
 
 export type CharaAnalysisSkillDocument = {
+  [DocumentBaseKey.id]?: never,
   [CharaAnalysisSkillDocumentKey.name]: string,
   [CharaAnalysisSkillDocumentKey.info]: string,
   [CharaAnalysisSkillDocumentKey.rotations]: string,

@@ -17,7 +17,7 @@ export const handleEditPost = async <P extends PostEditPayload, R extends PostEd
   // Check user privilege
   const isAdmin = await UserController.isAdmin(mongoClient, payload.uid);
   if (!isAdmin) {
-    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION, {httpCode: 401});
+    return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 
   // Edit post

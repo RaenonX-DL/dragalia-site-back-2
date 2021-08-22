@@ -37,7 +37,7 @@ export class UnitNameRefEntry extends Document {
   unitId: number;
 
   /**
-   * Construct a post data without title.
+   * Construct an unit name reference entry
    *
    * @param {UnitNameRefEntryConstructParams} params parameters to construct an unit name ref entry
    */

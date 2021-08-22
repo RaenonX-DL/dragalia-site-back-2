@@ -95,7 +95,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
 
   it('blocks publishing with insufficient permission', async () => {
     const result = await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload1);
-    expect(result.statusCode).toBe(200);
+    expect(result.statusCode).toBe(403);
 
     const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);

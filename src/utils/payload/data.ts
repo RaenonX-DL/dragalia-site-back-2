@@ -1,4 +1,4 @@
-import {UnitNameRefUpdatePayload} from '../../api-def/api';
+import {KeyPointInfoPayload, UnitNameRefUpdatePayload} from '../../api-def/api';
 import {processPayloadBase} from './base';
 
 
@@ -11,4 +11,8 @@ export const processUnitNameRefUpdatePayload = <T extends UnitNameRefUpdatePaylo
   }));
 
   return payload;
+};
+
+export const processKeyPointInfoPayload = <T extends KeyPointInfoPayload>(payload: T): T => {
+  return processPayloadBase(payload);
 };

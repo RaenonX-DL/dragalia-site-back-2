@@ -3,7 +3,7 @@ import {
   ApiEndPoints,
   ApiResponseCode, FailedResponse,
   SupportedLanguages,
-  UnitNameRefManageResponse,
+  UnitNameRefUpdateResponse,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {UnitNameRefEntry, UnitNameRefEntryDocumentKey} from '../model';
@@ -77,7 +77,7 @@ describe('Unit name reference update handler', () => {
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
+    const json: UnitNameRefUpdateResponse = response.json() as UnitNameRefUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
@@ -95,7 +95,7 @@ describe('Unit name reference update handler', () => {
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
+    const json: UnitNameRefUpdateResponse = response.json() as UnitNameRefUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
@@ -122,7 +122,7 @@ describe('Unit name reference update handler', () => {
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
+    const json: UnitNameRefUpdateResponse = response.json() as UnitNameRefUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
@@ -150,7 +150,7 @@ describe('Unit name reference update handler', () => {
     });
     expect(response.statusCode).toBe(200);
 
-    const json: UnitNameRefManageResponse = response.json() as UnitNameRefManageResponse;
+    const json: UnitNameRefUpdateResponse = response.json() as UnitNameRefUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 

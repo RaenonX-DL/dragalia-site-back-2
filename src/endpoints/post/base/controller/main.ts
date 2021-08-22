@@ -6,6 +6,7 @@ import {UpdateResult} from '../../../../base/enum/updateResult';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
+import {getCurrentEpoch} from '../../../../utils/misc';
 import {PostDocumentBaseNoTitle} from '../model';
 import {PostGetResult, ResultConstructFunction} from './get';
 import {PostControllerListOptions, PostListResult} from './list';
@@ -159,7 +160,7 @@ export abstract class PostController {
       return 'NOT_FOUND';
     }
 
-    const nowEpoch = new Date().valueOf();
+    const nowEpoch = getCurrentEpoch();
 
     // Create filter (condition for updating the post)
     let filter = {
@@ -183,7 +184,7 @@ export abstract class PostController {
       ViewCountableDocumentKey.viewCount, // Post view count should not be changed
       ...Object.keys(filterCondition), // Any keys that is used as the post selecting criteria
     ];
-    omitKeys.forEach((key) => delete update[key]);
+    omitKeys.forEach((key) => delete (update as Document)[key]);
 
     const updateResult = await collection.updateOne(filter, {$set: update});
 

@@ -4,11 +4,13 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
 import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
 import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
 import {handleUnitInfoLookup} from './info/lookup/main/handler';
+import {handleDataMeta} from './meta/data/handler';
 import {handleGeneralMeta} from './meta/general/handler';
 import {handlePostMeta} from './meta/post/handler';
 import {handleUnitMeta} from './meta/unit/handler';
@@ -27,6 +29,12 @@ import {handleGetAtkSkillPreset} from './preset/atkSkill/get/handler';
 import {handleSetAtkSkillPreset} from './preset/atkSkill/set/handler';
 import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
+import {handleTierNoteEdit} from './tier/notes/edit/handler';
+import {handleTierNoteGet} from './tier/notes/get/handler';
+import {handleTierNoteUpdate} from './tier/notes/update/handler';
+import {handleTierPointsGet} from './tier/points/get/handler';
+import {handleTierPointsManage} from './tier/points/manage/handler';
+import {handleTierPointsUpdate} from './tier/points/update/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -53,6 +61,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},
   [ApiEndPoints.PAGE_META_UNIT]: {GET: handleUnitMeta},
+  [ApiEndPoints.PAGE_META_DATA]: {GET: handleDataMeta},
   [ApiEndPoints.POST_QUEST_PUBLISH]: {POST: handlePublishQuestPost},
   [ApiEndPoints.POST_QUEST_LIST]: {GET: handleListQuestPost},
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
@@ -66,8 +75,13 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_CHARA]: {POST: handleEditCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
+  [ApiEndPoints.TIER_NOTES]: {GET: handleTierNoteGet},
+  [ApiEndPoints.TIER_KEY_POINTS]: {GET: handleTierPointsGet},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
+  [ApiEndPoints.DATA_KEY_POINT]: {GET: handleGetKeyPointData},
   [ApiEndPoints.MANAGE_UNIT_NAME_REF]: {GET: handleUnitNameRefManage, POST: handleUnitNameRefUpdate},
+  [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
+  [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
 };
 

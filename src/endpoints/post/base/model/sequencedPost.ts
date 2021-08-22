@@ -17,15 +17,15 @@ export enum PostDocumentKey {
   title = 't',
 }
 
-export type PostDocumentBase = PostDocumentBaseNoTitle &
-  SequentialDocumentBase & {
+export type PostDocumentBase = PostDocumentBaseNoTitle & SequentialDocumentBase & {
   [PostDocumentKey.title]: string,
 }
 
-export type SequencedPostConstructParams = PostConstructParamsNoTitle &
+export type SequencedPostConstructParams =
+  PostConstructParamsNoTitle &
   SequentialDocumentConstructParams & {
-  title: string,
-}
+    title: string,
+  }
 
 /**
  * Sequenced post data class.

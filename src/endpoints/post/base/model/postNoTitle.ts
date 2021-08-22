@@ -5,6 +5,7 @@ import {Document, DocumentConstructParams} from '../../../../base/model/base';
 import {EditableDocumentBase, EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {ViewCountableDocumentBase, ViewCountableDocumentKey} from '../../../../base/model/viewCount';
+import {getCurrentEpoch} from '../../../../utils/misc';
 
 export type PostDocumentBaseNoTitle =
   MultiLingualDocumentBase
@@ -38,7 +39,7 @@ export abstract class PostNoTitle extends Document {
   protected constructor(params: PostConstructParamsNoTitle) {
     super(params);
 
-    const nowEpoch = new Date().valueOf();
+    const nowEpoch = getCurrentEpoch();
 
     this.lang = params.lang;
     this.dateModifiedEpoch = params.dateModifiedEpoch || nowEpoch;

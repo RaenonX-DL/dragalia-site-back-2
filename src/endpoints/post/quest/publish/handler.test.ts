@@ -135,7 +135,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
 
   it('blocks publishing a quest post with insufficient permission', async () => {
     const result = await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload3);
-    expect(result.statusCode).toBe(200);
+    expect(result.statusCode).toBe(403);
 
     const json: BaseResponse = result.json() as BaseResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);

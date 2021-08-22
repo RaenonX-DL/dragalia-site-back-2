@@ -108,7 +108,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     const result = await app.app.inject()
       .post(ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON)
       .payload({...payloadEdit, uid: uidNormal});
-    expect(result.statusCode).toBe(401);
+    expect(result.statusCode).toBe(403);
 
     const json: FailedResponse = result.json() as FailedResponse;
     expect(json.code).toBe(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
