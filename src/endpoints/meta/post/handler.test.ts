@@ -4,7 +4,7 @@ import {insertMockUser} from '../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
-  CharaAnalysisPublishPayload,
+  CharaAnalysisPublishPayload, MiscPostPublishPayload,
   PostPageMetaResponse,
   PostType,
   QuestPostPublishPayload,
@@ -17,40 +17,17 @@ import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {resetCache} from '../../../utils/resources/loader/cache/main';
 import {UnitNameRefEntry} from '../../data/unitNameRef/model';
 import {AnalysisController} from '../../post/analysis/controller';
+import {MiscPostController} from '../../post/misc/controller';
 import {QuestPostController} from '../../post/quest/controller';
 import {AlertEntry, AlertEntryKey} from '../alert/model';
 
 
-describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
+describe('Post meta EP - Access Control', () => {
   let app: Application;
 
   const uidNormal = new ObjectId().toHexString();
   const uidAdsFree = new ObjectId().toHexString();
   const uidAdmin = new ObjectId().toHexString();
-
-  const payloadQuest: QuestPostPublishPayload = {
-    uid: 'uid',
-    seqId: 1,
-    lang: SupportedLanguages.EN,
-    title: 'post',
-    general: 'general',
-    video: 'video',
-    positional: [
-      {
-        position: 'pos1',
-        builds: 'build1',
-        rotations: 'rot1',
-        tips: 'tip1',
-      },
-      {
-        position: 'pos2',
-        builds: 'build2',
-        rotations: 'rot2',
-        tips: 'tip2',
-      },
-    ],
-    addendum: 'addendum',
-  };
 
   const payloadAnalysis: CharaAnalysisPublishPayload = {
     uid: uidAdmin,
@@ -103,7 +80,6 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadAnalysis);
-    await QuestPostController.publishPost(app.mongoClient, payloadQuest);
     resetCache();
   });
 
@@ -189,6 +165,72 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
       .filter((alert) => alert[MultiLingualDocumentKey.language] === SupportedLanguages.EN)
       .map((doc) => AlertEntry.fromDocument(doc).toApiEntry()),
     );
+  });
+});
+
+describe('Post meta EP - Analysis', () => {
+  let app: Application;
+
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdsFree = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
+
+  const payloadAnalysis: CharaAnalysisPublishPayload = {
+    uid: uidAdmin,
+    type: UnitType.CHARACTER,
+    lang: SupportedLanguages.EN,
+    unitId: 10950101,
+    summary: 'sum1',
+    summonResult: 'smn1',
+    passives: 'passive1',
+    forceStrikes: 'fs1',
+    normalAttacks: 'na1',
+    skills: [{
+      name: 's1',
+      info: 's1info',
+      rotations: 's1rot',
+      tips: 's1tips',
+    }],
+    tipsBuilds: 'tip1',
+    videos: 'video1',
+    story: 'story1',
+    keywords: 'kw1',
+  };
+
+  const dummyAlerts = [
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
+      [AlertEntryKey.message]: 'Alert 1',
+      [AlertEntryKey.variant]: 'info',
+    },
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
+      [AlertEntryKey.message]: 'Alert 2',
+      [AlertEntryKey.variant]: 'warning',
+    },
+  ];
+
+  const insertDummyAlerts = async () => {
+    const col = AlertEntry.getCollection(app.mongoClient);
+    await col.insertMany(dummyAlerts);
+  };
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  beforeEach(async () => {
+    await app.reset();
+    await insertDummyAlerts();
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadAnalysis);
+    resetCache();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   it('returns unit name as analysis meta if unit info exists', async () => {
@@ -291,6 +333,74 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
 
     expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
+});
+
+describe('Post meta EP - Quest Post', () => {
+  let app: Application;
+
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdsFree = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
+
+  const payloadQuest: QuestPostPublishPayload = {
+    uid: 'uid',
+    seqId: 1,
+    lang: SupportedLanguages.EN,
+    title: 'post',
+    general: 'general',
+    video: 'video',
+    positional: [
+      {
+        position: 'pos1',
+        builds: 'build1',
+        rotations: 'rot1',
+        tips: 'tip1',
+      },
+      {
+        position: 'pos2',
+        builds: 'build2',
+        rotations: 'rot2',
+        tips: 'tip2',
+      },
+    ],
+    addendum: 'addendum',
+  };
+
+  const dummyAlerts = [
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
+      [AlertEntryKey.message]: 'Alert 1',
+      [AlertEntryKey.variant]: 'info',
+    },
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
+      [AlertEntryKey.message]: 'Alert 2',
+      [AlertEntryKey.variant]: 'warning',
+    },
+  ];
+
+  const insertDummyAlerts = async () => {
+    const col = AlertEntry.getCollection(app.mongoClient);
+    await col.insertMany(dummyAlerts);
+  };
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  beforeEach(async () => {
+    await app.reset();
+    await insertDummyAlerts();
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
+    await QuestPostController.publishPost(app.mongoClient, payloadQuest);
+    resetCache();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
 
   it('returns correct quest meta', async () => {
     const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
@@ -349,6 +459,126 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_POST} - post page meta`, () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.params).toStrictEqual({
       title: payloadQuest.title,
+    });
+  });
+});
+
+describe('Post meta EP - Misc Post', () => {
+  let app: Application;
+
+  const uidNormal = new ObjectId().toHexString();
+  const uidAdsFree = new ObjectId().toHexString();
+  const uidAdmin = new ObjectId().toHexString();
+
+  const payloadMisc: MiscPostPublishPayload = {
+    uid: uidAdmin,
+    lang: SupportedLanguages.CHT,
+    title: 'post',
+    sections: [
+      {
+        title: 'A',
+        content: 'A1',
+      },
+      {
+        title: 'B',
+        content: 'B1',
+      },
+    ],
+  };
+
+  const dummyAlerts = [
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
+      [AlertEntryKey.message]: 'Alert 1',
+      [AlertEntryKey.variant]: 'info',
+    },
+    {
+      [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
+      [AlertEntryKey.message]: 'Alert 2',
+      [AlertEntryKey.variant]: 'warning',
+    },
+  ];
+
+  const insertDummyAlerts = async () => {
+    const col = AlertEntry.getCollection(app.mongoClient);
+    await col.insertMany(dummyAlerts);
+  };
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  beforeEach(async () => {
+    await app.reset();
+    await insertDummyAlerts();
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdsFree), isAdsFree: true});
+    await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
+    await MiscPostController.publishPost(app.mongoClient, payloadMisc);
+    resetCache();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('returns correct misc meta', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: 1,
+      postType: PostType.MISC,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      title: payloadMisc.title,
+    });
+  });
+
+  it('does not increase view count for getting a quest post', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: 1,
+      postType: PostType.MISC,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const post = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+
+    expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
+  });
+
+  it('fails if the post does not exist', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.EN,
+      postIdentifier: 88888888,
+      postType: PostType.MISC,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_EXISTS);
+    expect(json.success).toBeFalsy();
+  });
+
+  it('returns meta if the post exists in alt language', async () => {
+    const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
+      uid: '',
+      lang: SupportedLanguages.CHT,
+      postIdentifier: 1,
+      postType: PostType.MISC,
+    });
+    expect(response.statusCode).toBe(200);
+
+    const json: PostPageMetaResponse = response.json() as PostPageMetaResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.params).toStrictEqual({
+      title: payloadMisc.title,
     });
   });
 });
