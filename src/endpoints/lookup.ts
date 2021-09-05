@@ -20,6 +20,11 @@ import {handleEditDragonAnalysis} from './post/analysis/dragon/edit/handler';
 import {handlePublishDragonAnalysis} from './post/analysis/dragon/publish/handler';
 import {handleGetAnalysis} from './post/analysis/shared/get/handler';
 import {handleAnalysisIdCheck} from './post/analysis/shared/idCheck/handler';
+import {handleEditMiscPost} from './post/misc/edit/handler';
+import {handleGetMiscPost} from './post/misc/get/handler';
+import {handleMiscPostIdCheck} from './post/misc/idCheck/handler';
+import {handleListMiscPost} from './post/misc/list/handler';
+import {handlePublishMiscPost} from './post/misc/publish/handler';
 import {handleEditQuestPost} from './post/quest/edit/handler';
 import {handleGetQuestPost} from './post/quest/get/handler';
 import {handleQuestPostIdCheck} from './post/quest/idCheck/handler';
@@ -67,6 +72,11 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_QUEST_GET]: {GET: handleGetQuestPost},
   [ApiEndPoints.POST_QUEST_EDIT]: {POST: handleEditQuestPost},
   [ApiEndPoints.POST_QUEST_ID_CHECK]: {GET: handleQuestPostIdCheck},
+  [ApiEndPoints.POST_MISC_PUBLISH]: {POST: handlePublishMiscPost},
+  [ApiEndPoints.POST_MISC_LIST]: {GET: handleListMiscPost},
+  [ApiEndPoints.POST_MISC_GET]: {GET: handleGetMiscPost},
+  [ApiEndPoints.POST_MISC_EDIT]: {POST: handleEditMiscPost},
+  [ApiEndPoints.POST_MISC_ID_CHECK]: {GET: handleMiscPostIdCheck},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA]: {POST: handlePublishCharacterAnalysis},
   [ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON]: {POST: handlePublishDragonAnalysis},
   [ApiEndPoints.INFO_UNIT_LOOKUP]: {GET: handleUnitInfoLookup},
