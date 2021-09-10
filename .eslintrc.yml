@@ -59,6 +59,10 @@ rules:
         order: asc
         caseInsensitive: true
 
+  space-in-parens:
+    - error
+    - never
+
   max-len:
     - 2
     - code: 120
