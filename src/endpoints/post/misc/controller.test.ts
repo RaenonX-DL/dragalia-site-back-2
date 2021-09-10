@@ -201,28 +201,18 @@ describe('Misc post controller', () => {
     expect(post.seqId).toBe(3);
   });
 
-  it('returns a list correctly-sorted posts', async () => {
+  it('returns correctly sorted post list', async () => {
     for (let i = 0; i < 7; i++) {
       await MiscPostController.publishPost(app.mongoClient, payload);
     }
 
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
+    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT);
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it('returns a list correctly-sorted posts even if paginated', async () => {
-    for (let i = 0; i < 7; i++) {
-      await MiscPostController.publishPost(app.mongoClient, payload);
-    }
-
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
-
-    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
-  });
-
   it('returns without any error if no posts available yet', async () => {
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 2, 2);
+    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT);
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
   });
@@ -232,29 +222,9 @@ describe('Misc post controller', () => {
       await MiscPostController.publishPost(app.mongoClient, payload);
     }
 
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.EN, 0, 25);
+    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.EN);
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
-  });
-
-  it('returns correct post count', async () => {
-    for (let i = 0; i < 7; i++) {
-      await MiscPostController.publishPost(app.mongoClient, payload);
-    }
-
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
-
-    expect(postListResult.totalAvailableCount).toBe(7);
-  });
-
-  it('returns correct post count after pagination', async () => {
-    for (let i = 0; i < 30; i++) {
-      await MiscPostController.publishPost(app.mongoClient, payload);
-    }
-
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 0, 25);
-
-    expect(postListResult.totalAvailableCount).toBe(30);
   });
 
   it('increases the view count of a post after getting it', async () => {

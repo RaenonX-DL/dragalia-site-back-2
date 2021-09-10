@@ -29,8 +29,6 @@ export abstract class PostController {
     collection: Collection, lang: SupportedLanguages, options: PostControllerListOptions<E, D>,
   ): Promise<PostListResult<E>> {
     const {
-      start = 0,
-      limit = 0,
       projection = {},
       transformFunc,
     } = options;
@@ -49,15 +47,10 @@ export abstract class PostController {
         },
         sort: {[EditableDocumentKey.dateModifiedEpoch]: 'desc'},
       })
-      .skip(start)
-      .limit(limit)
       .toArray();
-
-    const totalAvailableCount = await collection.countDocuments(query);
 
     return new PostListResult<E>(
       posts,
-      totalAvailableCount,
       transformFunc,
     );
   }

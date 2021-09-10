@@ -15,18 +15,8 @@ export const handleListMiscPost = async ({
     mongoClient,
     payload,
     MiscPostController.getPostList,
-    (
-      userData,
-      postUnits,
-      startIdx,
-      availableCount,
-    ) => {
-      return new MiscPostListResponse(
-        userData ? userData.isAdmin : false,
-        postUnits,
-        startIdx,
-        availableCount,
-      );
+    (userData, postUnits) => {
+      return new MiscPostListResponse(userData ? userData.isAdmin : false, postUnits);
     },
   );
 };

@@ -31,18 +31,9 @@ describe('Misc post listing EP', () => {
     ],
   };
 
-  const payloadList1: MiscPostListPayload = {
+  const payloadList: MiscPostListPayload = {
     uid: '',
     lang: SupportedLanguages.CHT,
-    start: 0,
-    limit: 25,
-  };
-
-  const payloadList2: MiscPostListPayload = {
-    uid: '',
-    lang: SupportedLanguages.CHT,
-    start: 2,
-    limit: 2,
   };
 
   beforeAll(async () => {
@@ -62,39 +53,22 @@ describe('Misc post listing EP', () => {
       await MiscPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList1);
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList);
     expect(result.statusCode).toBe(200);
 
     const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.postCount).toBe(7);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it('returns correctly sorted posts after pagination', async () => {
-    for (let i = 0; i < 7; i++) {
-      await MiscPostController.publishPost(app.mongoClient, payloadPost);
-    }
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList2);
-    expect(result.statusCode).toBe(200);
-
-    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.postCount).toBe(7);
-    expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([5, 4]);
-  });
-
   it('returns an empty result if no post exists yet', async () => {
-    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList1);
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList);
     expect(result.statusCode).toBe(200);
 
     const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.postCount).toBe(0);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
@@ -105,13 +79,12 @@ describe('Misc post listing EP', () => {
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_MISC_LIST)
-      .query({...payloadList1, lang: SupportedLanguages.EN});
+      .query({...payloadList, lang: SupportedLanguages.EN});
     expect(result.statusCode).toBe(200);
 
     const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.postCount).toBe(0);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 
@@ -122,13 +95,12 @@ describe('Misc post listing EP', () => {
 
     const result = await app.app.inject()
       .get(ApiEndPoints.POST_MISC_LIST)
-      .query({...payloadList1, lang: 'non-existent'});
+      .query({...payloadList, lang: 'non-existent'});
     expect(result.statusCode).toBe(200);
 
     const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.postCount).toBe(0);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
   });
 });

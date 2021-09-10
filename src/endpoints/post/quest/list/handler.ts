@@ -5,6 +5,7 @@ import {handleListPost} from '../../base/handler/list';
 import {QuestPostController} from '../controller';
 import {QuestPostListResponse} from './response';
 
+
 export const handleListQuestPost = async ({
   payload, mongoClient,
 }: HandlerParams<QuestPostListPayload>): Promise<QuestPostListResponse> => {
@@ -14,18 +15,8 @@ export const handleListQuestPost = async ({
     mongoClient,
     payload,
     QuestPostController.getPostList,
-    (
-      userData,
-      postUnits,
-      startIdx,
-      availableCount,
-    ) => {
-      return new QuestPostListResponse(
-        userData ? userData.isAdmin : false,
-        postUnits,
-        startIdx,
-        availableCount,
-      );
+    (userData, postUnits) => {
+      return new QuestPostListResponse(userData ? userData.isAdmin : false, postUnits);
     },
   );
 };
