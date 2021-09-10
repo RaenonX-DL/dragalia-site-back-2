@@ -177,7 +177,7 @@ export class MiscPostController extends PostController implements SequencedContr
   ): Promise<boolean> {
     return SequencedController.isIdAvailable(
       mongoClient,
-      MiscPost.getCollection(mongoClient),
+      MiscPost.getCollection,
       MiscPostController.getNextSeqId,
       lang,
       seqId,

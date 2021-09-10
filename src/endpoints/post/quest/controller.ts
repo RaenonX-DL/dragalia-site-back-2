@@ -182,7 +182,7 @@ export class QuestPostController extends PostController implements SequencedCont
   ): Promise<boolean> {
     return SequencedController.isIdAvailable(
       mongoClient,
-      QuestPost.getCollection(mongoClient),
+      QuestPost.getCollection,
       QuestPostController.getNextSeqId,
       lang,
       seqId,
