@@ -19,7 +19,7 @@ export class KeyPointController {
    * @return {Promise<Array<KeyPointEntry>>} array of key point entries
    */
   static async getAllEntries(mongoClient: MongoClient): Promise<Array<KeyPointEntryDocument>> {
-    return await KeyPointEntry.getCollection(mongoClient).find().toArray();
+    return await KeyPointEntry.getCollection(mongoClient).find().toArray() as Array<KeyPointEntryDocument>;
   }
 
   /**

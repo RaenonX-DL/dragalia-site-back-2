@@ -4,6 +4,7 @@ import {trim} from '../../../utils/string';
 import {AnalysisController} from '../../post/analysis/controller';
 import {UnitAnalysisDocumentKey} from '../../post/analysis/model/unitAnalysis';
 import {PostDocumentKey} from '../../post/base/model';
+import {MiscPostController} from '../../post/misc/controller';
 import {QuestPostController} from '../../post/quest/controller';
 import {ParamGetterFunction} from './types';
 
@@ -37,19 +38,35 @@ const getQuestGuideMeta: ParamGetterFunction = async ({
     return null;
   }
 
-  const quest = await QuestPostController.getQuestPost(mongoClient, postIdentifier, lang, false);
+  const post = await QuestPostController.getQuestPost(mongoClient, postIdentifier, lang, false);
 
-  if (!quest) {
+  if (!post) {
     return null;
   }
 
   return {
-    title: quest.post[PostDocumentKey.title],
+    title: post.post[PostDocumentKey.title],
   };
 };
 
-const getMiscMeta = async (): Promise<null> => {
-  return null;
+const getMiscMeta: ParamGetterFunction = async ({
+  mongoClient,
+  postIdentifier,
+  lang,
+}) => {
+  if (typeof postIdentifier === 'string') {
+    return null;
+  }
+
+  const post = await MiscPostController.getMiscPost(mongoClient, postIdentifier, lang, false);
+
+  if (!post) {
+    return null;
+  }
+
+  return {
+    title: post.post[PostDocumentKey.title],
+  };
 };
 
 export const ParamGetters: { [type in PostType]: ParamGetterFunction } = {

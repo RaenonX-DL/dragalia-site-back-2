@@ -1,9 +1,9 @@
 import {MongoClient} from 'mongodb';
 
 import {
+  MiscPostEditPayload,
+  MiscPostPublishPayload,
   SequencedPostInfo,
-  QuestPostEditPayload,
-  QuestPostPublishPayload,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
@@ -13,52 +13,47 @@ import {PostGetResult} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
-import {QuestGetResponse} from './get/response';
-import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
+import {MiscGetResponse} from './get/response';
+import {dbInfo, MiscPost, MiscPostDocument, MiscPostDocumentKey, MiscSectionDocumentKey} from './model';
 
 
 /**
- * Result object of getting a quest post.
+ * Result object of getting a misc post.
  */
-class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
+class MiscPostGetResult extends PostGetResult<MiscPostDocument> {
   /**
-   * Construct a quest post get result object.
+   * Construct a misc post get result object.
    *
-   * @param {QuestPostDocument} post
+   * @param {MiscPostDocument} post
    * @param {boolean} isAltLang
    * @param {Array<SupportedLanguages>} otherLangs
    */
-  constructor(post: QuestPostDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
+  constructor(post: MiscPostDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
     super(post, isAltLang, otherLangs);
   }
 
   /**
    * @inheritDoc
    */
-  toResponseReady(): QuestGetResponse {
+  toResponseReady(): MiscGetResponse {
     return {
       ...super.toResponseReady(),
       title: this.post[PostDocumentKey.title],
       seqId: this.post[SequentialDocumentKey.sequenceId],
-      general: this.post[QuestPostDocumentKey.generalInfo],
-      video: this.post[QuestPostDocumentKey.video],
-      positional: this.post[QuestPostDocumentKey.positionInfo].map((doc) => ({
-        position: doc[QuestPositionDocumentKey.position],
-        builds: doc[QuestPositionDocumentKey.builds],
-        rotations: doc[QuestPositionDocumentKey.rotations],
-        tips: doc[QuestPositionDocumentKey.tips],
+      sections: this.post[MiscPostDocumentKey.sections].map((doc) => ({
+        title: doc[MiscSectionDocumentKey.title],
+        content: doc[MiscSectionDocumentKey.content],
       })),
-      addendum: this.post[QuestPostDocumentKey.addendum],
     };
   }
 }
 
 /**
- * Quest post controller.
+ * Misc post controller.
  */
-export class QuestPostController extends PostController implements SequencedController {
+export class MiscPostController extends PostController implements SequencedController {
   /**
-   * Same as {@link QuestPost.getNextSeqId}.
+   * Same as {@link MiscPost.getNextSeqId}.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {number?} seqId desired post sequential ID to use
@@ -68,39 +63,39 @@ export class QuestPostController extends PostController implements SequencedCont
   static async getNextSeqId(
     mongoClient: MongoClient, {seqId, increase}: NextSeqIdOptions,
   ): Promise<number> {
-    return await QuestPost.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
+    return await MiscPost.getNextSeqId(mongoClient, dbInfo, {seqId, increase});
   }
 
   /**
    * Publish a new post and get its sequential ID.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {QuestPostPublishPayload} payload payload for creating a quest post
+   * @param {QuestPostPublishPayload} payload payload for creating a misc post
    * @return {Promise<number>} post sequential ID
    */
-  static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
-    const post: QuestPost = QuestPost.fromPayload({
+  static async publishPost(mongoClient: MongoClient, payload: MiscPostPublishPayload): Promise<number> {
+    const post: MiscPost = MiscPost.fromPayload({
       ...payload,
-      seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
+      seqId: await MiscPostController.getNextSeqId(mongoClient, {seqId: payload.seqId}),
     });
 
-    await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
+    await MiscPost.getCollection(mongoClient).insertOne(post.toObject());
 
     return post.seqId;
   }
 
   /**
-   * Edit a quest post.
+   * Edit a misc post.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {QuestPostEditPayload} editPayload payload to edit a quest post
-   * @return {Promise<UpdateResult>} result of editing a quest post
+   * @param {MiscPostEditPayload} editPayload payload to edit a misc post
+   * @return {Promise<UpdateResult>} result of editing a misc post
    */
-  static async editQuestPost(mongoClient: MongoClient, editPayload: QuestPostEditPayload): Promise<UpdateResult> {
-    const post: QuestPost = QuestPost.fromPayload(editPayload);
+  static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<UpdateResult> {
+    const post: MiscPost = MiscPost.fromPayload(editPayload);
 
-    return await QuestPostController.editPost(
-      QuestPost.getCollection(mongoClient),
+    return await MiscPostController.editPost(
+      MiscPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
@@ -111,7 +106,7 @@ export class QuestPostController extends PostController implements SequencedCont
   }
 
   /**
-   * Get a list of quest posts.
+   * Get a list of misc posts.
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
    * @param {SupportedLanguages} lang language code of the posts
@@ -120,8 +115,8 @@ export class QuestPostController extends PostController implements SequencedCont
   static async getPostList(
     mongoClient: MongoClient, lang: SupportedLanguages,
   ): Promise<PostListResult<SequencedPostInfo>> {
-    return QuestPostController.listPosts(
-      QuestPost.getCollection(mongoClient),
+    return MiscPostController.listPosts(
+      MiscPost.getCollection(mongoClient),
       lang,
       {
         projection: {
@@ -138,7 +133,7 @@ export class QuestPostController extends PostController implements SequencedCont
   }
 
   /**
-   * Get a specific quest post.
+   * Get a specific misc post.
    *
    * If this is called for post displaying purpose, incCount should be ``true``. Otherwise, it should be ``false``.
    *
@@ -153,14 +148,14 @@ export class QuestPostController extends PostController implements SequencedCont
    * @param {number} seqId sequential ID of the post
    * @param {SupportedLanguages} lang language of the post
    * @param {boolean} incCount if to increase the view count of the post or not
-   * @return {Promise} result of getting a quest post
+   * @return {Promise} result of getting a misc post
    */
-  static async getQuestPost(
+  static async getMiscPost(
     mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
-  ): Promise<QuestPostGetResult | null> {
-    return super.getPost<QuestPostDocument, QuestPostGetResult>(
-      QuestPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
-      ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
+  ): Promise<MiscPostGetResult | null> {
+    return super.getPost<MiscPostDocument, MiscPostGetResult>(
+      MiscPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
+      ((post, isAltLang, otherLangs) => new MiscPostGetResult(post, isAltLang, otherLangs)),
     );
   }
 
@@ -182,8 +177,8 @@ export class QuestPostController extends PostController implements SequencedCont
   ): Promise<boolean> {
     return SequencedController.isIdAvailable(
       mongoClient,
-      QuestPost.getCollection,
-      QuestPostController.getNextSeqId,
+      MiscPost.getCollection,
+      MiscPostController.getNextSeqId,
       lang,
       seqId,
     );

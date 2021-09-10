@@ -3,41 +3,35 @@ import {ObjectId} from 'mongodb';
 import {
   ApiEndPoints,
   ApiResponseCode,
-  QuestPostListPayload,
-  QuestPostListResponse,
-  QuestPostPublishPayload, SupportedLanguages,
+  MiscPostListPayload,
+  MiscPostListResponse,
+  MiscPostPublishPayload,
+  SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
-import {QuestPostController} from '../controller';
+import {MiscPostController} from '../controller';
 
 
-describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing endpoint`, () => {
+describe('Misc post listing EP', () => {
   let app: Application;
 
-  const payloadPost: QuestPostPublishPayload = {
+  const payloadPost: MiscPostPublishPayload = {
     uid: new ObjectId().toHexString(),
     lang: SupportedLanguages.CHT,
     title: 'post',
-    general: 'general',
-    video: 'video',
-    positional: [
+    sections: [
       {
-        position: 'pos1',
-        builds: 'build1',
-        rotations: 'rot1',
-        tips: 'tip1',
+        title: 'A',
+        content: 'A1',
       },
       {
-        position: 'pos2',
-        builds: 'build2',
-        rotations: 'rot2',
-        tips: 'tip2',
+        title: 'B',
+        content: 'B1',
       },
     ],
-    addendum: 'addendum',
   };
 
-  const payloadList: QuestPostListPayload = {
+  const payloadList: MiscPostListPayload = {
     uid: '',
     lang: SupportedLanguages.CHT,
   };
@@ -56,23 +50,23 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
   it('returns correctly sorted posts', async () => {
     for (let i = 0; i < 7; i++) {
-      await QuestPostController.publishPost(app.mongoClient, payloadPost);
+      await MiscPostController.publishPost(app.mongoClient, payloadPost);
     }
 
-    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList);
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
   it('returns an empty result if no post exists yet', async () => {
-    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList);
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList);
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
@@ -80,15 +74,15 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
   it('returns an empty result if no post matches the querying parameters', async () => {
     for (let i = 0; i < 7; i++) {
-      await QuestPostController.publishPost(app.mongoClient, payloadPost);
+      await MiscPostController.publishPost(app.mongoClient, payloadPost);
     }
 
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
+      .get(ApiEndPoints.POST_MISC_LIST)
       .query({...payloadList, lang: SupportedLanguages.EN});
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
@@ -96,15 +90,15 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
 
   it('returns nothing if a non-existent language code is used', async () => {
     for (let i = 0; i < 7; i++) {
-      await QuestPostController.publishPost(app.mongoClient, payloadPost);
+      await MiscPostController.publishPost(app.mongoClient, payloadPost);
     }
 
     const result = await app.app.inject()
-      .get(ApiEndPoints.POST_QUEST_LIST)
+      .get(ApiEndPoints.POST_MISC_LIST)
       .query({...payloadList, lang: 'non-existent'});
     expect(result.statusCode).toBe(200);
 
-    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);

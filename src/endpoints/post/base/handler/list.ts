@@ -6,15 +6,14 @@ import {User} from '../../../userControl/model';
 import {PostListResult} from '../controller/list';
 import {PostListResponse} from '../response/post/list';
 
+
 type FunctionGetPostList<E extends SequencedPostInfo> = (
   mongoClient: MongoClient,
   lang: SupportedLanguages,
-  start: number,
-  limit: number,
 ) => Promise<PostListResult<E>>;
 
 type FunctionConstructResponse<R extends PostListResponse> = (
-  userData: User | null, postUnits: Array<SequencedPostInfo>, startIdx: number, availableCount: number,
+  userData: User | null, postUnits: Array<SequencedPostInfo>
 ) => R;
 
 export const handleListPost = async <P extends SequencedPostListPayload,
@@ -26,12 +25,10 @@ export const handleListPost = async <P extends SequencedPostListPayload,
   fnConstructResponse: FunctionConstructResponse<R>,
 ): Promise<R> => {
   // Get a list of posts
-  const {postListEntries, totalAvailableCount} = await fnGetPostList(
-    mongoClient, payload.lang, payload.start, payload.limit,
-  );
+  const {postListEntries} = await fnGetPostList(mongoClient, payload.lang);
 
   // Get the data of the user who send this request
   const userData = await UserController.getUserData(mongoClient, payload.uid);
 
-  return fnConstructResponse(userData, postListEntries, payload.start, totalAvailableCount);
+  return fnConstructResponse(userData, postListEntries);
 };
