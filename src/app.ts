@@ -42,8 +42,8 @@ export class Application {
     try {
       await this.mongoClient.close();
       await this.mongoReplSet?.stop();
-    } catch (e) {
-      console.error(`Error on application close: ${e.message}`);
+    } catch (err) {
+      console.error(`Error on application close: ${err instanceof Error ? err.message : err}`);
     }
   }
 
@@ -55,8 +55,8 @@ export class Application {
   async reset(): Promise<void> {
     try {
       await clearServer(this.mongoClient);
-    } catch (e) {
-      console.error(`Error on application reset: ${e.message}`);
+    } catch (err) {
+      console.error(`Error on application reset: ${err instanceof Error ? err.message : err}`);
     }
   }
 }

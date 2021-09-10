@@ -121,7 +121,7 @@ export const handleResponse = async <T extends RequestPayloadBase>(
 
     res.status(response.httpCode).send(response.toJson());
   } catch (err) {
-    console.error(`${method} ${req.url} - ERROR: ${err.message}`);
+    console.error(`${method} ${req.url} - ERROR: ${err instanceof Error ? err.message : err}`);
     console.error(err);
     throw err;
   }
