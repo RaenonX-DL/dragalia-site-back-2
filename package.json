@@ -31,8 +31,7 @@
     "mongodb-memory-server": "^7.4.0",
     "newrelic": "^8.3.0",
     "node-fetch": "^2.6.2",
-    "pm2": "^5.1.1",
-    "uuid": "^8.3.2"
+    "pm2": "^5.1.1"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
