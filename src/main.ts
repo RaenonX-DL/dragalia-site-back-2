@@ -17,11 +17,7 @@ if (isProduction()) {
     mongoUri: process.env.MONGO_URL || '',
     logger: isProduction() ?
       true :
-      {
-        prettyPrint: {
-          translateTime: true,
-        },
-      },
+      {prettyPrint: {translateTime: true}},
   })).app;
 
   await initHttp(app);
