@@ -39,8 +39,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_CHARA} - edit a charac
     }],
     tipsBuilds: 'tip1',
     videos: 'video1',
-    story: 'story1',
-    keywords: 'kw1',
   };
 
   const payloadEdit: CharaAnalysisEditPayload = {

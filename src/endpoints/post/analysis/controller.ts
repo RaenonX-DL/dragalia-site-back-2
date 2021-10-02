@@ -63,8 +63,6 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
       passives: this.post[UnitAnalysisDocumentKey.passives],
       normalAttacks: this.post[UnitAnalysisDocumentKey.normalAttacks],
       videos: this.post[UnitAnalysisDocumentKey.videos],
-      story: this.post[UnitAnalysisDocumentKey.story],
-      keywords: this.post[UnitAnalysisDocumentKey.keywords],
     };
 
     if (base.type === UnitType.CHARACTER) {

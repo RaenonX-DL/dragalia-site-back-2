@@ -42,8 +42,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_ANALYSIS_GET} - get analysis`, () => 
     }],
     tipsBuilds: 'tips',
     videos: 'video',
-    story: 'story',
-    keywords: 'keyword',
   };
 
   beforeAll(async () => {

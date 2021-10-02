@@ -34,8 +34,6 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis looku
     }],
     tipsBuilds: 'tips',
     videos: 'video',
-    story: 'story',
-    keywords: 'keyword',
   };
 
   const payloadLookup: UnitInfoLookupLandingPayload = {
@@ -69,7 +67,12 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis looku
       .toStrictEqual([10950101, 10950201]);
   });
 
-  it('returns at most 3 analyses', async () => {
+  it('returns at most 9 analyses', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10530401});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10530501});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10540102});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10540103});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10540201});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10540401});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10850401});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10850302});
@@ -83,7 +86,9 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis looku
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId))
-      .toStrictEqual([10950101, 10950201, 10850302]);
+      .toStrictEqual([
+        10950101, 10950201, 10850302, 10850401, 10540401, 10540201, 10540103, 10540102, 10530501,
+      ]);
   });
 
   it('returns an empty result if no analyses exist yet', async () => {

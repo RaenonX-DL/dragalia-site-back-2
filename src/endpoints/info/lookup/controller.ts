@@ -38,7 +38,7 @@ export class UnitInfoLookupController {
    * @return {Promise<Array<UnitInfoLookupEntry>>} list of most recently modified analyses
    */
   static async getRecentlyModifiedAnalyses(
-    mongoClient: MongoClient, lang: SupportedLanguages, maxCount = 3,
+    mongoClient: MongoClient, lang: SupportedLanguages, maxCount = 9,
   ): Promise<Array<UnitInfoLookupEntry>> {
     return UnitInfoLookupController.getAnalysisInfo(mongoClient, lang, (cursor) => {
       return cursor

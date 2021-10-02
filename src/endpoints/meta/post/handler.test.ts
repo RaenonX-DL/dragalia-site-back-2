@@ -83,8 +83,6 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
-      story: 'story1',
-      keywords: 'kw1',
     };
 
     beforeEach(async () => {
@@ -191,8 +189,6 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
-      story: 'story1',
-      keywords: 'kw1',
     };
 
     beforeEach(async () => {
