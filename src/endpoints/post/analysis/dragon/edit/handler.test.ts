@@ -34,8 +34,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON} - edit a drago
     notes: 'dragonNotes',
     suitableCharacters: 'dragonChara',
     videos: 'dragonVideo',
-    story: 'dragonStory',
-    keywords: 'dragonKeyword',
   };
 
   const payloadEdit: DragonAnalysisEditPayload = {

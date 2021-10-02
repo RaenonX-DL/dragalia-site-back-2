@@ -30,8 +30,6 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
-    story: 'story',
-    keywords: 'keyword',
   };
 
   beforeAll(async () => {
@@ -74,8 +72,6 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     ]);
     expect(post.tipsBuilds).toBe('tips');
     expect(post.videos).toBe('video');
-    expect(post.story).toBe('story');
-    expect(post.keywords).toBe('keyword');
     // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
     expect(post.datePublishedEpoch).toEqual(expect.any(Number));
     expect(post.dateModifiedEpoch).toEqual(expect.any(Number));
@@ -89,7 +85,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {
       ...payloadChara,
       lang: SupportedLanguages.EN,
-      keywords: 'kw-en',
+      passives: 'passive-en',
     });
 
     const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
@@ -102,7 +98,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     expect(post.unitId).toBe(10950101);
     expect(post.summary).toBe('summary');
     expect(post.summonResult).toBe('summon');
-    expect(post.passives).toBe('passive');
+    expect(post.passives).toBe('passive-en');
     expect(post.normalAttacks).toBe('normal');
     expect(post.forceStrike).toBe('force');
     expect(post.skills.map((info) => info.toObject())).toStrictEqual([
@@ -115,8 +111,6 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     ]);
     expect(post.tipsBuilds).toBe('tips');
     expect(post.videos).toBe('video');
-    expect(post.story).toBe('story');
-    expect(post.keywords).toBe('kw-en');
   });
 
   it('publishes analyses in different languages and IDs', async () => {
@@ -183,8 +177,6 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
     ]);
     expect(post.tipsBuilds).toBe('tips');
     expect(post.videos).toBe('video');
-    expect(post.story).toBe('story');
-    expect(post.keywords).toBe('keyword');
   });
 
   it('blocks publishing with non-existent unit ID', async () => {

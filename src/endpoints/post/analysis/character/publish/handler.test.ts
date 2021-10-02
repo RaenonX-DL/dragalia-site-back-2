@@ -40,8 +40,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     }],
     tipsBuilds: 'tip1',
     videos: 'video1',
-    story: 'story1',
-    keywords: 'kw1',
   };
 
   const payload2: CharaAnalysisPublishPayload = {
@@ -168,8 +166,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     ));
     expect(doc.tipsBuilds).toEqual(payload2.tipsBuilds);
     expect(doc.videos).toEqual(payload2.videos);
-    expect(doc.story).toEqual(payload2.story);
-    expect(doc.keywords).toEqual(payload2.keywords);
     expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);
@@ -201,8 +197,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     ));
     expect(doc.tipsBuilds).toEqual(payload2.tipsBuilds);
     expect(doc.videos).toEqual(payload2.videos);
-    expect(doc.story).toEqual(payload2.story);
-    expect(doc.keywords).toEqual(payload2.keywords);
     expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);

@@ -24,8 +24,6 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     notes: 'dragonNotes',
     suitableCharacters: 'dragonChara',
     videos: 'dragonVideo',
-    story: 'dragonStory',
-    keywords: 'dragonKeyword',
   };
 
   beforeAll(async () => {
@@ -61,8 +59,6 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     expect(post.notes).toBe('dragonNotes');
     expect(post.suitableCharacters).toBe('dragonChara');
     expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('dragonKeyword');
     // Weird syntax on checking the value is number - https://stackoverflow.com/a/56133391/11571888
     expect(post.datePublishedEpoch).toEqual(expect.any(Number));
     expect(post.dateModifiedEpoch).toEqual(expect.any(Number));
@@ -77,7 +73,7 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
       ...payloadDragon,
       unitId: payloadDragon.unitId,
       lang: SupportedLanguages.EN,
-      keywords: 'kw-en',
+      passives: 'passive-en',
     });
 
     const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
@@ -90,14 +86,12 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     expect(post.unitId).toBe(20040405);
     expect(post.summary).toBe('dragonSummary');
     expect(post.summonResult).toBe('dragonSummon');
-    expect(post.passives).toBe('dragonPassive');
+    expect(post.passives).toBe('passive-en');
     expect(post.normalAttacks).toBe('dragonNormal');
     expect(post.ultimate).toBe('dragonUltimate');
     expect(post.notes).toBe('dragonNotes');
     expect(post.suitableCharacters).toBe('dragonChara');
     expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('kw-en');
   });
 
   it('blocks publishing duplicated analysis and the content is unchanged', async () => {
@@ -125,8 +119,6 @@ describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
     expect(post.notes).toBe('dragonNotes');
     expect(post.suitableCharacters).toBe('dragonChara');
     expect(post.videos).toBe('dragonVideo');
-    expect(post.story).toBe('dragonStory');
-    expect(post.keywords).toBe('dragonKeyword');
   });
 
   it('blocks publishing analysis with non-existent unit ID', async () => {

@@ -35,8 +35,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
     notes: 'dragonNotes',
     suitableCharacters: 'dragonChara',
     videos: 'dragonVideo',
-    story: 'dragonStory',
-    keywords: 'dragonKeyword',
   };
 
   const payload2: DragonAnalysisPublishPayload = {
@@ -159,8 +157,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
     expect(doc.ultimate).toEqual(payload2.ultimate);
     expect(doc.notes).toEqual(payload2.notes);
     expect(doc.videos).toEqual(payload2.videos);
-    expect(doc.story).toEqual(payload2.story);
-    expect(doc.keywords).toEqual(payload2.keywords);
     expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);
@@ -188,8 +184,6 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
     expect(doc.ultimate).toEqual(payload2.ultimate);
     expect(doc.notes).toEqual(payload2.notes);
     expect(doc.videos).toEqual(payload2.videos);
-    expect(doc.story).toEqual(payload2.story);
-    expect(doc.keywords).toEqual(payload2.keywords);
     expect(doc.datePublishedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.dateModifiedEpoch.valueOf() - Date.now()).toBeLessThanOrEqual(1000);
     expect(doc.editNotes).toHaveLength(0);

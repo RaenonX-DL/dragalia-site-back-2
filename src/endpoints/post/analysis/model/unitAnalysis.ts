@@ -14,8 +14,6 @@ export enum UnitAnalysisDocumentKey {
   passives = 'p',
   normalAttacks = 'na',
   videos = 'v',
-  story = 'st',
-  keywords = 'k',
 }
 
 export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
@@ -26,8 +24,6 @@ export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
   [UnitAnalysisDocumentKey.passives]: string,
   [UnitAnalysisDocumentKey.normalAttacks]: string,
   [UnitAnalysisDocumentKey.videos]: string,
-  [UnitAnalysisDocumentKey.story]: string,
-  [UnitAnalysisDocumentKey.keywords]: string,
 }
 
 export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
@@ -38,8 +34,6 @@ export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
   passives: string,
   normalAttacks: string,
   videos: string,
-  story: string,
-  keywords: string,
 }
 
 /**
@@ -53,8 +47,6 @@ export abstract class UnitAnalysis extends PostNoTitle {
   passives: string;
   normalAttacks: string;
   videos: string;
-  story: string;
-  keywords: string;
 
   /**
    * Construct a unit analysis data.
@@ -64,7 +56,7 @@ export abstract class UnitAnalysis extends PostNoTitle {
   protected constructor(params: UnitAnalysisConstructParams) {
     super(params);
 
-    const {type, unitId, summary, summonResult, passives, normalAttacks, videos, story, keywords} = params;
+    const {type, unitId, summary, summonResult, passives, normalAttacks, videos} = params;
 
     this.type = type;
     this.unitId = unitId;
@@ -73,8 +65,6 @@ export abstract class UnitAnalysis extends PostNoTitle {
     this.passives = passives;
     this.normalAttacks = normalAttacks;
     this.videos = videos;
-    this.story = story;
-    this.keywords = keywords;
   }
 
   /**
@@ -113,8 +103,6 @@ export abstract class UnitAnalysis extends PostNoTitle {
       passives: obj[UnitAnalysisDocumentKey.passives],
       normalAttacks: obj[UnitAnalysisDocumentKey.normalAttacks],
       videos: obj[UnitAnalysisDocumentKey.videos],
-      story: obj[UnitAnalysisDocumentKey.story],
-      keywords: obj[UnitAnalysisDocumentKey.keywords],
       editNotes: obj[EditableDocumentKey.editNotes].map((editNote) => EditNote.fromDocument(editNote)),
     };
   }
@@ -147,8 +135,6 @@ export abstract class UnitAnalysis extends PostNoTitle {
       [UnitAnalysisDocumentKey.passives]: this.passives,
       [UnitAnalysisDocumentKey.normalAttacks]: this.normalAttacks,
       [UnitAnalysisDocumentKey.videos]: this.videos,
-      [UnitAnalysisDocumentKey.story]: this.story,
-      [UnitAnalysisDocumentKey.keywords]: this.keywords,
     };
   }
 }

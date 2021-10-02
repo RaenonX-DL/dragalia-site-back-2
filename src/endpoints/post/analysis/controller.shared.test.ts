@@ -34,8 +34,6 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
-    story: 'story',
-    keywords: 'keyword',
   };
 
   beforeAll(async () => {
