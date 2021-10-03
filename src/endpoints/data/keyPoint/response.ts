@@ -18,7 +18,7 @@ export class KeyPointInfoResponse extends ApiResponse {
   info: KeyPointInfo;
 
   /**
-   * Construct an unit name update endpoint API response.
+   * Construct a unit name update endpoint API response.
    *
    * @param {KeyPointInfoResponseOptions} options options to construct the response
    */

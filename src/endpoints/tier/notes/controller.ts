@@ -37,14 +37,14 @@ export class TierNoteController {
   }
 
   /**
-   * Get the unit tier note of a certain unit for editing.
+   * Get the unit tier note of a unit.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {SupportedLanguages} lang language of the tier note
-   * @param {number} unitId unit ID of the tier note to be edited
+   * @param {number} unitId unit ID of the tier note
    * @return {Promise<UnitTierNoteApi>}
    */
-  static async getUnitTierNoteEdit(
+  static async getUnitTierNoteSingle(
     mongoClient: MongoClient, lang: SupportedLanguages, unitId: number,
   ): Promise<UnitTierNoteApi | null> {
     const tierNoteDoc = await UnitTierNote.getCollection(mongoClient)

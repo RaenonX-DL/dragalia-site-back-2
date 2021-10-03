@@ -3,7 +3,7 @@ import {ApiResponse} from '../../../../base/response';
 
 
 /**
- * API response class for the endpoint to update the tier notes of an unit.
+ * API response class for the endpoint to update the tier notes of a unit.
  */
 export class UnitTierNoteUpdateResponse extends ApiResponse {
   /**

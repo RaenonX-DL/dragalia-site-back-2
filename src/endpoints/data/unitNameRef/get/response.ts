@@ -16,7 +16,7 @@ export class UnitNameRefResponse extends ApiResponse {
   data: UnitNameRefData;
 
   /**
-   * Construct an unit name reference endpoint API response.
+   * Construct a unit name reference endpoint API response.
    *
    * @param {UnitNameRefResponseOptions} options options to construct the response
    */

@@ -21,7 +21,7 @@ export class UnhandledUnitTypeError extends CustomError {
  */
 export class UnitNotExistsError extends CustomError {
   /**
-   * Construct an unit not exists error.
+   * Construct a unit not exists error.
    *
    * @param {number} unitId non-existent unit ID
    */
@@ -35,7 +35,7 @@ export class UnitNotExistsError extends CustomError {
  */
 export class UnitTypeMismatchError extends CustomError {
   /**
-   * Construct an unit type mismatch error.
+   * Construct a unit type mismatch error.
    *
    * @param {number} unitId unit ID that causes the error
    * @param {UnitType} expectedType expected unit type
