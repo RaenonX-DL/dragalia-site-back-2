@@ -86,7 +86,9 @@ export class SequentialDocument extends Document {
         throw new SeqIdSkippingError(seqId, latestSeqId + 1);
       }
 
-      updateOps = {$set: {[SequenceCounterKeys.counter]: seqId}};
+      // Use `$max` instead of `$set` so that the sequential counter is updated
+      // only if the new ID is the newest
+      updateOps = {$max: {[SequenceCounterKeys.counter]: seqId}};
     } else {
       updateOps = {$inc: {[SequenceCounterKeys.counter]: increase ? 1 : 0}};
     }
