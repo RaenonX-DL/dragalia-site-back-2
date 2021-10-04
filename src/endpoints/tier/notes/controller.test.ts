@@ -86,7 +86,7 @@ describe('Tier note data controller', () => {
 
   describe('getUnitTierNoteEdit()', () => {
     it('returns `null` if no existing tier note available', async () => {
-      const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
+      const data = await TierNoteController.getUnitTierNoteSingle(app.mongoClient, SupportedLanguages.CHT, 10950101);
 
       expect(data).toStrictEqual(null);
     });
@@ -108,7 +108,7 @@ describe('Tier note data controller', () => {
       ].map((entry) => entry.toObject());
       await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
 
-      const data = await TierNoteController.getUnitTierNoteEdit(app.mongoClient, SupportedLanguages.CHT, 10950101);
+      const data = await TierNoteController.getUnitTierNoteSingle(app.mongoClient, SupportedLanguages.CHT, 10950101);
 
       expect(data).toStrictEqual({
         points: [],

@@ -10,7 +10,7 @@ import {ApiResponse} from '../../../../base/response';
 type UnitTierNoteEditResponseOptions = Omit<UnitTierNoteEditResponseApi, keyof BaseResponse>;
 
 /**
- * API response class for the endpoint to get the unit tier notes of an unit for edit.
+ * API response class for the endpoint to get the unit tier notes of a unit for edit.
  */
 export class UnitTierNoteEditResponse extends ApiResponse {
   data: UnitTierNote | null;

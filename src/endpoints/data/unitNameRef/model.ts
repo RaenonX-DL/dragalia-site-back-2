@@ -37,9 +37,9 @@ export class UnitNameRefEntry extends Document {
   unitId: number;
 
   /**
-   * Construct an unit name reference entry
+   * Construct a unit name reference entry
    *
-   * @param {UnitNameRefEntryConstructParams} params parameters to construct an unit name ref entry
+   * @param {UnitNameRefEntryConstructParams} params parameters to construct a unit name ref entry
    */
   constructor(params: UnitNameRefEntryConstructParams) {
     super(params);

@@ -9,7 +9,7 @@ import {ApiResponse} from '../../../../base/response';
  */
 export class UnitNameRefUpdateResponse extends ApiResponse {
   /**
-   * Construct an unit name update endpoint API response.
+   * Construct a unit name update endpoint API response.
    */
   constructor() {
     super(ApiResponseCode.SUCCESS);

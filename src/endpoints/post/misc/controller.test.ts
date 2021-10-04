@@ -427,4 +427,26 @@ describe('Misc post controller', () => {
 
     expect(availability).toBe(false);
   });
+
+  it('returns correct ID check result across languages', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const available = await MiscPostController.isPostIdAvailable(app.mongoClient, SupportedLanguages.CHT, 3);
+
+    expect(available).toBeTruthy();
+  });
+
+  it('publishes in correct ID order', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const newPostId = await MiscPostController.publishPost(
+      app.mongoClient, {...payload, lang: SupportedLanguages.CHT},
+    );
+
+    expect(newPostId).toBe(3);
+  });
 });

@@ -11,7 +11,7 @@ export const handleTierNoteEdit = async ({
 }: HandlerParams<UnitTierNoteEditPayload>): Promise<UnitTierNoteEditResponse> => {
   payload = processTierNoteEditPayload(payload);
 
-  const data = await TierNoteController.getUnitTierNoteEdit(mongoClient, payload.lang, payload.unitId);
+  const data = await TierNoteController.getUnitTierNoteSingle(mongoClient, payload.lang, payload.unitId);
 
   return new UnitTierNoteEditResponse({data});
 };

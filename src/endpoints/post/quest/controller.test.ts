@@ -9,7 +9,8 @@ import {SeqIdSkippingError} from '../error';
 import {QuestPostController} from './controller';
 import {QuestPost, QuestPostDocument} from './model';
 
-describe(`[Controller] ${QuestPostController.name}`, () => {
+
+describe('Quest post controller', () => {
   let app: Application;
 
   beforeAll(async () => {
@@ -448,5 +449,27 @@ describe(`[Controller] ${QuestPostController.name}`, () => {
     const availability = await QuestPostController.isPostIdAvailable(app.mongoClient, payload.lang, -8);
 
     expect(availability).toBe(false);
+  });
+
+  it('returns correct ID check result across languages', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const available = await QuestPostController.isPostIdAvailable(app.mongoClient, SupportedLanguages.CHT, 3);
+
+    expect(available).toBeTruthy();
+  });
+
+  it('publishes in correct ID order', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await QuestPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const newPostId = await QuestPostController.publishPost(
+      app.mongoClient, {...payload, lang: SupportedLanguages.CHT},
+    );
+
+    expect(newPostId).toBe(3);
   });
 });

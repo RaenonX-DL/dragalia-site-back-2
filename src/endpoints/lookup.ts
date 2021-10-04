@@ -36,6 +36,7 @@ import {handleRoot} from './root/handler';
 import {handleEmitError} from './test/handler';
 import {handleTierNoteEdit} from './tier/notes/edit/handler';
 import {handleTierNoteGet} from './tier/notes/get/handler';
+import {handleTierNoteSingle} from './tier/notes/single/handler';
 import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
@@ -86,6 +87,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.POST_ANALYSIS_EDIT_DRAGON]: {POST: handleEditDragonAnalysis},
   [ApiEndPoints.POST_ANALYSIS_ID_CHECK]: {GET: handleAnalysisIdCheck},
   [ApiEndPoints.TIER_NOTES]: {GET: handleTierNoteGet},
+  [ApiEndPoints.TIER_UNIT]: {GET: handleTierNoteSingle},
   [ApiEndPoints.TIER_KEY_POINTS]: {GET: handleTierPointsGet},
   [ApiEndPoints.DATA_UNIT_NAME_REF]: {GET: handleDataUnitNameRef},
   [ApiEndPoints.DATA_KEY_POINT]: {GET: handleGetKeyPointData},

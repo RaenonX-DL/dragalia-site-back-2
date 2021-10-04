@@ -16,9 +16,9 @@ export class UnitNameRefManageResponse extends ApiResponse {
   refs: Array<UnitNameRefEntry>;
 
   /**
-   * Construct an unit name managing endpoint API response.
+   * Construct a unit name managing endpoint API response.
    *
-   * @param {UnitNameRefManageResponseOptions} options options to construct an unit name ref response
+   * @param {UnitNameRefManageResponseOptions} options options to construct a unit name ref response
    */
   constructor(options: UnitNameRefManageResponseOptions) {
     const responseCode = ApiResponseCode.SUCCESS;

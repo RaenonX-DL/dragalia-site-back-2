@@ -1,4 +1,4 @@
-import {UnitTierNoteEditPayload, UnitTierNoteUpdatePayload} from '../../api-def/api';
+import {UnitTierNoteEditPayload, UnitTierNoteSinglePayload, UnitTierNoteUpdatePayload} from '../../api-def/api';
 import {processPayloadBase} from './base';
 
 
@@ -9,6 +9,10 @@ const processPayloadHasUnitId = <P extends PayloadHasUnitId>(payload: P): P => {
   payload.unitId = +payload.unitId;
 
   return payload;
+};
+
+export const processTierNoteSinglePayload = <P extends UnitTierNoteSinglePayload>(payload: P): P => {
+  return processPayloadHasUnitId(payload);
 };
 
 export const processTierNoteEditPayload = <P extends UnitTierNoteEditPayload>(payload: P): P => {
