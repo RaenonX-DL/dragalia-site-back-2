@@ -126,23 +126,6 @@ describe(`Misc post getting EP`, () => {
     expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
   });
 
-  it('returns nothing as available languages if ID is spread', async () => {
-    await MiscPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN});
-    await MiscPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT});
-    await MiscPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP});
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_GET).query({...payloadGet, seqId: 2});
-    expect(result.statusCode).toBe(200);
-
-    const json: MiscPostGetResponse = result.json() as MiscPostGetResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(2);
-    expect(json.lang).toBe(SupportedLanguages.CHT);
-    expect(json.otherLangs).toStrictEqual([]);
-  });
-
   it('fails for non-existing post', async () => {
     const result = await app.app.inject().get(ApiEndPoints.POST_MISC_GET).query(payloadGet);
     expect(result.statusCode).toBe(404);

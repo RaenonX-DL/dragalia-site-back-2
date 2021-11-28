@@ -157,7 +157,7 @@ describe('Misc post controller', () => {
       .toThrow(SeqIdSkippingError);
   });
 
-  it('assigns different ID for posts in different language', async () => {
+  it('assigns ID for posts in different language automatically', async () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.EN});
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.JP});
@@ -171,18 +171,18 @@ describe('Misc post controller', () => {
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
-    expect(post.seqId).toBe(2);
+    expect(post.seqId).toBe(1);
     postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
-    expect(post.seqId).toBe(3);
+    expect(post.seqId).toBe(1);
   });
 
-  it('publishes posts in different languages and IDs', async () => {
+  it('publishes posts with correct manually assigned IDs', async () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
-    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
-    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 3, lang: SupportedLanguages.JP});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.JP});
 
     let postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
@@ -193,12 +193,12 @@ describe('Misc post controller', () => {
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
-    expect(post.seqId).toBe(2);
+    expect(post.seqId).toBe(1);
     postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
-    expect(post.seqId).toBe(3);
+    expect(post.seqId).toBe(1);
   });
 
   it('returns correctly sorted post list', async () => {
@@ -392,7 +392,7 @@ describe('Misc post controller', () => {
     expect(availability).toBe(true);
   });
 
-  it('returns available for an unused language in the next unused ID', async () => {
+  it('returns unavailable for an unused language in the next unused ID', async () => {
     const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
 
     const availability = await MiscPostController.isPostIdAvailable(
@@ -401,7 +401,7 @@ describe('Misc post controller', () => {
       newSeqId + 1,
     );
 
-    expect(availability).toBe(true);
+    expect(availability).toBe(false);
   });
 
   it('returns unavailable for a skipping ID', async () => {
@@ -438,7 +438,7 @@ describe('Misc post controller', () => {
     expect(available).toBeTruthy();
   });
 
-  it('publishes in correct ID order', async () => {
+  it('publishes successfully (1C - 2C - 1E - C)', async () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
@@ -448,5 +448,29 @@ describe('Misc post controller', () => {
     );
 
     expect(newPostId).toBe(3);
+  });
+
+  it('publishes successfully (1C - 2C - 1E - 2E)', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const newPostId = await MiscPostController.publishPost(
+      app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.EN},
+    );
+
+    expect(newPostId).toBe(2);
+  });
+
+  it('publishes successfully (1C - 2C - 1E - E)', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
+    await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
+
+    const newPostId = await MiscPostController.publishPost(
+      app.mongoClient, {...payload, lang: SupportedLanguages.EN},
+    );
+
+    expect(newPostId).toBe(2);
   });
 });
