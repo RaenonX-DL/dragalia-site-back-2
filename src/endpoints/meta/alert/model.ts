@@ -14,16 +14,19 @@ export const dbInfo: CollectionInfo = {
 
 export enum AlertEntryKey {
   message = 'm',
-  variant = 'v'
+  variant = 'v',
+  priority = 'p',
 }
 
 export type AlertEntryDocument = MultiLingualDocumentBase & {
   [AlertEntryKey.message]: string,
   [AlertEntryKey.variant]: AlertVariant,
+  [AlertEntryKey.priority]?: number,
 }
 
 type AlertEntryConstructOptions = AlertEntryApi & {
   lang: SupportedLanguages,
+  priority?: number,
 }
 
 /**
@@ -33,6 +36,7 @@ export class AlertEntry extends Document {
   lang: SupportedLanguages;
   variant: AlertVariant;
   message: string;
+  priority?: number;
 
   /**
    * Construct a site alert entry.
@@ -45,6 +49,7 @@ export class AlertEntry extends Document {
     this.lang = options.lang;
     this.message = options.message;
     this.variant = options.variant;
+    this.priority = options.priority;
   }
 
   /**
@@ -55,6 +60,7 @@ export class AlertEntry extends Document {
       lang: doc[MultiLingualDocumentKey.language],
       message: doc[AlertEntryKey.message],
       variant: doc[AlertEntryKey.variant],
+      priority: doc[AlertEntryKey.priority],
     });
   }
 
@@ -62,7 +68,12 @@ export class AlertEntry extends Document {
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+      collection.createIndex(
+        {[AlertEntryKey.priority]: 1, [MultiLingualDocumentKey.language]: 1},
+        {unique: true, partialFilterExpression: {houseName: {$type: 'number'}}},
+      );
+    }));
   }
 
   /**
@@ -86,6 +97,7 @@ export class AlertEntry extends Document {
       [MultiLingualDocumentKey.language]: this.lang,
       [AlertEntryKey.message]: this.message,
       [AlertEntryKey.variant]: this.variant,
+      [AlertEntryKey.priority]: this.priority,
     };
   }
 }
