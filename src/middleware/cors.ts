@@ -1,5 +1,6 @@
 import {FastifyCorsOptions} from 'fastify-cors';
 
+
 let allowedOriginsEnv: string | undefined = process.env.CORS_ALLOWED_ORIGINS;
 
 if (!allowedOriginsEnv) {

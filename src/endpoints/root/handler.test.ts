@@ -1,6 +1,7 @@
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 
+
 describe(`[Server] GET ${ApiEndPoints.ROOT} - the root endpoint`, () => {
   let app: Application;
 

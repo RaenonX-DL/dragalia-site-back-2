@@ -8,6 +8,7 @@ import {UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {DragonAnalysis, DragonAnalysisDocument} from './model/dragon';
 import {UnitAnalysisDocumentKey} from './model/unitAnalysis';
 
+
 describe(`[Controller] ${AnalysisController.name} (Dragon)`, () => {
   let app: Application;
 

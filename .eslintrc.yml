@@ -48,6 +48,10 @@ rules:
   indent:
     - off
 
+  linebreak-style:
+    - error
+    - unix
+
   import/order:
     - error
     - groups:
@@ -58,6 +62,10 @@ rules:
       alphabetize:
         order: asc
         caseInsensitive: true
+
+  import/newline-after-import:
+    - error
+    - count: 2
 
   space-in-parens:
     - error

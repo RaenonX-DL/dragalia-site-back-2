@@ -7,6 +7,7 @@ import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../../bas
 import {ViewCountableDocumentBase, ViewCountableDocumentKey} from '../../../../base/model/viewCount';
 import {getCurrentEpoch} from '../../../../utils/misc';
 
+
 export type PostDocumentBaseNoTitle =
   MultiLingualDocumentBase
   & EditableDocumentBase

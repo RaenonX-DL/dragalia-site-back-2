@@ -9,6 +9,7 @@ import {ApiFailedResponse} from '../../../base/response/failed';
 import {AnalysisController} from '../../controller';
 import {CharaAnalysisPublishedResponse} from './response';
 
+
 export const handlePublishCharacterAnalysis = async (
   {payload, mongoClient}: HandlerParams<CharaAnalysisPublishPayload>,
 ): Promise<ApiResponse> => {

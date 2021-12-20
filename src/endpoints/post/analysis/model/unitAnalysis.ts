@@ -6,6 +6,7 @@ import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from '../../base/model';
 import {dbInfo} from './config';
 
+
 export enum UnitAnalysisDocumentKey {
   type = 'tp',
   unitId = 'id',
@@ -70,7 +71,7 @@ export abstract class UnitAnalysis extends PostNoTitle {
   /**
    * Convert `payload` to an instance of construct params.
    *
-   * @param {T} payload payload to be converted
+   * @param {AnalysisBody} payload payload to be converted
    * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    */
@@ -86,7 +87,7 @@ export abstract class UnitAnalysis extends PostNoTitle {
   /**
    * Convert `obj` to an instance to an instance of construct params.
    *
-   * @param {T} obj object to be converted
+   * @param {UnitAnalysisDocument} obj object to be converted
    * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    * @protected

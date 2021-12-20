@@ -1,5 +1,6 @@
 import {trim} from './string';
 
+
 describe('String utils', () => {
   test('over-length string is trimmed', () => {
     expect(trim('123456', 5)).toBe('12345...');
