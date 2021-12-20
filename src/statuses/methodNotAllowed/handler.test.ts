@@ -3,6 +3,7 @@
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 
+
 describe(`[Server] POST ${ApiEndPoints.ROOT} - root endpoint in undefined method`, () => {
   let app: Application;
 

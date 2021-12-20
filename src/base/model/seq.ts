@@ -1,5 +1,6 @@
-import {Collection, MongoClient} from 'mongodb';
+import {Collection, Filter, MongoClient} from 'mongodb';
 
+import {SupportedLanguages} from '../../api-def/api/other/lang';
 import {DocumentBase} from '../../api-def/models';
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';
@@ -20,6 +21,7 @@ const counterCollectionName = '_seq_counter';
 
 enum SequenceCounterKeys {
   collection = '_col',
+  lang = '_lang',
   counter = '_seq',
 }
 
@@ -59,11 +61,12 @@ export class SequentialDocument extends Document {
    * @param {CollectionInfo} dbInfo database info of the document
    * @param {number?} seqId desired post sequential ID to use
    * @param {boolean} increase increase the counter or not
+   * @param {string} lang language bound to the sequential ID
    * @return {number} next available sequential ID
    * @throws {SeqIdSkippingError} if the desired seqId to use is not sequential
    */
   static async getNextSeqId(
-    mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase}: NextSeqIdOptions,
+    mongoClient: MongoClient, dbInfo: CollectionInfo, {seqId, increase, lang}: NextSeqIdOptions,
   ): Promise<number> {
     // explicit check because `increase` is `bool`
     // `==` to check for both `null` and `undefined`
@@ -73,10 +76,10 @@ export class SequentialDocument extends Document {
 
     // Initialize the collection, if not yet set up
     if (!this.seqCollection) {
-      await this.init(mongoClient, dbInfo);
+      await this.init(mongoClient, dbInfo, lang);
     }
 
-    const filter = {[SequenceCounterKeys.collection]: dbInfo.collectionName};
+    const filter = this.seqCounterFilter(dbInfo.collectionName, lang);
 
     let updateOps;
     if (seqId) {
@@ -102,27 +105,45 @@ export class SequentialDocument extends Document {
       },
     );
 
-    return (updateResult.value as SequentialDocumentBase)[SequenceCounterKeys.counter];
+    // Counter is only updated if the new ID is the newest,
+    // So `seqId` might be less than what's in the counter
+    return seqId || (updateResult.value as SequentialDocumentBase)[SequenceCounterKeys.counter];
   }
 
   /**
-   * Initialize the necessary properties for this sequential document.
+   * Initialize the necessary things for this sequential document.
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {CollectionInfo} dbInfo database info of this sequential document
+   * @param {string?} lang language of the sequential document
    * @private
    */
-  private static async init(mongoClient: MongoClient, dbInfo: CollectionInfo): Promise<void> {
+  private static async init(
+    mongoClient: MongoClient, dbInfo: CollectionInfo, lang?: SupportedLanguages,
+  ): Promise<void> {
     this.seqCollection = getCollection(mongoClient, {...dbInfo, collectionName: counterCollectionName});
 
     // Initialize the counter field, if not yet available
     await this.seqCollection.updateOne(
-      {[SequenceCounterKeys.collection]: dbInfo.collectionName},
+      this.seqCounterFilter(dbInfo.collectionName, lang),
       {$inc: {[SequenceCounterKeys.counter]: 0}},
-      {
-        upsert: true,
-      },
+      {upsert: true},
     );
+  }
+
+  /**
+   * Get the filter for getting the counter.
+   *
+   * @param {string} collectionName name of the sequenced collection
+   * @param {SupportedLanguages} lang language of the sequential document
+   * @return {Filter<Document>} filter for getting the counter
+   * @private
+   */
+  private static seqCounterFilter(collectionName: string, lang?: SupportedLanguages): Filter<DocumentBase> {
+    return {
+      [SequenceCounterKeys.collection]: collectionName,
+      ...(!!lang ? {[SequenceCounterKeys.lang]: lang} : {}),
+    };
   }
 
   /**

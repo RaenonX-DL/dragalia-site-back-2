@@ -9,6 +9,7 @@ import {ApiFailedResponse} from '../../../base/response/failed';
 import {AnalysisController} from '../../controller';
 import {DragonAnalysisPublishedResponse} from './response';
 
+
 export const handlePublishDragonAnalysis = async (
   {payload, mongoClient}: HandlerParams<DragonAnalysisPublishPayload>,
 ): Promise<ApiResponse> => {

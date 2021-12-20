@@ -9,6 +9,7 @@ import {CharaAnalysis, CharaAnalysisDocument} from './model/chara';
 import {CharaAnalysisSkillDocumentKey} from './model/charaSkill';
 import {UnitAnalysisDocumentKey} from './model/unitAnalysis';
 
+
 describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   let app: Application;
 

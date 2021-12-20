@@ -1,6 +1,7 @@
 import {ApiResponseCode, ApiResponseCodeUtil, BaseResponse} from '../api-def/api';
 import {HttpCode} from '../utils/httpCode';
 
+
 export type ApiResponseOptions = {
   httpCode?: HttpCode,
 }

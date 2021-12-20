@@ -133,23 +133,6 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
     expect(json.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
   });
 
-  it('returns nothing as available languages if ID is spread', async () => {
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 1, lang: SupportedLanguages.EN});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 2, lang: SupportedLanguages.CHT});
-    await QuestPostController.publishPost(app.mongoClient, {...payloadPost, seqId: 3, lang: SupportedLanguages.JP});
-
-    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query({...payloadGet, seqId: 2});
-    expect(result.statusCode).toBe(200);
-
-    const json: QuestPostGetResponse = result.json() as QuestPostGetResponse;
-    expect(json.code).toBe(ApiResponseCode.SUCCESS);
-    expect(json.success).toBe(true);
-    expect(json.isAltLang).toBe(false);
-    expect(json.seqId).toBe(2);
-    expect(json.lang).toBe(SupportedLanguages.CHT);
-    expect(json.otherLangs).toStrictEqual([]);
-  });
-
   it('fails for non-existing post', async () => {
     const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);
     expect(result.statusCode).toBe(404);

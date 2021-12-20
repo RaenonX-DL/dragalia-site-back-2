@@ -6,6 +6,7 @@ import {handleEditSequencedPost} from '../../base/handler/edit/sequenced';
 import {QuestPostController} from '../controller';
 import {QuestPostEditResponse} from './response';
 
+
 export const handleEditQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostEditPayload>,
 ): Promise<ApiResponse> => {

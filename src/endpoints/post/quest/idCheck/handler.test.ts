@@ -106,7 +106,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     expect(json.available).toBe(true);
   });
 
-  it('returns available for an unused language in the next unused ID', async () => {
+  it('returns unavailable for an unused language in the next unused ID', async () => {
     const payloadIdCheck: QuestPostIdCheckPayload = {
       uid: uidAdmin,
       seqId: newPostSeqId + 1,
@@ -119,7 +119,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     const json: QuestPostIdCheckResponse = result.json() as QuestPostIdCheckResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.available).toBe(true);
+    expect(json.available).toBe(false);
   });
 
   it('returns unavailable for a skipping ID', async () => {

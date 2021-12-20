@@ -8,11 +8,12 @@ import {SequentialDocumentKey} from '../model/seq';
 export type NextSeqIdOptions = {
   seqId?: number,
   increase?: boolean,
+  lang?: SupportedLanguages,
 }
 
 type FuncGetCollection = (mongoClient: MongoClient) => Collection;
 
-type FuncGetNextSeqId = (mongoClient: MongoClient, {seqId, increase}: NextSeqIdOptions) => Promise<number>;
+type FuncGetNextSeqId = (mongoClient: MongoClient, options: NextSeqIdOptions) => Promise<number>;
 
 /**
  * Sequence controller.
@@ -45,7 +46,7 @@ export abstract class SequencedController {
       return false;
     }
 
-    const nextSeqId = await getNextSeqId(mongoClient, {increase: false});
+    const nextSeqId = await getNextSeqId(mongoClient, {increase: false, lang});
     if (seqId > nextSeqId + 1) {
       return false;
     }

@@ -7,6 +7,7 @@ import {SequencedPostEditResponse} from '../../response/post/edit/sequenced';
 import {handleEditPost} from './base';
 import {FunctionConstructResponse, FunctionEditPost} from './types';
 
+
 export const handleEditSequencedPost = async <P extends SequencedPostEditPayload, R extends SequencedPostEditResponse>(
   mongoClient: MongoClient,
   payload: P,

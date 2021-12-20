@@ -8,6 +8,7 @@ import {ApiFailedResponse} from '../../base/response/failed';
 import {QuestPostController} from '../controller';
 import {QuestPostPublishResponse} from './response';
 
+
 export const handlePublishQuestPost = async (
   {payload, mongoClient}: HandlerParams<QuestPostPublishPayload>,
 ): Promise<ApiResponse> => {

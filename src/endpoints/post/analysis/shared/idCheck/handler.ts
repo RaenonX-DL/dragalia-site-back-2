@@ -5,6 +5,7 @@ import {handlePostIdCheck} from '../../../base/handler/idCheck/main';
 import {AnalysisController} from '../../controller';
 import {AnalysisIdCheckResponse} from './response';
 
+
 export const handleAnalysisIdCheck = async (
   {payload, mongoClient}: HandlerParams<AnalysisIdCheckPayload>,
 ): Promise<AnalysisIdCheckResponse> => {

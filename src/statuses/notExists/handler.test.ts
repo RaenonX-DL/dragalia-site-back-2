@@ -3,6 +3,7 @@
 import {ApiEndPoints, ApiResponseCode, BaseResponse} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 
+
 describe(`[Server] GET ${ApiEndPoints.NOT_EXISTS} - not-existed endpoint`, () => {
   let app: Application;
 

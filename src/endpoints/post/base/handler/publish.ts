@@ -6,6 +6,7 @@ import {SeqIdSkippingError} from '../../error';
 import {ApiFailedResponse} from '../response/failed';
 import {PostPublishResponse} from '../response/post/publish/common';
 
+
 type FunctionPublishPost<P extends RequestPayloadBase> = (mongoClient: MongoClient, payload: P) => Promise<number>;
 
 type FunctionConstructResponse<R extends PostPublishResponse> = (
