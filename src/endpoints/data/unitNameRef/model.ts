@@ -57,7 +57,10 @@ export class UnitNameRefEntry extends Document {
       // For getting the unit references
       collection.createIndex(MultiLingualDocumentKey.language);
       // For preventing duplicated entries
-      collection.createIndex(UnitNameRefEntryDocumentKey.name, {unique: true});
+      collection.createIndex(
+        [UnitNameRefEntryDocumentKey.name, MultiLingualDocumentKey.language],
+        {unique: true},
+      );
     }));
   }
 
