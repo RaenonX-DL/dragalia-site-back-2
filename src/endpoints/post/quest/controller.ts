@@ -114,10 +114,11 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
    * @param {SupportedLanguages} lang language code of the posts
+   * @param {number} limit result limit count
    * @return {Promise<PostListResult>} post listing result
    */
   static async getPostList(
-    mongoClient: MongoClient, lang: SupportedLanguages,
+    mongoClient: MongoClient, lang: SupportedLanguages, limit?: number,
   ): Promise<PostListResult<SequencedPostInfo>> {
     return QuestPostController.listPosts(
       QuestPost.getCollection(mongoClient),
@@ -132,6 +133,7 @@ export class QuestPostController extends PostController implements SequencedCont
           seqId: post[SequentialDocumentKey.sequenceId],
           title: post[PostDocumentKey.title],
         }),
+        limit,
       },
     );
   }
