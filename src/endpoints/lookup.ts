@@ -8,6 +8,7 @@ import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
 import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
+import {handleHomepageLanding} from './info/homepage/handler';
 import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
 import {handleUnitInfoLookup} from './info/lookup/main/handler';
 import {handleDataMeta} from './meta/data/handler';
@@ -63,6 +64,7 @@ type EndpointHandlers<P extends RequestPayloadBase = never> = {
 
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
+  [ApiEndPoints.HOME]: {GET: handleHomepageLanding},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},

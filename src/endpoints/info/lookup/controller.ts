@@ -39,7 +39,7 @@ export class UnitInfoLookupController {
    */
   static async getRecentlyModifiedAnalyses(
     mongoClient: MongoClient, lang: SupportedLanguages, maxCount = 9,
-  ): Promise<Array<UnitInfoLookupEntry>> {
+  ): Promise<UnitInfoLookupEntry[]> {
     return UnitInfoLookupController.getAnalysisInfo(mongoClient, lang, (cursor) => {
       return cursor
         // Sort by last modified epoch DESC
