@@ -30,7 +30,7 @@ export type QuestPositionDocument = {
   [QuestPositionDocumentKey.builds]: string,
   [QuestPositionDocumentKey.rotations]: string,
   [QuestPositionDocumentKey.tips]: string,
-}
+};
 
 export enum QuestPostDocumentKey {
   generalInfo = 'g',
@@ -44,7 +44,7 @@ export type QuestPostDocument = PostDocumentBase & {
   [QuestPostDocumentKey.video]: string,
   [QuestPostDocumentKey.positionInfo]: Array<QuestPositionDocument>,
   [QuestPostDocumentKey.addendum]: string,
-}
+};
 
 /**
  * Quest positional info data class.
@@ -109,7 +109,7 @@ export type QuestPostConstructParams = SequencedPostConstructParams & {
   video: string,
   positionInfo: Array<QuestPosition>,
   addendum: string,
-}
+};
 
 /**
  * A quest post document.
@@ -176,7 +176,7 @@ export class QuestPost extends SequencedPost {
   /**
    * Convert `payload` to a `QuestPost`.
    *
-   * @param {T} payload payload to be converted
+   * @param {QuestPostBody} payload payload to be converted
    * @return {QuestPost} converted quest post instance
    */
   static fromPayload<T extends QuestPostBody>(payload: T): QuestPost {

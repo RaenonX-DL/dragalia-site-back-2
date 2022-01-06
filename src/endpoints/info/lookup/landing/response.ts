@@ -8,7 +8,7 @@ import {ApiResponse} from '../../../../base/response';
 
 type ConstructOptions = {
   analyses: Array<UnitInfoLookupEntry>
-}
+};
 
 /**
  * API response class for getting the info to be used upon landing on analysis lookup.

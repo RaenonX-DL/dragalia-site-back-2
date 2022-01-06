@@ -26,7 +26,7 @@ export type MiscSectionDocument = {
   [DocumentBaseKey.id]?: never,
   [MiscSectionDocumentKey.title]: string,
   [MiscSectionDocumentKey.content]: string,
-}
+};
 
 export enum MiscPostDocumentKey {
   sections = 's',
@@ -34,7 +34,7 @@ export enum MiscPostDocumentKey {
 
 export type MiscPostDocument = PostDocumentBase & {
   [MiscPostDocumentKey.sections]: Array<MiscSectionDocument>,
-}
+};
 
 /**
  * Misc post section data class.
@@ -79,7 +79,7 @@ export class MiscSection extends Document {
 
 export type MiscPostConstructParams = SequencedPostConstructParams & {
   sections: Array<MiscSection>
-}
+};
 
 /**
  * A misc post document.
@@ -124,7 +124,7 @@ export class MiscPost extends SequencedPost {
   /**
    * Convert `payload` to a `MiscPost`.
    *
-   * @param {T} payload payload to be converted
+   * @param {MiscPostBody} payload payload to be converted
    * @return {QuestPost} converted misc post instance
    */
   static fromPayload<T extends MiscPostBody>(payload: T): MiscPost {

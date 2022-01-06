@@ -6,7 +6,7 @@ import {ApiResponse} from '../../../../../base/response';
  * API response class for a successful post listing.
  */
 export abstract class PostListResponse extends ApiResponse {
-  posts: Array<SequencedPostInfo>
+  posts: Array<SequencedPostInfo>;
 
   /**
    * Construct a successful post listing API response.

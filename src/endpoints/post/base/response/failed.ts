@@ -4,7 +4,7 @@ import {ApiResponse, ApiResponseOptions} from '../../../../base/response';
 
 type ApiFailedResponseOptions = ApiResponseOptions & {
   message?: string,
-}
+};
 
 /**
  * API response class for a failed API request.

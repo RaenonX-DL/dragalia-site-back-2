@@ -5,7 +5,7 @@ import {
 import {PostGetResponse, PostGetResponseParam} from '../../base/response/post/get';
 
 
-export type MiscGetResponse = PostGetResponseParam & MiscPostBody
+export type MiscGetResponse = PostGetResponseParam & MiscPostBody;
 
 /**
  * API response class for getting a misc post.

@@ -12,13 +12,13 @@ export type DragonAnalysisDocument = UnitAnalysisDocument & {
   [DragonAnalysisDocumentKey.ultimate]: string,
   [DragonAnalysisDocumentKey.notes]: string,
   [DragonAnalysisDocumentKey.suitableCharacters]: string,
-}
+};
 
 export type DragonAnalysisConstructParams = Omit<UnitAnalysisConstructParams, 'type'> & {
   ultimate: string,
   notes: string,
   suitableCharacters: string,
-}
+};
 
 /**
  * Dragon analysis data class.
@@ -47,7 +47,7 @@ export class DragonAnalysis extends UnitAnalysis {
   /**
    * Convert `payload` to a `DragonAnalysis`.
    *
-   * @param {T} payload payload to be converted
+   * @param {DragonAnalysisPayload} payload payload to be converted
    * @return {QuestPost} converted dragon analysis instance
    */
   static fromPayload<T extends DragonAnalysisPayload>(payload: T): DragonAnalysis {

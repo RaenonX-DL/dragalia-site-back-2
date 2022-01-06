@@ -28,13 +28,13 @@ type DatabaseInfo = {
   name: string,
   sizeOnDisk: number,
   empty: boolean,
-}
+};
 
 type DatabaseList = {
   databases: Array<DatabaseInfo>,
   totalSize: number,
   ok: number,
-}
+};
 
 export const clearServer = async (client: MongoClient, skipDatabaseNames?: Array<string>): Promise<void> => {
   const databases: DatabaseList = (await client.db().admin().listDatabases()) as unknown as DatabaseList;

@@ -2,7 +2,7 @@ import {UnitTierNoteEditPayload, UnitTierNoteSinglePayload, UnitTierNoteUpdatePa
 import {processPayloadBase} from './base';
 
 
-type PayloadHasUnitId = UnitTierNoteEditPayload | UnitTierNoteUpdatePayload
+type PayloadHasUnitId = UnitTierNoteEditPayload | UnitTierNoteUpdatePayload;
 
 const processPayloadHasUnitId = <P extends PayloadHasUnitId>(payload: P): P => {
   payload = processPayloadBase(payload);

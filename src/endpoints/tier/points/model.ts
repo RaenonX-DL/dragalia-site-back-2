@@ -25,7 +25,7 @@ export type KeyPointEntryDocument = DocumentBase & {
 export type KeyPointEntryConstructParams = DocumentConstructParams & {
   type: KeyPointEntryDocument[KeyPointEntryDocumentKey.type],
   description: KeyPointEntryDocument[KeyPointEntryDocumentKey.description],
-}
+};
 
 /**
  * Key point entry class.

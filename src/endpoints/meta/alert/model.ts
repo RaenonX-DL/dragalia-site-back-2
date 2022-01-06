@@ -22,12 +22,12 @@ export type AlertEntryDocument = MultiLingualDocumentBase & {
   [AlertEntryKey.message]: string,
   [AlertEntryKey.variant]: AlertVariant,
   [AlertEntryKey.priority]?: number,
-}
+};
 
 type AlertEntryConstructOptions = AlertEntryApi & {
   lang: SupportedLanguages,
   priority?: number,
-}
+};
 
 /**
  * Class of a site alert entry.

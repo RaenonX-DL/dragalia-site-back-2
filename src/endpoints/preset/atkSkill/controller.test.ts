@@ -2,7 +2,7 @@ import {ObjectId} from 'mongodb';
 
 import {Application, createApp} from '../../../app';
 import {AtkSkillPresetController} from './controller';
-import {AtkSkillPreset} from './get/model';
+import {AtkSkillPreset} from './model';
 
 
 describe('ATK skill input preset controller', () => {

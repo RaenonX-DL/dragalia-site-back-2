@@ -50,7 +50,7 @@ export type HandlerParams<T extends RequestPayloadBase = never> = {
   mongoClient: MongoClient,
   request: FastifyRequest,
   response: FastifyReply,
-}
+};
 
 type HandlerFunction<T extends RequestPayloadBase> = (
   params: HandlerParams<T>,
@@ -59,7 +59,7 @@ type HandlerFunction<T extends RequestPayloadBase> = (
 type EndpointHandlers<P extends RequestPayloadBase = never> = {
   GET?: HandlerFunction<P>,
   POST?: HandlerFunction<P>,
-}
+};
 
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},

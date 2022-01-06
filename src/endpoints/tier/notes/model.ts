@@ -30,13 +30,13 @@ export type TierNoteEntryDocument = {
   [TierNoteEntryDocumentKey.ranking]: Ranking,
   [TierNoteEntryDocumentKey.note]: { [lang in SupportedLanguages]?: string },
   [TierNoteEntryDocumentKey.isCompDependent]: boolean,
-}
+};
 
 export type TierNoteConstructParams = {
   ranking: Ranking,
   note: { [lang in SupportedLanguages]?: string },
   isCompDependent: boolean,
-}
+};
 
 /**
  * Tier note for a single dimension.
@@ -127,7 +127,7 @@ export type UnitTierNoteConstructParams = DocumentConstructParams & {
   points: Array<string>,
   tier: { [dim in DimensionKey]?: TierNote },
   lastUpdateEpoch: number,
-}
+};
 
 /**
  * Unit tier note data class.

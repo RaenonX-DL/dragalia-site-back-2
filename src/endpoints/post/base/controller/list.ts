@@ -33,7 +33,7 @@ export class PostListResult<E extends PostInfo> {
 export type PostControllerListOptions<E extends PostInfo, D extends Document> = {
   projection?: D,
   transformFunc: PostEntryTransformFunction<E>,
-}
+};
 
 export const defaultTransformFunction = (post: Document): PostInfo => ({
   lang: post[MultiLingualDocumentKey.language],

@@ -64,7 +64,7 @@ export class Application {
 type AppCreateOptions = {
   mongoUri?: string,
   logger?: boolean | FastifyLoggerOptions,
-}
+};
 
 export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Promise<Application> => {
   const app: FastifyInstance = fastify({

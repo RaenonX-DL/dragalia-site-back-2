@@ -4,7 +4,7 @@ import {HttpCode} from '../utils/httpCode';
 
 export type ApiResponseOptions = {
   httpCode?: HttpCode,
-}
+};
 
 /**
  * Base API response class.

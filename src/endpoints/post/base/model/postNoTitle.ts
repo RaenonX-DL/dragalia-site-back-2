@@ -11,7 +11,7 @@ import {getCurrentEpoch} from '../../../../utils/misc';
 export type PostDocumentBaseNoTitle =
   MultiLingualDocumentBase
   & EditableDocumentBase
-  & ViewCountableDocumentBase
+  & ViewCountableDocumentBase;
 
 export type PostConstructParamsNoTitle = DocumentConstructParams & {
   lang: SupportedLanguages,
@@ -20,7 +20,7 @@ export type PostConstructParamsNoTitle = DocumentConstructParams & {
   id?: ObjectId,
   editNotes?: Array<EditNote>,
   viewCount?: number,
-}
+};
 
 /**
  * Post data class without title.

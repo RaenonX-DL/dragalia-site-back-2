@@ -18,14 +18,14 @@ export type CharaAnalysisSkillDocument = {
   [CharaAnalysisSkillDocumentKey.info]: string,
   [CharaAnalysisSkillDocumentKey.rotations]: string,
   [CharaAnalysisSkillDocumentKey.tips]: string,
-}
+};
 
 export type CharaAnalysisSkillConstructParams = {
   name: string,
   info: string,
   rotations: string,
   tips: string,
-}
+};
 
 /**
  * Character analysis skill data class.

@@ -6,7 +6,7 @@ import {AlertController} from './alert/controller';
 import {GenericPageMetaResponse} from './general/response';
 
 
-type SharedResponseOptions = Omit<PageMetaResponse, 'params' | keyof BaseResponse>
+type SharedResponseOptions = Omit<PageMetaResponse, 'params' | keyof BaseResponse>;
 
 export const generateResponse = async <P extends PageMetaPayload, T extends GenericPageMetaResponse>(
   payload: P,

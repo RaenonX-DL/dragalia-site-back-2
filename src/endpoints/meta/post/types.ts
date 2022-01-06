@@ -7,6 +7,6 @@ export type ParamGetterOptions = {
   mongoClient: MongoClient,
   postIdentifier: number | string,
   lang: SupportedLanguages,
-}
+};
 
-export type ParamGetterFunction = (options: ParamGetterOptions) => Promise<PostMetaParams | null>
+export type ParamGetterFunction = (options: ParamGetterOptions) => Promise<PostMetaParams | null>;

@@ -2,7 +2,7 @@ import {MongoClient, ObjectId} from 'mongodb';
 
 import {InputDataPreset} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models';
-import {AtkSkillPreset, AtkSkillPresetDocumentKey} from './get/model';
+import {AtkSkillPreset, AtkSkillPresetDocumentKey} from './model';
 
 
 /**

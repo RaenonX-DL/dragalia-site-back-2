@@ -26,7 +26,7 @@ export type UnitNameRefEntryConstructParams = DocumentConstructParams & {
   lang: SupportedLanguages,
   name: string,
   unitId: number,
-}
+};
 
 /**
  * Unit name reference entry class.
