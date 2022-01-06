@@ -1,9 +1,9 @@
-import {GAPeriodicCountryUserData, GAPeriodicTotalUserData} from '../../../src/api-def/api';
+import {GAPeriodicCountryUserData, GAPeriodicLangUserData} from '../../../src/api-def/api';
 
 
-export const periodicTotalData: GAPeriodicTotalUserData = [
-  {user: 1006, date: '20220105'},
-  {user: 1007, date: '20220106'},
+export const periodicLangData: GAPeriodicLangUserData = [
+  {date: '20220103', user: {'English': 777, 'Chinese': 888}},
+  {date: '20220104', user: {'English': 666, 'Chinese': 999}},
 ];
 
 export const periodicCountryData: GAPeriodicCountryUserData = {

@@ -1,4 +1,4 @@
-import {periodicCountryData, periodicTotalData} from '../../../../test/data/thirdparty/ga';
+import {periodicCountryData, periodicLangData} from '../../../../test/data/thirdparty/ga';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -44,8 +44,8 @@ describe(`Homepage landing info endpoint`, () => {
   beforeEach(async () => {
     await app.reset();
 
-    jest.spyOn(periodicTotal, 'getPeriodicTotalUser')
-      .mockResolvedValue(periodicTotalData);
+    jest.spyOn(periodicTotal, 'getPeriodicLanguageUser')
+      .mockResolvedValue(periodicLangData);
     jest.spyOn(periodicCountry, 'getPeriodicCountryUser')
       .mockResolvedValue(periodicCountryData);
   });
@@ -69,10 +69,6 @@ describe(`Homepage landing info endpoint`, () => {
   });
 
   it('returns site usage stats', async () => {
-    for (let seqId = 1; seqId <= 7; seqId++) {
-      await QuestPostController.publishPost(app.mongoClient, {...payload, seqId});
-    }
-
     const result = await app.app.inject().get(ApiEndPoints.HOME).query({lang: SupportedLanguages.EN});
     expect(result.statusCode).toBe(200);
 
@@ -80,6 +76,6 @@ describe(`Homepage landing info endpoint`, () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.data.stats.user.perCountry).toStrictEqual(periodicCountryData);
-    expect(json.data.stats.user.period).toStrictEqual(periodicTotalData);
+    expect(json.data.stats.user.perLang).toStrictEqual(periodicLangData);
   });
 });

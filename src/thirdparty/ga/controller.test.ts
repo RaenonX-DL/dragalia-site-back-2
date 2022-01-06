@@ -1,4 +1,4 @@
-import {periodicCountryData, periodicTotalData} from '../../../test/data/thirdparty/ga';
+import {periodicCountryData, periodicLangData} from '../../../test/data/thirdparty/ga';
 import {Application, createApp} from '../../app';
 import {CACHE_LIFE_SECS} from '../../utils/cache/const';
 import {getGaData, resetGaData} from './controller';
@@ -16,8 +16,8 @@ describe('Google Analytics data cache', () => {
   });
 
   beforeEach(async () => {
-    fnFetchTotal = jest.spyOn(periodicTotal, 'getPeriodicTotalUser')
-      .mockResolvedValue(periodicTotalData);
+    fnFetchTotal = jest.spyOn(periodicTotal, 'getPeriodicLanguageUser')
+      .mockResolvedValue(periodicLangData);
     fnFetchCountry = jest.spyOn(periodicCountry, 'getPeriodicCountryUser')
       .mockResolvedValue(periodicCountryData);
   });
