@@ -7,9 +7,10 @@ import {
   GACountryUserEntry,
 } from '../../../api-def/api';
 import {gaClient, property} from '../client';
+import {otherText} from './const';
 
 
-export const getPeriodicCountryUser = async (): Promise<GAPeriodicCountryUserData> => {
+export const getPeriodicCountryUser = async (countryLimit: number): Promise<GAPeriodicCountryUserData> => {
   const [response] = await gaClient.runReport({
     property,
     dateRanges: Object.entries(GAPeriod).map(([name, length]) => ({
@@ -35,26 +36,46 @@ export const getPeriodicCountryUser = async (): Promise<GAPeriodicCountryUserDat
     },
   };
 
-  // Fill entries by country
-  response.rows?.forEach((row) => {
-    Object.entries(GAPeriod).forEach(([name]) => {
-      if (!row.dimensionValues?.some((value) => value.value === name) || !row.metricValues) {
+  let entry: GACountryUserEntry | undefined;
+  Object.entries(GAPeriod).forEach(([name]) => {
+    const periodName = name as GAPeriodKey;
+
+    response.rows?.forEach((row) => {
+      if (!row.dimensionValues?.some((value) => value.value === periodName) || !row.metricValues) {
         return;
       }
 
-      const countryName = row.dimensionValues?.find((value) => value.value !== name);
+      const countryName = row.dimensionValues?.find((value) => value.value !== periodName);
 
       if (!countryName || !countryName.value) {
         return;
       }
 
-      const entry: GACountryUserEntry = {
-        country: countryName.value,
-        user: Number(row.metricValues[0].value),
-      };
+      const user = Number(row.metricValues[0].value);
 
-      result[name as GAPeriodKey].countries.push(entry);
+      if (!entry) {
+        entry = {country: countryName.value, user};
+      }
+
+      if (result[periodName].countries.length >= countryLimit) {
+        // Country count is over the limit, aggregate all data as others
+        if (entry.country === otherText) {
+          entry.user += user;
+        } else {
+          entry = {country: otherText, user};
+        }
+      } else {
+        // Country count is less than the limit, directly add it
+        result[periodName].countries.push(entry);
+        entry = undefined;
+      }
     });
+
+    // Push the entry of the "others" if used
+    if (entry?.country === otherText) {
+      result[periodName].countries.push(entry);
+      entry = undefined;
+    }
   });
 
   // Fill data of dimensional total

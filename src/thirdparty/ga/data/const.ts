@@ -1,1 +1,1 @@
-export const otherLangText = '(Other)';
+export const otherText = '(Other)';

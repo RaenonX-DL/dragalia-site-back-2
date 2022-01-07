@@ -34,7 +34,7 @@ export const getGaData = async (): Promise<GACache> => {
 
   cache = {
     data: {
-      perCountry: await getPeriodicCountryUser(),
+      perCountry: await getPeriodicCountryUser(6),
       perLang: await getPeriodicLanguageUser(30, 3),
     },
     lastFetchedEpoch: currentEpoch,

@@ -2,7 +2,7 @@ import {google} from '@google-analytics/data/build/protos/protos';
 
 import {GALangUserOfDate, GAPeriodicLangUserData} from '../../../api-def/api';
 import {gaClient, property} from '../client';
-import {otherLangText} from './const';
+import {otherText} from './const';
 
 
 export const getPeriodicLanguageUser = async (
@@ -60,8 +60,8 @@ export const getPeriodicLanguageUser = async (
     if (Object.keys(entry.user).length < topLangCount) {
       entry.user[lang] = count;
     } else {
-      appearedLang.add(otherLangText);
-      entry.user[otherLangText] = (entry.user[otherLangText] || 0) + count;
+      appearedLang.add(otherText);
+      entry.user[otherText] = (entry.user[otherText] || 0) + count;
     }
   });
 
