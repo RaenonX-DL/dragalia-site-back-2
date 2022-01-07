@@ -11,7 +11,10 @@ const generateNewCache = (): GACache => ({
       D7: {countries: [], total: 0},
       D30: {countries: [], total: 0},
     },
-    perLang: [],
+    perLang: {
+      data: [],
+      toppedLang: [],
+    },
   },
   lastFetchedEpoch: 0,
 });

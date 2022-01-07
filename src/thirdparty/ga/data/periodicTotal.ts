@@ -24,7 +24,11 @@ export const getPeriodicLanguageUser = async (
     metricAggregations: [google.analytics.data.v1beta.MetricAggregation.TOTAL],
   });
 
-  const result: GAPeriodicLangUserData = [];
+  const appearedLang = new Set<string>();
+  const result: GAPeriodicLangUserData = {
+    data: [],
+    toppedLang: [],
+  };
   let entry: GALangUserOfDate | undefined = undefined;
 
   response.rows?.forEach((row) => {
@@ -39,12 +43,14 @@ export const getPeriodicLanguageUser = async (
       return;
     }
 
+    appearedLang.add(lang);
+
     if (!entry) {
       // Initial entry creation
       entry = {date, user: {}};
     } else if (date !== entry.date) {
       // On date changed
-      result.push(entry);
+      result.data.push(entry);
 
       entry = {date, user: {}};
     }
@@ -54,13 +60,16 @@ export const getPeriodicLanguageUser = async (
     if (Object.keys(entry.user).length < topLangCount) {
       entry.user[lang] = count;
     } else {
+      appearedLang.add(otherLangText);
       entry.user[otherLangText] = (entry.user[otherLangText] || 0) + count;
     }
   });
 
   if (entry) {
-    result.push(entry);
+    result.data.push(entry);
   }
+
+  result.toppedLang = Array.from(appearedLang);
 
   return result;
 };
