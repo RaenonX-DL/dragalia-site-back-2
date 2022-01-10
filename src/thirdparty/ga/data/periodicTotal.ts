@@ -1,4 +1,8 @@
 import {google} from '@google-analytics/data/build/protos/protos';
+import dotenv from 'dotenv';
+
+
+dotenv.config();
 
 import {GALangUserOfDate, GAPeriodicLangUserData} from '../../../api-def/api';
 import {gaClient, property} from '../client';
@@ -21,7 +25,6 @@ export const getPeriodicLanguageUser = async (
         },
       },
     ],
-    metricAggregations: [google.analytics.data.v1beta.MetricAggregation.TOTAL],
   });
 
   const appearedLang = new Set<string>();

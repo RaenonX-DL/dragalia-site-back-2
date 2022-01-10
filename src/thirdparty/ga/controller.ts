@@ -1,4 +1,5 @@
 import {isCacheExpired} from '../../utils/cache/func';
+import {getPeriodicActiveUser} from './data/periodicActive';
 import {getPeriodicCountryUser} from './data/periodicCountry';
 import {getPeriodicLanguageUser} from './data/periodicTotal';
 import {GACache} from './type';
@@ -14,6 +15,9 @@ const generateNewCache = (): GACache => ({
     perLang: {
       data: [],
       toppedLang: [],
+    },
+    active: {
+      data: [],
     },
   },
   lastFetchedEpoch: 0,
@@ -36,6 +40,7 @@ export const getGaData = async (): Promise<GACache> => {
     data: {
       perCountry: await getPeriodicCountryUser(6),
       perLang: await getPeriodicLanguageUser(30, 3),
+      active: await getPeriodicActiveUser(30),
     },
     lastFetchedEpoch: currentEpoch,
   };
