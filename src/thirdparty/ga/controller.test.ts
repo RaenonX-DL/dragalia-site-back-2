@@ -1,7 +1,8 @@
-import {periodicCountryData, periodicLangData} from '../../../test/data/thirdparty/ga';
+import {periodicActiveData, periodicCountryData, periodicLangData} from '../../../test/data/thirdparty/ga';
 import {Application, createApp} from '../../app';
 import {CACHE_LIFE_SECS} from '../../utils/cache/const';
 import {getGaData, resetGaData} from './controller';
+import * as periodicActive from './data/periodicActive';
 import * as periodicCountry from './data/periodicCountry';
 import * as periodicTotal from './data/periodicTotal';
 
@@ -10,6 +11,7 @@ describe('Google Analytics data cache', () => {
   let app: Application;
   let fnFetchTotal: jest.SpyInstance;
   let fnFetchCountry: jest.SpyInstance;
+  let fnFetchActive: jest.SpyInstance;
 
   beforeAll(async () => {
     app = await createApp();
@@ -20,6 +22,8 @@ describe('Google Analytics data cache', () => {
       .mockResolvedValue(periodicLangData);
     fnFetchCountry = jest.spyOn(periodicCountry, 'getPeriodicCountryUser')
       .mockResolvedValue(periodicCountryData);
+    fnFetchActive = jest.spyOn(periodicActive, 'getPeriodicActiveUser')
+      .mockResolvedValue(periodicActiveData);
   });
 
   afterEach(() => {
@@ -34,21 +38,25 @@ describe('Google Analytics data cache', () => {
     await getGaData();
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
+    expect(fnFetchActive).toHaveBeenCalledTimes(1);
   });
 
   it('does not re-fetch data twice', async () => {
     await getGaData();
     fnFetchTotal.mockClear();
     fnFetchCountry.mockClear();
+    fnFetchActive.mockClear();
     await getGaData();
     expect(fnFetchTotal).not.toHaveBeenCalled();
     expect(fnFetchCountry).not.toHaveBeenCalled();
+    expect(fnFetchActive).not.toHaveBeenCalled();
   });
 
   it('re-fetches after the cache expires', async () => {
     await getGaData();
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
+    expect(fnFetchActive).toHaveBeenCalledTimes(1);
 
     // Accelerate time
     const now = Date.now();
@@ -59,6 +67,7 @@ describe('Google Analytics data cache', () => {
     await getGaData();
     expect(fnFetchTotal).toHaveBeenCalledTimes(2);
     expect(fnFetchCountry).toHaveBeenCalledTimes(2);
+    expect(fnFetchActive).toHaveBeenCalledTimes(2);
 
     jest.restoreAllMocks();
   });

@@ -1,4 +1,4 @@
-import {periodicCountryData, periodicLangData} from '../../../../test/data/thirdparty/ga';
+import {periodicActiveData, periodicCountryData, periodicLangData} from '../../../../test/data/thirdparty/ga';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -6,6 +6,7 @@ import {
   SupportedLanguages, HomepageLandingResponse, PostType,
 } from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
+import * as periodicActive from '../../../thirdparty/ga/data/periodicActive';
 import * as periodicCountry from '../../../thirdparty/ga/data/periodicCountry';
 import * as periodicTotal from '../../../thirdparty/ga/data/periodicTotal';
 import {QuestPostController} from '../../post/quest/controller';
@@ -48,6 +49,8 @@ describe(`Homepage landing info endpoint`, () => {
       .mockResolvedValue(periodicLangData);
     jest.spyOn(periodicCountry, 'getPeriodicCountryUser')
       .mockResolvedValue(periodicCountryData);
+    jest.spyOn(periodicActive, 'getPeriodicActiveUser')
+      .mockResolvedValue(periodicActiveData);
   });
 
   afterAll(async () => {
