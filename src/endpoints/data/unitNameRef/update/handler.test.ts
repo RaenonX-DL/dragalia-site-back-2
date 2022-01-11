@@ -62,7 +62,12 @@ describe('Unit name reference update handler', () => {
     expect(json.success).toBe(false);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      expect((await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray()).length).toBe(2);
+      expect(
+        (await UnitNameRefEntry.getCollection(app.mongoClient)
+          .find({$or: [{n: 'Unit A'}, {n: 'Unit B'}]})
+          .toArray())
+          .length,
+      ).toBe(2);
     });
   });
 

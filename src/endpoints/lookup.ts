@@ -8,6 +8,7 @@ import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
 import {handleUnitNameRefUpdate} from './data/unitNameRef/update/handler';
+import {handleHomepageLanding} from './info/homepage/handler';
 import {handleUnitInfoLookupLanding} from './info/lookup/landing/handler';
 import {handleUnitInfoLookup} from './info/lookup/main/handler';
 import {handleDataMeta} from './meta/data/handler';
@@ -50,7 +51,7 @@ export type HandlerParams<T extends RequestPayloadBase = never> = {
   mongoClient: MongoClient,
   request: FastifyRequest,
   response: FastifyReply,
-}
+};
 
 type HandlerFunction<T extends RequestPayloadBase> = (
   params: HandlerParams<T>,
@@ -59,10 +60,11 @@ type HandlerFunction<T extends RequestPayloadBase> = (
 type EndpointHandlers<P extends RequestPayloadBase = never> = {
   GET?: HandlerFunction<P>,
   POST?: HandlerFunction<P>,
-}
+};
 
 export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.ROOT]: {GET: handleRoot},
+  [ApiEndPoints.HOME]: {GET: handleHomepageLanding},
   [ApiEndPoints.ERROR_TEST]: {GET: handleEmitError},
   [ApiEndPoints.PAGE_META_GENERAL]: {GET: handleGeneralMeta},
   [ApiEndPoints.PAGE_META_POST]: {GET: handlePostMeta},

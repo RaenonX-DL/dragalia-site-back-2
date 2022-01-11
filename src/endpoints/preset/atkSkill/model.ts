@@ -1,9 +1,9 @@
 import {Collection, MongoClient} from 'mongodb';
 
-import {InputDataPreset} from '../../../../api-def/api';
-import {DocumentBase} from '../../../../api-def/models';
-import {CollectionInfo} from '../../../../base/controller/info';
-import {Document, DocumentConstructParams} from '../../../../base/model/base';
+import {InputDataPreset} from '../../../api-def/api';
+import {DocumentBase} from '../../../api-def/models';
+import {CollectionInfo} from '../../../base/controller/info';
+import {Document, DocumentConstructParams} from '../../../base/model/base';
 
 
 const dbInfo: CollectionInfo = {
@@ -20,11 +20,10 @@ export type AtkSkillPresetDocument = DocumentBase & {
   [AtkSkillPresetDocumentKey.preset]: InputDataPreset,
   [AtkSkillPresetDocumentKey.lastUsed]: Date,
 };
-
 export type AtkSkillPresetConstructParams = DocumentConstructParams & {
   preset: InputDataPreset,
   lastUsed?: Date,
-}
+};
 
 /**
  * ATK skill preset data class.

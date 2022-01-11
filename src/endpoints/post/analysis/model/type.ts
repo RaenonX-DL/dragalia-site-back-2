@@ -2,4 +2,4 @@ import {CharaAnalysisDocument} from './chara';
 import {DragonAnalysisDocument} from './dragon';
 
 
-export type AnalysisDocument = CharaAnalysisDocument | DragonAnalysisDocument
+export type AnalysisDocument = CharaAnalysisDocument | DragonAnalysisDocument;

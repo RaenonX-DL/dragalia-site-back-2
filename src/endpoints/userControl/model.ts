@@ -5,7 +5,7 @@ import {CollectionInfo} from '../../base/controller/info';
 import {Document} from '../../base/model/base';
 
 
-type UserConstructOptions = UserDocument
+type UserConstructOptions = UserDocument;
 
 export const dbInfo: CollectionInfo = {
   dbName: AUTH_DB,

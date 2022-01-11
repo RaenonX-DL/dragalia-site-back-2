@@ -10,7 +10,7 @@ export type DataMetaHandlerOptions = {
   payload: DataPageMetaPayload,
   mongoClient: MongoClient,
   user: User | null,
-}
+};
 
 export type DataMetaHandler = (
   options: DataMetaHandlerOptions

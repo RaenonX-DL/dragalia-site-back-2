@@ -109,10 +109,11 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * @param {MongoClient} mongoClient mongo client to perform the listing
    * @param {SupportedLanguages} lang language code of the posts
+   * @param {number} limit result limit count
    * @return {Promise<PostListResult>} post listing result
    */
   static async getPostList(
-    mongoClient: MongoClient, lang: SupportedLanguages,
+    mongoClient: MongoClient, lang: SupportedLanguages, limit?: number,
   ): Promise<PostListResult<SequencedPostInfo>> {
     return MiscPostController.listPosts(
       MiscPost.getCollection(mongoClient),
@@ -127,6 +128,7 @@ export class MiscPostController extends PostController implements SequencedContr
           seqId: post[SequentialDocumentKey.sequenceId],
           title: post[PostDocumentKey.title],
         }),
+        limit,
       },
     );
   }

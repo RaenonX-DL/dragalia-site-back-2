@@ -8,7 +8,7 @@ import {NotImplementedError} from '../error';
 
 export type DocumentConstructParams = {
   id?: ObjectId,
-}
+};
 
 /**
  * Base mongodb document class.

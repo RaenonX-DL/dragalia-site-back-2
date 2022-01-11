@@ -25,7 +25,7 @@ export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
   [UnitAnalysisDocumentKey.passives]: string,
   [UnitAnalysisDocumentKey.normalAttacks]: string,
   [UnitAnalysisDocumentKey.videos]: string,
-}
+};
 
 export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
   type: UnitType,
@@ -35,7 +35,7 @@ export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
   passives: string,
   normalAttacks: string,
   videos: string,
-}
+};
 
 /**
  * Unit analysis base class.

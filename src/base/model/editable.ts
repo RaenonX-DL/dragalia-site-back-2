@@ -24,7 +24,7 @@ export enum EditNoteDocumentKey {
 export type EditNoteDocument = DocumentBase & {
   [EditNoteDocumentKey.timestampEpoch]: number,
   [EditNoteDocumentKey.note]: string,
-}
+};
 
 
 /**

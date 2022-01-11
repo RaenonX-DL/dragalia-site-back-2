@@ -2,7 +2,7 @@ import * as fetch from 'node-fetch';
 
 import {Application, createApp} from '../../../app';
 import {UnitNameRefController} from '../../../endpoints/data/unitNameRef/controller';
-import {CACHE_LIFE_SECS} from '../const';
+import {CACHE_LIFE_SECS} from '../../cache/const';
 import {resetCache} from './cache/main';
 import {getUnitIdByName} from './unitName2Id';
 

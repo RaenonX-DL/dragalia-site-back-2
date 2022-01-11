@@ -46,6 +46,7 @@ export abstract class PostController {
           [ViewCountableDocumentKey.viewCount]: 1,
         },
         sort: {[EditableDocumentKey.dateModifiedEpoch]: 'desc'},
+        limit: options.limit,
       })
       .toArray();
 
@@ -65,7 +66,7 @@ export abstract class PostController {
    * @param {SupportedLanguages} lang language of the post
    * @param {boolean} incCount if to increase the view count of the post or not
    * @param {ResultConstructFunction} resultConstructFunction function to construct the result object
-   * @return {Promise<T>} result of getting a post
+   * @return {Promise<PostGetResult>} result of getting a post
    * @protected
    */
   protected static async getPost<D extends PostDocumentBaseNoTitle,
@@ -134,9 +135,9 @@ export abstract class PostController {
    * @param {Collection} collection mongo collection containing the post to be edited
    * @param {Document} filterCondition condition to select the post to edit
    * @param {string | undefined} lang language of the post to be edited
-   * @param {D} update document used to replace the old post
+   * @param {PostDocumentBaseNoTitle} update document used to replace the old post
    * @param {string} editNote post edit note
-   * @param {D} additionalFilter additional filtering conditions
+   * @param {PostDocumentBaseNoTitle} additionalFilter additional filtering conditions
    * @return {Promise<UpdateResult>} promise of the update result
    * @protected
    */

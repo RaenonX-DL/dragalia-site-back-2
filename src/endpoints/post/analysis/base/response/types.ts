@@ -5,4 +5,4 @@ import {
 } from '../../../../../api-def/api';
 
 
-export type AnalysisBodyWithInfo = PostBodyBase & (CharaAnalysisBody | DragonAnalysisBody)
+export type AnalysisBodyWithInfo = PostBodyBase & (CharaAnalysisBody | DragonAnalysisBody);

@@ -9,7 +9,7 @@ export type NextSeqIdOptions = {
   seqId?: number,
   increase?: boolean,
   lang?: SupportedLanguages,
-}
+};
 
 type FuncGetCollection = (mongoClient: MongoClient) => Collection;
 

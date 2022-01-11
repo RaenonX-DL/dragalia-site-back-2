@@ -67,6 +67,12 @@ rules:
     - error
     - count: 2
 
+  semi:
+    - off
+
+  "@typescript-eslint/semi":
+    - error
+
   space-in-parens:
     - error
     - never

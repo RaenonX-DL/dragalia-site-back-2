@@ -234,6 +234,16 @@ describe('Quest post controller', () => {
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
+  it('returns limited results', async () => {
+    for (let i = 0; i < 7; i++) {
+      await QuestPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await QuestPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 3);
+
+    expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5]);
+  });
+
   it('returns without any error if no posts available yet', async () => {
     const postListResult = await QuestPostController.getPostList(app.mongoClient, SupportedLanguages.CHT);
 

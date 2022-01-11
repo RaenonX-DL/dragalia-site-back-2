@@ -8,7 +8,7 @@ type MockUserOptions = {
   id?: ObjectId,
   isAdmin?: boolean,
   isAdsFree?: boolean,
-}
+};
 
 export const insertMockUser = async (mongoClient: MongoClient, options?: MockUserOptions): Promise<ObjectId> => {
   const user: UserDocument = {

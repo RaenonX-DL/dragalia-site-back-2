@@ -10,7 +10,7 @@ import {UserDocumentKey} from '../../../../api-def/models/user';
 import {Application, createApp} from '../../../../app';
 import {UserController} from '../../../userControl/controller';
 import {User} from '../../../userControl/model';
-import {AtkSkillPreset} from './model';
+import {AtkSkillPreset} from '../model';
 
 
 describe('Get ATK skill preset handler', () => {

@@ -1,0 +1,1 @@
+export const otherText = '(Other)';

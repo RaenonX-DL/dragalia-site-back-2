@@ -5,7 +5,7 @@ import {
 import {PostGetResponse, PostGetResponseParam} from '../../base/response/post/get';
 
 
-export type QuestGetResponse = PostGetResponseParam & QuestPostBody
+export type QuestGetResponse = PostGetResponseParam & QuestPostBody;
 
 /**
  * API response class for getting a quest post.

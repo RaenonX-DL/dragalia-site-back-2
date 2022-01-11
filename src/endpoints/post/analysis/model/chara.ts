@@ -13,13 +13,13 @@ export type CharaAnalysisDocument = UnitAnalysisDocument & {
   [CharaAnalysisDocumentKey.forceStrike]: string,
   [CharaAnalysisDocumentKey.skills]: Array<CharaAnalysisSkillDocument>,
   [CharaAnalysisDocumentKey.tipsBuilds]: string,
-}
+};
 
 export type CharaAnalysisConstructParams = Omit<UnitAnalysisConstructParams, 'type'> & {
   forceStrike: string,
   skills: Array<CharaAnalysisSkill>,
   tipsBuilds: string,
-}
+};
 
 /**
  * Character analysis data class.
@@ -48,7 +48,7 @@ export class CharaAnalysis extends UnitAnalysis {
   /**
    * Convert `payload` to a `CharaAnalysis`.
    *
-   * @param {T} payload payload to be converted
+   * @param {CharaAnalysisPayload} payload payload to be converted
    * @return {QuestPost} converted character analysis instance
    */
   static fromPayload<T extends CharaAnalysisPayload>(payload: T): CharaAnalysis {

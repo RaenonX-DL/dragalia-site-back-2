@@ -8,13 +8,13 @@ import {ApiResponse} from '../../../../base/response';
 
 type ConstructOptions = {
   analyses: UnitInfoLookupAnalyses
-}
+};
 
 /**
  * API response class for getting the info for analysis lookup.
  */
 export class UnitInfoLookupResponse extends ApiResponse {
-  analyses: UnitInfoLookupAnalyses
+  analyses: UnitInfoLookupAnalyses;
 
   /**
    * Construct an analysis lookup info API response.

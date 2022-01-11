@@ -27,7 +27,7 @@ enum SequenceCounterKeys {
 
 export type SequentialDocumentConstructParams = DocumentConstructParams & {
   seqId: number,
-}
+};
 
 /**
  * Sequential document class.

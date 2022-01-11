@@ -2,7 +2,7 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     /* Basic Options */
-    "target": "es2020",
+    "target": "esnext",
     "module": "commonjs",
     "esModuleInterop": true,
     /* Compiling Options */
@@ -31,6 +31,6 @@
     "src/"
   ],
   "exclude": [
-    "./**/*.test.ts",
+    "./**/*.test.ts"
   ]
 }
