@@ -5,8 +5,7 @@ let allowedOriginsEnv: string | undefined = process.env.CORS_ALLOWED_ORIGINS;
 
 if (!allowedOriginsEnv) {
   if (!process.env.CI) {
-    console.error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
-    process.exit(1);
+    throw new Error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
   } else {
     allowedOriginsEnv = '';
   }
