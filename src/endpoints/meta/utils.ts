@@ -1,6 +1,7 @@
 import {MongoClient} from 'mongodb';
 
 import {BaseResponse, PageMetaPayload, PageMetaResponse} from '../../api-def/api';
+import {UserController} from '../userControl/controller';
 import {User} from '../userControl/model';
 import {AlertController} from './alert/controller';
 import {GenericPageMetaResponse} from './general/response';
@@ -22,6 +23,8 @@ export const generateResponse = async <P extends PageMetaPayload, T extends Gene
       showAds: true,
       alerts,
     });
+  } else {
+    await UserController.recordLang(mongoClient, userData?.uid, payload.lang);
   }
 
   return generateResponseFn({

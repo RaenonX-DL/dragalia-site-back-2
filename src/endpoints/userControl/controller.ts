@@ -1,6 +1,7 @@
 import {MongoClient, ObjectId} from 'mongodb';
 
-import {DocumentBaseKey, UserDocument} from '../../api-def/models';
+import {SupportedLanguages} from '../../api-def/api';
+import {DocumentBaseKey, UserDocument, UserDocumentKey} from '../../api-def/models';
 import {UserNotExistsError} from './error';
 import {User} from './model';
 
@@ -71,5 +72,26 @@ export class UserController {
     }
 
     return userData?.isAdmin || false;
+  }
+
+  /**
+   * Record the language of the user `uid`.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string | ObjectId} uid user ID
+   * @param {SupportedLanguages} lang language the user is using
+   */
+  static async recordLang(mongoClient: MongoClient, uid: string | ObjectId, lang: SupportedLanguages): Promise<void> {
+    if (!uid) {
+      return;
+    }
+
+    await User.getCollection(mongoClient).updateOne(
+      {
+        // Ensure `uid` is converted to `ObjectId`
+        [DocumentBaseKey.id]: new ObjectId(uid),
+      },
+      {$set: {[UserDocumentKey.lang]: lang}},
+    );
   }
 }
