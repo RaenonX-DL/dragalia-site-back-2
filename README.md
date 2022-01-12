@@ -40,19 +40,20 @@ This one is using [fastify] (was [express.js][express]) while the previous one i
 
 ## Environment Variables
 
-|            Name             | Required/Optional | Description                                                                                                                                        |
-|:---------------------------:|:-----------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------|
-|   `CORS_ALLOWED_ORIGINS`    |     Required      | Allowed origins separated by comma (`,`). For example: `https://dl.raenonx.cc,http://localhost:3000`. This is allow to be empty if `CI` is `true`. |
-|         `MONGO_URL`         |     Required      | Connection string of MongoDB database.                                                                                                             |
-|   `GA_CREDENTIAL_BASE64`    |     Required      | Google Analytics Data API OAuth client JSON credential in base64 string.                                                                           |
-|        `MAIL_SENDER`        |     Required      | Email address for logging into a SMTP server for email service.                                                                                    |
-|       `MAIL_PASSWORD`       |     Required      | Password for logging into a SMTP server for email service.                                                                                         |
-|   `NEW_RELIC_LICENSE_KEY`   |     Optional      | New Relic license key for measuring the app performance.                                                                                           |
-| `NEXT_PUBLIC_RESOURCE_ROOT` |     Required      | Root URL of the exported resources. This should **not** end with a slash (`/`).                                                                    |
-|  `NEXT_PUBLIC_DEPOT_ROOT`   |     Required      | Root URL of the data depot. This should **not** end with a slash (`/`).                                                                            |
-|  `NEXT_PUBLIC_AUDIO_ROOT`   |     Required      | Root URL of the audio depot. This should **not** end with a slash (`/`).                                                                           |
-|            `CI`             |     Optional      | Set this to `true` for CI-specific behavior.                                                                                                       |
-|           `PORT`            |     Optional      | Port to run the app. Defaults to `8787`.                                                                                                           |
+|            Name             | Required/Optional | Description                                                                                                                                                       |
+|:---------------------------:|:-----------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   `CORS_ALLOWED_ORIGINS`    |     Required      | Allowed origins separated by comma (`,`). For example: `https://dl.raenonx.cc,http://localhost:3000`. This is allow to be empty if `CI` is `true`.                |
+|         `MONGO_URL`         |     Required      | Connection string of MongoDB database.                                                                                                                            |
+|   `GA_CREDENTIAL_BASE64`    |     Required      | Google Analytics Data API OAuth client JSON credential in base64 string.                                                                                          |
+|          `GA_DEV`           |     Optional      | Setting this to any truthy value will make any related queries return mock Google Analytics data instead of actually sending the request, reducing the API usage. |
+|        `MAIL_SENDER`        |     Required      | Email address for logging into a SMTP server for email service.                                                                                                   |
+|       `MAIL_PASSWORD`       |     Required      | Password for logging into a SMTP server for email service.                                                                                                        |
+|   `NEW_RELIC_LICENSE_KEY`   |     Optional      | New Relic license key for measuring the app performance.                                                                                                          |
+| `NEXT_PUBLIC_RESOURCE_ROOT` |     Required      | Root URL of the exported resources. This should **not** end with a slash (`/`).                                                                                   |
+|  `NEXT_PUBLIC_DEPOT_ROOT`   |     Required      | Root URL of the data depot. This should **not** end with a slash (`/`).                                                                                           |
+|  `NEXT_PUBLIC_AUDIO_ROOT`   |     Required      | Root URL of the audio depot. This should **not** end with a slash (`/`).                                                                                          |
+|            `CI`             |     Optional      | Set this to `true` for CI-specific behavior.                                                                                                                      |
+|           `PORT`            |     Optional      | Port to run the app. Defaults to `8787`.                                                                                                                          |
 
 ## Deployments
 

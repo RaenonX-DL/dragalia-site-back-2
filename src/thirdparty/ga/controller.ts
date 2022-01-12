@@ -1,3 +1,4 @@
+import {periodicActiveData, periodicCountryData, periodicLangData} from '../../../test/data/thirdparty/ga';
 import {isCacheExpired} from '../../utils/cache/func';
 import {getPeriodicActiveUser} from './data/periodicActive';
 import {getPeriodicCountryUser} from './data/periodicCountry';
@@ -34,6 +35,15 @@ export const getGaData = async (): Promise<GACache> => {
 
   if (!isCacheExpired(cache, currentEpoch)) {
     return cache;
+  } else if (process.env.GA_DEV) {
+    return {
+      data: {
+        perCountry: periodicCountryData,
+        perLang: periodicLangData,
+        active: periodicActiveData,
+      },
+      lastFetchedEpoch: currentEpoch,
+    };
   }
 
   cache = {
