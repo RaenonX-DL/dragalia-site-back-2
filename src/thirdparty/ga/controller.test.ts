@@ -71,4 +71,24 @@ describe('Google Analytics data cache', () => {
 
     jest.restoreAllMocks();
   });
+
+  it('does not re-fetch before the cache expires', async () => {
+    await getGaData();
+    expect(fnFetchTotal).toHaveBeenCalledTimes(1);
+    expect(fnFetchCountry).toHaveBeenCalledTimes(1);
+    expect(fnFetchActive).toHaveBeenCalledTimes(1);
+
+    // Accelerate time
+    const now = Date.now();
+    jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => now + CACHE_LIFE_SECS * 1000 / 2);
+
+    await getGaData();
+    expect(fnFetchTotal).toHaveBeenCalledTimes(1);
+    expect(fnFetchCountry).toHaveBeenCalledTimes(1);
+    expect(fnFetchActive).toHaveBeenCalledTimes(1);
+
+    jest.restoreAllMocks();
+  });
 });

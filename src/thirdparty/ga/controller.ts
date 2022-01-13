@@ -31,7 +31,7 @@ export const resetGaData = (): void => {
 };
 
 export const getGaData = async (): Promise<GACache> => {
-  const currentEpoch = Date.now();
+  const currentEpoch = Math.round(Date.now() / 1000);
 
   if (!isCacheExpired(cache, currentEpoch)) {
     return cache;
