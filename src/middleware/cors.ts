@@ -1,17 +1,12 @@
+import env from 'env-var';
 import {FastifyCorsOptions} from 'fastify-cors';
 
+import {isCi} from '../api-def/utils';
 
-let allowedOriginsEnv: string | undefined = process.env.CORS_ALLOWED_ORIGINS;
 
-if (!allowedOriginsEnv) {
-  if (!process.env.CI) {
-    throw new Error('Specify allowed CORS origins as `CORS_ALLOWED_ORIGINS` in env vars.');
-  } else {
-    allowedOriginsEnv = '';
-  }
-}
-
-const allowedOrigins = allowedOriginsEnv.split(',');
+const allowedOrigins = env.get('CORS_ALLOWED_ORIGINS')
+  .required(!isCi())
+  .asArray();
 
 console.info('Allowed Origins: ', allowedOrigins);
 
