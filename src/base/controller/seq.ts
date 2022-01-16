@@ -1,8 +1,9 @@
-import {Collection, MongoClient} from 'mongodb';
+import {Collection, Filter, MongoClient} from 'mongodb';
 
 import {SupportedLanguages} from '../../api-def/api';
-import {MultiLingualDocumentKey} from '../model/multiLang';
-import {SequentialDocumentKey} from '../model/seq';
+import {DocumentBase} from '../../api-def/models';
+import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../model/multiLang';
+import {SequentialDocumentBase, SequentialDocumentKey} from '../model/seq';
 
 
 export type NextSeqIdOptions = {
@@ -11,7 +12,7 @@ export type NextSeqIdOptions = {
   lang?: SupportedLanguages,
 };
 
-type FuncGetCollection = (mongoClient: MongoClient) => Collection;
+type FuncGetCollection<T extends DocumentBase> = (mongoClient: MongoClient) => Collection<T>;
 
 type FuncGetNextSeqId = (mongoClient: MongoClient, options: NextSeqIdOptions) => Promise<number>;
 
@@ -32,9 +33,9 @@ export abstract class SequencedController {
    * @param {number} seqId post sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the sequential ID
    */
-  static async isIdAvailable(
+  static async isIdAvailable<T extends SequentialDocumentBase & MultiLingualDocumentBase>(
     mongoClient: MongoClient,
-    getCollection: FuncGetCollection,
+    getCollection: FuncGetCollection<T>,
     getNextSeqId: FuncGetNextSeqId,
     lang: SupportedLanguages,
     seqId?: number,
@@ -51,16 +52,20 @@ export abstract class SequencedController {
       return false;
     }
 
+    const filter: Filter<T> = {
+      [SequentialDocumentKey.sequenceId]: seqId,
+      [MultiLingualDocumentKey.language]: lang,
+    } as Filter<T>;
+
     // Cannot directly pass in the collection because for some reason,
     // if `seqId` is negative and the function is early-terminated,
     // the mongo client will be used for getting the collection and
     // triggers session expired error.
     // This happens when calling `npm run test:ci-jest`,
     // but not when calling `npm run test` or using the IDE builtin `jest` testing config.
-    return !await getCollection(mongoClient)
-      .findOne({
-        [SequentialDocumentKey.sequenceId]: seqId,
-        [MultiLingualDocumentKey.language]: lang,
-      });
+    // ------------
+    // False-negative of the inspection
+    // noinspection JSVoidFunctionReturnValueUsed
+    return !await getCollection(mongoClient).findOne(filter);
   }
 }

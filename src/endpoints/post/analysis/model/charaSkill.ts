@@ -2,6 +2,7 @@ import {Collection, MongoClient} from 'mongodb';
 
 import {DocumentBaseKey} from '../../../../api-def/models';
 import {Document} from '../../../../base/model/base';
+import {getCollection} from '../../../../utils/mongodb';
 import {dbInfo} from './config';
 
 
@@ -67,8 +68,8 @@ export class CharaAnalysisSkill extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<CharaAnalysisSkillDocument> {
+    return getCollection<CharaAnalysisSkillDocument>(mongoClient, dbInfo);
   }
 
   /**

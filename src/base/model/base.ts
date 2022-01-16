@@ -1,8 +1,6 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
 import {DocumentBase, DocumentBaseKey} from '../../api-def/models';
-import {getCollection, IndexInitFunction} from '../../utils/mongodb';
-import {CollectionInfo} from '../controller/info';
 import {NotImplementedError} from '../error';
 
 
@@ -43,22 +41,8 @@ export abstract class Document {
    */
   static getCollection(
     mongoClient: MongoClient, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Collection {
+  ): Collection<any> {
     throw new NotImplementedError('`getCollection()` must be overridden');
-  }
-
-  /**
-   * Get the collection storing this document and initialize the collection indices, if any.
-   *
-   * @param {MongoClient} mongoClient mongo client instance
-   * @param {CollectionInfo} dbInfo database info of the collection
-   * @param {IndexInitFunction} indexInitFunc index initializing function
-   * @return {Collection} collection of this document
-   */
-  protected static getCollectionWithInfo(
-    mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunc?: IndexInitFunction,
-  ): Collection {
-    return getCollection(mongoClient, dbInfo, indexInitFunc);
   }
 
   /**

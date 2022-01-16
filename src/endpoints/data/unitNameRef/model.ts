@@ -5,6 +5,7 @@ import {DocumentBase} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {getCollection} from '../../../utils/mongodb';
 
 
 const dbInfo: CollectionInfo = {
@@ -52,8 +53,8 @@ export class UnitNameRefEntry extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+  static getCollection(mongoClient: MongoClient): Collection<UnitNameRefEntryDocument> {
+    return getCollection<UnitNameRefEntryDocument>(mongoClient, dbInfo, ((collection) => {
       // For getting the unit references
       collection.createIndex(MultiLingualDocumentKey.language);
       // For preventing duplicated entries

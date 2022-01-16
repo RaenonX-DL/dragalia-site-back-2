@@ -4,6 +4,7 @@ import {KeyPointType, KeyPointEntry as KeyPointEntryApi, SupportedLanguages} fro
 import {DocumentBase, DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
+import {getCollection} from '../../../utils/mongodb';
 import {DescriptionTraversalError} from './error';
 
 
@@ -49,8 +50,8 @@ export class KeyPointEntry extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<KeyPointEntryDocument> {
+    return getCollection<KeyPointEntryDocument>(mongoClient, dbInfo);
   }
 
   /**

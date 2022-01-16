@@ -145,8 +145,8 @@ export class MiscPost extends SequencedPost {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<MiscPostDocument> {
+    return super.getCollectionWithInfo<MiscPostDocument>(mongoClient, dbInfo);
   }
 
   /**

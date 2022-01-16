@@ -1,6 +1,6 @@
 import {UnitType, CharaAnalysisPayload} from '../../../../api-def/api';
 import {CharaAnalysisSkill, CharaAnalysisSkillDocument} from './charaSkill';
-import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
+import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocumentBase} from './unitAnalysis';
 
 
 export enum CharaAnalysisDocumentKey {
@@ -9,7 +9,7 @@ export enum CharaAnalysisDocumentKey {
   tipsBuilds = 'tb',
 }
 
-export type CharaAnalysisDocument = UnitAnalysisDocument & {
+export type CharaAnalysisDocument = UnitAnalysisDocumentBase & {
   [CharaAnalysisDocumentKey.forceStrike]: string,
   [CharaAnalysisDocumentKey.skills]: Array<CharaAnalysisSkillDocument>,
   [CharaAnalysisDocumentKey.tipsBuilds]: string,

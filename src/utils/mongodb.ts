@@ -6,10 +6,10 @@ import {CollectionInfo} from '../base/controller/info';
 const dbPool: Record<string, Db> = {};
 const colIndicesInit: Set<CollectionInfo> = new Set<CollectionInfo>();
 
-export type IndexInitFunction = <T extends Document = Document>(collection: Collection<T>) => void;
-
-export const getCollection = <T extends Document = Document>(
-  mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunction?: IndexInitFunction,
+export const getCollection = <T extends Document>(
+  mongoClient: MongoClient,
+  dbInfo: CollectionInfo,
+  indexInitFunction?: (collection: Collection<T>) => void,
 ): Collection<T> => {
   if (!(dbInfo.dbName in dbPool)) {
     dbPool[dbInfo.dbName] = mongoClient.db(dbInfo.dbName);

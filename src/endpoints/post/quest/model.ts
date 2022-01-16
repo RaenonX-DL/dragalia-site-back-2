@@ -8,6 +8,7 @@ import {EditableDocumentKey, EditNote, EditNoteDocument} from '../../../base/mod
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {getCollection} from '../../../utils/mongodb';
 import {SequencedPost, SequencedPostConstructParams, PostDocumentBase, PostDocumentKey} from '../base/model';
 import {SeqIdMissingError} from '../error';
 
@@ -87,8 +88,8 @@ export class QuestPosition extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<QuestPositionDocument> {
+    return getCollection<QuestPositionDocument>(mongoClient, dbInfo);
   }
 
   /**
@@ -200,8 +201,8 @@ export class QuestPost extends SequencedPost {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<QuestPostDocument> {
+    return super.getCollectionWithInfo<QuestPostDocument>(mongoClient, dbInfo);
   }
 
   /**

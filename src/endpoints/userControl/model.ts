@@ -3,6 +3,7 @@ import {Collection, MongoClient, ObjectId} from 'mongodb';
 import {AUTH_DB, AUTH_USER_COLLECTION, UserDocument, UserDocumentKey, DocumentBaseKey} from '../../api-def/models';
 import {CollectionInfo} from '../../base/controller/info';
 import {Document} from '../../base/model/base';
+import {getCollection} from '../../utils/mongodb';
 
 
 type UserConstructOptions = UserDocument;
@@ -61,8 +62,8 @@ export class User extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<UserDocument> {
+    return getCollection<UserDocument>(mongoClient, dbInfo);
   }
 
   /**

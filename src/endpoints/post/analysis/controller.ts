@@ -234,7 +234,7 @@ export class AnalysisController extends PostController {
   static async getAnalysis(
     mongoClient: MongoClient, unitIdentifier: string | number, lang: SupportedLanguages, incCount = true,
   ): Promise<AnalysisGetResult | null> {
-    // Convert string identifier to unit ID, if possible
+    // Convert string identifier to unit ID, if needed
     if (typeof unitIdentifier === 'string') {
       const unitId = await getUnitIdByName(unitIdentifier, mongoClient);
 
@@ -245,9 +245,11 @@ export class AnalysisController extends PostController {
       unitIdentifier = unitId;
     }
 
+    const collection = UnitAnalysis.getCollection(mongoClient);
+
     // Tries to get the analysis using `unitIdentifier` (indexed)
-    const result = await super.getPost<AnalysisDocument, AnalysisGetResult>(
-      UnitAnalysis.getCollection(mongoClient),
+    const result = await super.getPost(
+      collection,
       {[UnitAnalysisDocumentKey.unitId]: unitIdentifier},
       lang,
       incCount,
@@ -262,8 +264,8 @@ export class AnalysisController extends PostController {
     }
 
     // Otherwise, use sequential ID to get the analysis instead
-    return super.getPost<AnalysisDocument, AnalysisGetResult>(
-      UnitAnalysis.getCollection(mongoClient),
+    return super.getPost(
+      collection,
       {[SequentialDocumentKey.sequenceId]: unitIdentifier},
       lang,
       incCount,

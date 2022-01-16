@@ -11,6 +11,7 @@ import {DocumentBase, DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
 import {getCurrentEpoch} from '../../../utils/misc';
+import {getCollection} from '../../../utils/mongodb';
 import {TierNoteTraversalError} from './error';
 
 
@@ -155,8 +156,8 @@ export class UnitTierNote extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo);
+  static getCollection(mongoClient: MongoClient): Collection<UnitTierNoteDocument> {
+    return getCollection<UnitTierNoteDocument>(mongoClient, dbInfo);
   }
 
   /**

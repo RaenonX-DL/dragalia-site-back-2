@@ -1,5 +1,5 @@
 import {UnitType, DragonAnalysisPayload} from '../../../../api-def/api';
-import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocument} from './unitAnalysis';
+import {UnitAnalysis, UnitAnalysisConstructParams, UnitAnalysisDocumentBase} from './unitAnalysis';
 
 
 export enum DragonAnalysisDocumentKey {
@@ -8,7 +8,7 @@ export enum DragonAnalysisDocumentKey {
   suitableCharacters = 'sc',
 }
 
-export type DragonAnalysisDocument = UnitAnalysisDocument & {
+export type DragonAnalysisDocument = UnitAnalysisDocumentBase & {
   [DragonAnalysisDocumentKey.ultimate]: string,
   [DragonAnalysisDocumentKey.notes]: string,
   [DragonAnalysisDocumentKey.suitableCharacters]: string,
