@@ -1,5 +1,6 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {SupportedLanguages} from '../../api-def/api/other/lang';
 import {AUTH_DB, AUTH_USER_COLLECTION, UserDocument, UserDocumentKey, DocumentBaseKey} from '../../api-def/models';
 import {CollectionInfo} from '../../base/controller/info';
 import {Document} from '../../base/model/base';
@@ -24,11 +25,10 @@ export class User extends Document {
   image: string;
   isAdmin: boolean;
 
-  createdAt: Date;
-  updatedAt: Date;
   adsFreeExpiry?: Date;
 
   isAdsFree: boolean;
+  lang?: SupportedLanguages;
 
   /**
    * Construct a user data.
@@ -45,11 +45,10 @@ export class User extends Document {
     this.image = options[UserDocumentKey.image];
     this.isAdmin = options[UserDocumentKey.isAdmin];
 
-    this.createdAt = options[UserDocumentKey.createdAt];
-    this.updatedAt = options[UserDocumentKey.updatedAt];
     this.adsFreeExpiry = options[UserDocumentKey.adsFreeExpiry];
 
     this.isAdsFree = !!this.adsFreeExpiry;
+    this.lang = options[UserDocumentKey.lang];
   }
 
   /**
@@ -76,9 +75,8 @@ export class User extends Document {
       [UserDocumentKey.email]: this.email,
       [UserDocumentKey.image]: this.image,
       [UserDocumentKey.isAdmin]: this.isAdmin,
-      [UserDocumentKey.createdAt]: this.createdAt,
-      [UserDocumentKey.updatedAt]: this.updatedAt,
       [UserDocumentKey.adsFreeExpiry]: this.adsFreeExpiry,
+      [UserDocumentKey.lang]: this.lang,
     };
   }
 }

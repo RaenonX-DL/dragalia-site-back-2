@@ -1,9 +1,13 @@
 import {ObjectId} from 'mongodb';
 
 import {insertMockUser} from '../../../test/data/user';
+import {SupportedLanguages} from '../../api-def/api/other/lang';
+import {DocumentBaseKey} from '../../api-def/models/base';
+import {UserDocument, UserDocumentKey} from '../../api-def/models/user';
 import {Application, createApp} from '../../app';
 import {UserController} from './controller';
 import {UserNotExistsError} from './error';
+import {User} from './model';
 
 
 describe(`[Controller] ${UserController.name}`, () => {
@@ -47,5 +51,27 @@ describe(`[Controller] ${UserController.name}`, () => {
     const userData = await UserController.getUserData(app.mongoClient, new ObjectId());
 
     expect(userData).toBeNull();
+  });
+
+  it('gets user data array', async () => {
+    const users: UserDocument[] = [...Array(10).keys()]
+      .map((num) => ({
+        [DocumentBaseKey.id]: new ObjectId(),
+        email: `${num}@example.com`,
+        name: num.toString(),
+        image: num.toString(),
+        isAdmin: false,
+        lang: num % 2 === 0 ? SupportedLanguages.CHT : SupportedLanguages.EN,
+      }));
+    await User.getCollection(app.mongoClient).insertMany(users);
+
+    const dataArray = await UserController.getUserDataOfLang(
+      app.mongoClient,
+      users.slice(0, 7).map((user) => user[DocumentBaseKey.id] as ObjectId),
+      SupportedLanguages.CHT,
+    );
+
+    const expected = users.slice(0, 7).filter((doc) => doc[UserDocumentKey.lang] === SupportedLanguages.CHT);
+    expect(dataArray).toStrictEqual(expected);
   });
 });

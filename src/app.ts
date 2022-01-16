@@ -81,7 +81,10 @@ export const createApp = async ({mongoUri, logger}: AppCreateOptions = {}): Prom
   };
   if (!mongoUri) {
     // Only wired tiger supports transaction
-    server = await MongoMemoryReplSet.create({replSet: {count: 1, storageEngine: 'wiredTiger'}});
+    server = await MongoMemoryReplSet.create({
+      replSet: {count: 1, storageEngine: 'wiredTiger'},
+      instanceOpts: [{port: 9090}]},
+    );
     mongoClient = await MongoClient.connect(server.getUri(), options);
   } else {
     mongoClient = await MongoClient.connect(mongoUri, options);
