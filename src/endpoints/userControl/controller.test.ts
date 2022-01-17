@@ -2,8 +2,7 @@ import {ObjectId} from 'mongodb';
 
 import {insertMockUser} from '../../../test/data/user';
 import {SupportedLanguages} from '../../api-def/api';
-import {DocumentBaseKey} from '../../api-def/models/base';
-import {UserDocument, UserDocumentKey} from '../../api-def/models/user';
+import {DocumentBaseKey, UserDocument, UserDocumentKey} from '../../api-def/models';
 import {Application, createApp} from '../../app';
 import {UserController} from './controller';
 import {UserNotExistsError} from './error';

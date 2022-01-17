@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {SupportedLanguages} from '../../../../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../../../../api-def/api';
 import {makeLink} from '../../base/link';
 import {MakeMailContentPublishedHtmlOpts} from './type';
 

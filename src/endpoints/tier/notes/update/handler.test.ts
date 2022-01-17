@@ -8,7 +8,7 @@ import {
   SupportedLanguages,
   UnitTierNoteUpdateResponse,
 } from '../../../../api-def/api';
-import {DocumentBaseKey} from '../../../../api-def/models/base';
+import {DocumentBaseKey} from '../../../../api-def/models';
 import {Application, createApp} from '../../../../app';
 import * as utils from '../../../../utils/misc';
 import {

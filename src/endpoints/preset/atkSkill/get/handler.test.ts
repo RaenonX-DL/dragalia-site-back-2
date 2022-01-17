@@ -6,7 +6,7 @@ import {
   FailedResponse,
   GetAtkSkillPresetResponse,
 } from '../../../../api-def/api';
-import {UserDocumentKey} from '../../../../api-def/models/user';
+import {UserDocumentKey} from '../../../../api-def/models';
 import {Application, createApp} from '../../../../app';
 import {UserController} from '../../../userControl/controller';
 import {User} from '../../../userControl/model';

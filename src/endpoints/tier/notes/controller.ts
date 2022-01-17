@@ -1,8 +1,11 @@
 import {MongoClient} from 'mongodb';
 
 import {DimensionKey, SupportedLanguages, UnitTierData, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
-import {DocumentBaseKey} from '../../../api-def/models/base';
+import {DocumentBaseKey} from '../../../api-def/models';
+import {UnitPath, makeUnitUrl} from '../../../api-def/paths';
+import {sendMailTierUpdated} from '../../../thirdparty/mail/send/tier/edited';
 import {getCurrentEpoch} from '../../../utils/misc';
+import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {
   TierNote,
   TierNoteEntryDocument,
@@ -76,6 +79,13 @@ export class TierNoteController {
     const original: UnitTierNoteDocument = await UnitTierNote.getCollection(mongoClient)
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId}) as UnitTierNoteDocument;
 
+    await sendMailTierUpdated({
+      mongoClient,
+      lang,
+      sitePath: makeUnitUrl(UnitPath.UNIT_TIER, {lang, id: unitId}),
+      title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
+    });
+
     if (!original) {
       // Original not available - create one and insert it
       await UnitTierNote.getCollection(mongoClient)
@@ -100,7 +110,7 @@ export class TierNoteController {
 
     // Get original tier note entries
     const originalTierNoteEntries = Object.entries(original[UnitTierNoteDocumentKey.tier])
-      // Filter out notes to be removed because it exist in `original` in `lang` but not `tierNote`
+      // Excludes the notes that exist in `original` but not in `tierNote` which is to be overridden
       .filter(([key, originalDoc]) => {
         const dimension = key as DimensionKey;
         const noteLanguages = Object.keys(originalDoc[TierNoteEntryDocumentKey.note]) as Array<SupportedLanguages>;
