@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {MailContent} from '../../type';
-import {generateMailContent} from '../base/make';
+import {MailContent} from '../../../type';
+import {generateMailContent} from '../../base/make';
 import {MailContentEditedComponent} from './html';
 import {makeMailContentEditedText} from './text';
 import {makeMailContentEditedTitle} from './title';

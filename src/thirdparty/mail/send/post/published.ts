@@ -1,8 +1,8 @@
 import {EmailSendResult, PostType} from '../../../../api-def/api';
 import {SubscriptionRecordController} from '../../data/subscription/controller';
 import {SendMailOpts} from '../../make/base/type';
-import {makeMailContentPublished} from '../../make/published/make';
-import {MakeMailContentPublishedOpts} from '../../make/published/type';
+import {makeMailContentPublished} from '../../make/post/published/make';
+import {MakeMailContentPublishedOpts} from '../../make/post/published/type';
 import {sendMail} from '../base';
 import {PostTypeToSubscriptionKey} from './const';
 

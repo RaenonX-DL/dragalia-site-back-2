@@ -1,4 +1,4 @@
-import {GenerateMailHtmlOpts, GenerateMailOpts, MakeMailContentUpdatedCommonOpts} from '../base/type';
+import {GenerateMailHtmlOpts, GenerateMailOpts, MakeMailContentUpdatedCommonOpts} from '../../base/type';
 
 
 export type MakeMailContentPublishedOpts = GenerateMailOpts & MakeMailContentUpdatedCommonOpts;

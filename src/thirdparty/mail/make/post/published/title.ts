@@ -1,4 +1,4 @@
-import {SupportedLanguages} from '../../../../api-def/api';
+import {SupportedLanguages} from '../../../../../api-def/api';
 import {MakeMailContentPublishedOpts} from './type';
 
 
