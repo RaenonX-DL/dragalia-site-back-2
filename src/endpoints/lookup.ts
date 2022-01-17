@@ -42,6 +42,7 @@ import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
+import {handlerSubscriptionUpdate} from './userControl/notifications/update/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -97,6 +98,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
+  [ApiEndPoints.USER_SUBSCRIPTIONS]: {POST: handlerSubscriptionUpdate},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(

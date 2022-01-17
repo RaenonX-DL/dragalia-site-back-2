@@ -1,10 +1,10 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
+import {SubscriptionKey} from '../../../../api-def/api';
 import {DocumentBase} from '../../../../api-def/models';
 import {CollectionInfo} from '../../../../base/controller/info';
 import {Document} from '../../../../base/model/base';
 import {getCollection} from '../../../../utils/mongodb';
-import {SubscriptionKey} from './key';
 
 
 const dbInfo: CollectionInfo = {

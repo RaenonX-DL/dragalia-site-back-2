@@ -1,5 +1,4 @@
-import {PostType} from '../../../../api-def/api';
-import {SubscriptionKeyConstName} from '../../data/subscription/key';
+import {PostType, SubscriptionKeyConstName} from '../../../../api-def/api';
 
 
 export const PostTypeToSubscriptionKey: {[type in PostType]: SubscriptionKeyConstName} = {

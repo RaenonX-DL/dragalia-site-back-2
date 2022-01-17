@@ -9,7 +9,7 @@ export const I18nData: I18nDataStruct = {
       [SupportedLanguages.EN]: 'Dragalia Lost Info Site by OM',
       [SupportedLanguages.JP]: 'ドラガリ攻略サイト by OM',
     },
-    notifications: {
+    manageSubscription: {
       [SupportedLanguages.CHT]: '點選連結以管理通知: ',
       [SupportedLanguages.EN]: 'Click the link to manage the email subscription settings: ',
       [SupportedLanguages.JP]: 'URLをクリックするとメール受信を管理する: ',

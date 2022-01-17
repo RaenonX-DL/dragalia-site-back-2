@@ -63,36 +63,34 @@ export class UnitNameRefController {
     lang: SupportedLanguages,
     refs: Array<UnitNameRefEntryApi>,
   ): Promise<void> {
-    await execTransaction(
-      mongoClient,
-      async (session) => {
-        const collection = UnitNameRefEntry.getCollection(mongoClient);
+    await execTransaction(mongoClient, async (session) => {
+      const collection = UnitNameRefEntry.getCollection(mongoClient);
 
-        await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
+      await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
 
-        if (!refs.length) {
-          // No references to add
-          return;
+      if (!refs.length) {
+        // No references to add
+        return;
+      }
+
+      try {
+        await collection.insertMany(
+          refs.map((entry) => ({
+            [UnitNameRefEntryDocumentKey.name]: entry.name,
+            [UnitNameRefEntryDocumentKey.unitId]: entry.unitId,
+            [MultiLingualDocumentKey.language]: lang,
+          } as UnitNameRefEntryDocument)),
+          {session},
+        );
+      } catch (e) {
+        if (e instanceof MongoError && e.code === 11000) {
+          // E11000 for duplicated key
+          throw new DuplicatedNamesError(e.errmsg);
+        } else {
+          throw e; // let other type of error bubble up
         }
-
-        try {
-          await collection.insertMany(
-            refs.map((entry) => ({
-              [UnitNameRefEntryDocumentKey.name]: entry.name,
-              [UnitNameRefEntryDocumentKey.unitId]: entry.unitId,
-              [MultiLingualDocumentKey.language]: lang,
-            } as UnitNameRefEntryDocument)),
-            {session},
-          );
-        } catch (e) {
-          if (e instanceof MongoError && e.code === 11000) {
-            // E11000 for duplicated key
-            throw new DuplicatedNamesError(e.errmsg);
-          } else {
-            throw e; // let other type of error bubble up
-          }
-        }
-      },
+      }
+    },
     );
   }
 }

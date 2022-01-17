@@ -1,9 +1,9 @@
 import {MongoClient, ObjectId} from 'mongodb';
 
-import {SupportedLanguages} from '../../../../api-def/api';
+import {SubscriptionUpdatePayload, SupportedLanguages, SubscriptionKey} from '../../../../api-def/api';
 import {UserDocumentKey} from '../../../../api-def/models';
 import {UserController} from '../../../../endpoints/userControl/controller';
-import {SubscriptionKey} from './key';
+import {execTransaction} from '../../../../utils/mongodb';
 import {SubscriptionRecord, SubscriptionRecordDocumentKey} from './model';
 
 
@@ -37,5 +37,37 @@ export class SubscriptionRecordController {
       lang,
     ))
       .map((doc) => doc[UserDocumentKey.email]);
+  }
+
+  /**
+   * Update the user subscriptions by payload.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SubscriptionUpdatePayload} payload user subscription update payload
+   * @return {Promise<void>}
+   */
+  static async updateSubscriptions(mongoClient: MongoClient, payload: SubscriptionUpdatePayload): Promise<void> {
+    const {uid, subKeysBase64} = payload;
+
+    const subKeys = JSON.parse(Buffer.from(subKeysBase64, 'base64url').toString() || '[]') as SubscriptionKey[];
+
+    await execTransaction(mongoClient, async (session) => {
+      const uidObjectId = new ObjectId(uid);
+      const collection = SubscriptionRecord.getCollection(mongoClient);
+
+      await collection.deleteMany({[SubscriptionRecordDocumentKey.uid]: new ObjectId(uid)}, {session});
+
+      if (!subKeys.length) {
+        return;
+      }
+
+      await collection.insertMany(
+        subKeys.map((key) => ({
+          [SubscriptionRecordDocumentKey.key]: key,
+          [SubscriptionRecordDocumentKey.uid]: uidObjectId,
+        })),
+        {session},
+      );
+    });
   }
 }
