@@ -23,6 +23,6 @@ export const handlePublishQuestPost = async (
     mongoClient,
     payload,
     QuestPostController.publishPost,
-    (seqId) => new QuestPostPublishResponse(seqId),
+    ({seqId, ...result}) => new QuestPostPublishResponse(seqId, result),
   );
 };

@@ -1,6 +1,6 @@
 import {Collection, Filter, MongoClient} from 'mongodb';
 
-import {SupportedLanguages} from '../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../api-def/api';
 import {DocumentBase} from '../../api-def/models';
 import {SeqIdSkippingError} from '../../endpoints/post/error';
 import {getCollection} from '../../utils/mongodb';

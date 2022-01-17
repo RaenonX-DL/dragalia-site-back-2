@@ -30,6 +30,6 @@ export const handlePublishCharacterAnalysis = async (
     mongoClient,
     payload,
     AnalysisController.publishCharaAnalysis,
-    (unitId) => new CharaAnalysisPublishedResponse(unitId),
+    ({unitId, ...result}) => new CharaAnalysisPublishedResponse(unitId, result),
   );
 };

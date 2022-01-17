@@ -1,4 +1,4 @@
-import {PostType} from '../../../../api-def/api/post/types';
+import {PostType} from '../../../../api-def/api';
 import {SubscriptionKeyConstName} from '../../data/subscription/key';
 
 

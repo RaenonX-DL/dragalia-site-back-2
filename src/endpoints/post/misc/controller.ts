@@ -1,18 +1,20 @@
 import {MongoClient} from 'mongodb';
 
 import {
+  EmailSendResult,
   MiscPostEditPayload,
   MiscPostPublishPayload,
+  PostType,
   SequencedPostInfo,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
-import {UpdateResult} from '../../../base/enum/updateResult';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {PostGetResult} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
+import {SequencedEditResult, SequencedPublishResult} from '../base/type';
 import {MiscGetResponse} from './get/response';
 import {dbInfo, MiscPost, MiscPostDocument, MiscPostDocumentKey, MiscSectionDocumentKey} from './model';
 
@@ -68,9 +70,11 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostPublishPayload} payload payload for creating a misc post
-   * @return {Promise<number>} post sequential ID
+   * @return {Promise<SequencedPublishResult>} post publish result
    */
-  static async publishPost(mongoClient: MongoClient, payload: MiscPostPublishPayload): Promise<number> {
+  static async publishPost(
+    mongoClient: MongoClient, payload: MiscPostPublishPayload,
+  ): Promise<SequencedPublishResult> {
     const {seqId, lang} = payload;
 
     const post: MiscPost = MiscPost.fromPayload({
@@ -78,9 +82,12 @@ export class MiscPostController extends PostController implements SequencedContr
       seqId: await MiscPostController.getNextSeqId(mongoClient, {seqId, lang}),
     });
 
-    await MiscPost.getCollection(mongoClient).insertOne(post.toObject());
+    const [emailResult] = await Promise.all([
+      SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.MISC, post.seqId),
+      MiscPost.getCollection(mongoClient).insertOne(post.toObject()),
+    ]);
 
-    return post.seqId;
+    return {seqId: post.seqId, emailResult};
   }
 
   /**
@@ -88,20 +95,38 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {MiscPostEditPayload} editPayload payload to edit a misc post
-   * @return {Promise<UpdateResult>} result of editing a misc post
+   * @return {Promise<SequencedEditResult>} result of editing a misc post
    */
-  static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<UpdateResult> {
+  static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<SequencedEditResult> {
+    const {lang, editNote} = editPayload;
+
     const post: MiscPost = MiscPost.fromPayload(editPayload);
 
-    return await MiscPostController.editPost(
+    const updated = await MiscPostController.editPost(
       MiscPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
-      editPayload.lang,
+      lang,
       post.toObject(),
       editPayload.editNote,
     );
+
+    let emailResult: EmailSendResult = {
+      accepted: [],
+      rejected: [],
+    };
+    if (updated === 'UPDATED') {
+      emailResult = await SequencedController.sendPostEditedEmail(
+        mongoClient, lang, PostType.MISC, post.seqId, editNote,
+      );
+    }
+
+    return {
+      seqId: post.seqId,
+      updated,
+      emailResult,
+    };
   }
 
   /**

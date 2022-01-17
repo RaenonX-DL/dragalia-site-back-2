@@ -1,25 +1,30 @@
 import {MongoClient, MongoError} from 'mongodb';
 
-import {ApiResponseCode, RequestPayloadBase} from '../../../../api-def/api';
+import {ApiResponseCode, PostPublishResult, RequestPayloadBase} from '../../../../api-def/api';
 import {UnitNotExistsError, UnitTypeMismatchError} from '../../analysis/error';
 import {SeqIdSkippingError} from '../../error';
 import {ApiFailedResponse} from '../response/failed';
 import {PostPublishResponse} from '../response/post/publish/common';
 
 
-type FunctionPublishPost<P extends RequestPayloadBase> = (mongoClient: MongoClient, payload: P) => Promise<number>;
+type FunctionPublishPost<P extends RequestPayloadBase, T extends PostPublishResult> = (
+  mongoClient: MongoClient, payload: P
+) => Promise<T>;
 
-type FunctionConstructResponse<R extends PostPublishResponse> = (
-  seqId: number,
+type FunctionConstructResponse<R extends PostPublishResponse, T extends PostPublishResult> = (
+  result: T,
 ) => R;
 
-export const handlePublishPost = async <P extends RequestPayloadBase, R extends PostPublishResponse>(
+export const handlePublishPost = async <
+  P extends RequestPayloadBase,
+  R extends PostPublishResponse,
+  T extends PostPublishResult
+>(
   mongoClient: MongoClient,
   payload: P,
-  fnPublishPost: FunctionPublishPost<P>,
-  fnConstructResponse: FunctionConstructResponse<R>,
+  fnPublishPost: FunctionPublishPost<P, T>,
+  fnConstructResponse: FunctionConstructResponse<R, T>,
 ): Promise<R | ApiFailedResponse> => {
-  // Publish the post
   let newSeqId;
   try {
     newSeqId = await fnPublishPost(mongoClient, payload);

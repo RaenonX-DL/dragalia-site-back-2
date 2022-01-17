@@ -27,8 +27,6 @@ describe('Set ATK skill preset handler', () => {
       [UserDocumentKey.email]: 'email',
       [UserDocumentKey.image]: 'image',
       [UserDocumentKey.isAdmin]: false,
-      [UserDocumentKey.createdAt]: new Date(),
-      [UserDocumentKey.updatedAt]: new Date(),
     }));
   };
 

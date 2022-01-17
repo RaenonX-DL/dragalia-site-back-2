@@ -16,6 +16,6 @@ export const handleEditQuestPost = async (
     mongoClient,
     payload,
     QuestPostController.editQuestPost,
-    ({seqId}) => new QuestPostEditResponse(seqId),
+    ({seqId}, result) => new QuestPostEditResponse(seqId, result),
   );
 };

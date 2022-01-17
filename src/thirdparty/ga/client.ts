@@ -8,7 +8,6 @@ const propertyId = '250199955';
 export const property = `properties/${propertyId}`;
 
 const gaCredential = env.get('GA_CREDENTIAL_BASE64')
-  .default('{}')
   .required(isProduction())
   .convertFromBase64()
   .asString();
@@ -22,5 +21,5 @@ const gaCredential = env.get('GA_CREDENTIAL_BASE64')
  * @type {BetaAnalyticsDataClient} Google Analytics data client
  */
 export const gaClient = new BetaAnalyticsDataClient({
-  credentials: JSON.parse(gaCredential),
+  credentials: JSON.parse(gaCredential || '{}'),
 });

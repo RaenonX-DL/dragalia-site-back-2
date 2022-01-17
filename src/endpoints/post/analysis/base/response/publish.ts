@@ -1,4 +1,4 @@
-import {AnalysisPublishResponse as AnalysisPublishResponseApi} from '../../../../../api-def/api';
+import {AnalysisPublishResponse as AnalysisPublishResponseApi, PostPublishResult} from '../../../../../api-def/api';
 import {PostPublishResponse} from '../../../base/response/post/publish/common';
 
 /**
@@ -11,9 +11,10 @@ export abstract class AnalysisPublishResponse extends PostPublishResponse {
    * Construct an analysis publishing API response.
    *
    * @param {number} unitId unit ID of the published analysis
+   * @param {PostPublishResult} result analysis publishing result
    */
-  protected constructor(unitId: number) {
-    super();
+  protected constructor(unitId: number, result: PostPublishResult) {
+    super(result);
 
     this.unitId = unitId;
   }

@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-import {DataPageMetaPayload} from '../../../api-def/api/meta/data/payload';
+import {DataPageMetaPayload} from '../../../api-def/api';
 import {ApiFailedResponse} from '../../post/base/response/failed';
 import {User} from '../../userControl/model';
 import {DataPageMetaResponse} from './response';

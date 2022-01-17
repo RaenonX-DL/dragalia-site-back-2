@@ -19,6 +19,10 @@ export type GenerateMailContentOpts<T> = T & {
   getHtml: (opts: GenerateMailHtmlOpts<T>) => React.ReactNode,
 };
 
+export type MakeMailContentUpdatedCommonOpts = {
+  sitePath: string,
+};
+
 export type SendMailOpts = {
   mongoClient: MongoClient,
 };

@@ -6,17 +6,23 @@ import {
   CharaAnalysisPublishPayload,
   DragonAnalysisEditPayload,
   DragonAnalysisPublishPayload,
+  EmailSendResult,
   PostBodyBase,
+  PostType,
   SupportedLanguages,
   UnitType,
 } from '../../../api-def/api';
+import {PostPath, makePostUrl} from '../../../api-def/paths';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
+import {sendMailPostEdited} from '../../../thirdparty/mail/send/post/edited';
+import {sendMailPostPublished} from '../../../thirdparty/mail/send/post/published';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {getUnitIdByName} from '../../../utils/resources/loader/unitName2Id';
 import {PostGetResult} from '../base/controller/get';
 import {PostController} from '../base/controller/main';
+import {PostEditResultCommon} from '../base/type';
 import {AnalysisBodyWithInfo} from './base/response/types';
 import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {
@@ -32,6 +38,7 @@ import {
   UnitAnalysisDocumentKey,
 } from './model';
 import {AnalysisDocument} from './model/type';
+import {AnalysisPublishResult} from './type';
 
 
 /**
@@ -129,18 +136,23 @@ export class AnalysisController extends PostController {
    * @param {CharaAnalysisPublishPayload} payload payload for creating a character analysis
    * @throws UnitNotExistsError if the unit does not exist using the unit ID in `payload`
    * @throws UnitTypeMismatchError if the unit type is not character
-   * @return {Promise<number>} post unit ID
+   * @return {Promise<AnalysisPublishResult>} post publishing result
    */
   static async publishCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisPublishPayload,
-  ): Promise<number> {
-    await AnalysisController.checkUnitValid(payload.unitId, UnitType.CHARACTER);
+  ): Promise<AnalysisPublishResult> {
+    const {lang, unitId} = payload;
+
+    await AnalysisController.checkUnitValid(unitId, UnitType.CHARACTER);
 
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
-    await CharaAnalysis.getCollection(mongoClient).insertOne(analysis.toObject());
+    const [emailResult] = await Promise.all([
+      AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
+      CharaAnalysis.getCollection(mongoClient).insertOne(analysis.toObject()),
+    ]);
 
-    return analysis.unitId;
+    return {unitId: analysis.unitId, emailResult};
   }
 
   /**
@@ -148,18 +160,23 @@ export class AnalysisController extends PostController {
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {DragonAnalysisPublishPayload} payload payload for creating a dragon analysis
-   * @return {Promise<number>} post unit ID
+   * @return {Promise<AnalysisPublishResult>} post publishing result
    */
   static async publishDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisPublishPayload,
-  ): Promise<number> {
-    await AnalysisController.checkUnitValid(payload.unitId, UnitType.DRAGON);
+  ): Promise<AnalysisPublishResult> {
+    const {lang, unitId} = payload;
+
+    await AnalysisController.checkUnitValid(unitId, UnitType.DRAGON);
 
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
-    await DragonAnalysis.getCollection(mongoClient).insertOne(analysis.toObject());
+    const [emailResult] = await Promise.all([
+      AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
+      DragonAnalysis.getCollection(mongoClient).insertOne(analysis.toObject()),
+    ]);
 
-    return analysis.unitId;
+    return {unitId: analysis.unitId, emailResult};
   }
 
   /**
@@ -171,10 +188,12 @@ export class AnalysisController extends PostController {
    */
   static async editCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisEditPayload,
-  ): Promise<UpdateResult> {
+  ): Promise<PostEditResultCommon> {
+    const {lang, unitId, editNote} = payload;
+
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
-    return await AnalysisController.editPost(
+    const updated = await AnalysisController.editPost(
       CharaAnalysis.getCollection(mongoClient),
       {
         [UnitAnalysisDocumentKey.unitId]: payload.unitId,
@@ -183,6 +202,13 @@ export class AnalysisController extends PostController {
       analysis.toObject(),
       payload.editNote,
     );
+
+    return {
+      updated,
+      emailResult: await AnalysisController.sendAnalysisEditedEmail(
+        mongoClient, lang, unitId, updated, editNote,
+      ),
+    };
   }
 
   /**
@@ -194,10 +220,12 @@ export class AnalysisController extends PostController {
    */
   static async editDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisEditPayload,
-  ): Promise<UpdateResult> {
+  ): Promise<PostEditResultCommon> {
+    const {lang, unitId, editNote} = payload;
+
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
-    return await AnalysisController.editPost(
+    const updated = await AnalysisController.editPost(
       DragonAnalysis.getCollection(mongoClient),
       {
         [UnitAnalysisDocumentKey.unitId]: payload.unitId,
@@ -206,6 +234,72 @@ export class AnalysisController extends PostController {
       analysis.toObject(),
       payload.editNote,
     );
+
+    return {
+      updated,
+      emailResult: await AnalysisController.sendAnalysisEditedEmail(
+        mongoClient, lang, unitId, updated, editNote,
+      ),
+    };
+  }
+
+  /**
+   * Sends an analysis published email.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the published analysis
+   * @param {number} unitId unit ID of the published analysis
+   * @return {Promise<EmailSendResult>} email send result
+   * @private
+   */
+  private static async sendAnalysisPublishedEmail(
+    mongoClient: MongoClient, lang: SupportedLanguages, unitId: number,
+  ): Promise<EmailSendResult> {
+    return sendMailPostPublished({
+      mongoClient,
+      lang,
+      postType: PostType.ANALYSIS,
+      sitePath: makePostUrl(PostPath.ANALYSIS, {lang, pid: unitId}),
+      title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
+    });
+  }
+
+  /**
+   * Sends an analysis edited email.
+   *
+   * Does not send any email if `updated` is not `UPDATED`.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the edited analysis
+   * @param {number} unitId unit ID of the edited analysis
+   * @param {UpdateResult} updated analysis update result
+   * @param {string} editNote analysis edit note
+   * @return {Promise<EmailSendResult>} email send result
+   * @private
+   */
+  private static async sendAnalysisEditedEmail(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    unitId: number,
+    updated: UpdateResult,
+    editNote: string,
+  ): Promise<EmailSendResult> {
+    if (updated !== 'UPDATED') {
+      return {
+        accepted: [],
+        rejected: [],
+      };
+    }
+
+    return sendMailPostEdited({
+      mongoClient,
+      lang,
+      postType: PostType.ANALYSIS,
+      postId: unitId,
+      sitePath: makePostUrl(PostPath.ANALYSIS, {lang, pid: unitId}),
+      title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
+      editNote: editNote,
+    });
   }
 
   /**

@@ -1,3 +1,4 @@
+import {PostEditResult} from '../../../../api-def/api';
 import {SequencedPostEditResponse} from '../../base/response/post/edit/sequenced';
 
 /**
@@ -5,11 +6,9 @@ import {SequencedPostEditResponse} from '../../base/response/post/edit/sequenced
  */
 export class QuestPostEditResponse extends SequencedPostEditResponse {
   /**
-   * Construct a quest post edit API response.
-   *
-   * @param {number} seqId sequential ID of the edited post
+   * @inheritDoc
    */
-  constructor(seqId: number) {
-    super({seqId});
+  constructor(seqId: number, result: PostEditResult) {
+    super({seqId, ...result});
   }
 }

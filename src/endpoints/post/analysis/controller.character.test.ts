@@ -3,6 +3,8 @@ import {MongoError} from 'mongodb';
 import {CharaAnalysisPublishPayload, SupportedLanguages, UnitType} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import * as sendEmailEdited from '../../../thirdparty/mail/send/post/edited';
+import * as sendEmailPublished from '../../../thirdparty/mail/send/post/published';
 import {AnalysisController} from './controller';
 import {UnitNotExistsError, UnitTypeMismatchError} from './error';
 import {CharaAnalysis, CharaAnalysisDocument} from './model/chara';
@@ -10,7 +12,7 @@ import {CharaAnalysisSkillDocumentKey} from './model/charaSkill';
 import {UnitAnalysisDocumentKey} from './model/unitAnalysis';
 
 
-describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
+describe('Character Analysis Controller', () => {
   let app: Application;
 
   const payloadChara: CharaAnalysisPublishPayload = {
@@ -46,7 +48,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   });
 
   it('publishes', async () => {
-    const unitId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+    const {unitId} = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
     expect(unitId).toBe(10950101);
 
@@ -79,7 +81,7 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   });
 
   it('publishes in an used ID but different language', async () => {
-    const unitId = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+    const {unitId} = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
     expect(unitId).toBe(payloadChara.unitId);
 
@@ -221,12 +223,12 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   it('edits', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const editResult = await AnalysisController.editCharaAnalysis(
+    const {updated} = await AnalysisController.editCharaAnalysis(
       app.mongoClient,
       {...payloadChara, videos: 'videoEdit', editNote: 'mod'},
     );
 
-    expect(editResult).toBe('UPDATED');
+    expect(updated).toBe('UPDATED');
 
     const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
@@ -243,12 +245,12 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   it('edits even if no changes were made', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const editResult = await AnalysisController.editCharaAnalysis(
+    const {updated} = await AnalysisController.editCharaAnalysis(
       app.mongoClient,
       {...payloadChara, editNote: 'mod'},
     );
 
-    expect(editResult).toBe('NO_CHANGE');
+    expect(updated).toBe('NO_CHANGE');
 
     const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
@@ -262,11 +264,34 @@ describe(`[Controller] ${AnalysisController.name} (Character)`, () => {
   it('returns `NOT_FOUND` if the post to be edited not found', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const editResult = await AnalysisController.editCharaAnalysis(
+    const {updated} = await AnalysisController.editCharaAnalysis(
       app.mongoClient,
       {...payloadChara, videos: 'videoEdit', unitId: 10950102, editNote: 'mod'},
     );
 
-    expect(editResult).toBe('NOT_FOUND');
+    expect(updated).toBe('NOT_FOUND');
+  });
+
+  it('sends an email on published', async () => {
+    const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
+      .mockResolvedValue({accepted: [], rejected: []});
+
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+
+    expect(fnSendPostPublishedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends an email on edited', async () => {
+    const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
+      .mockResolvedValue({accepted: [], rejected: []});
+
+    const {unitId} = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+
+    await AnalysisController.editCharaAnalysis(
+      app.mongoClient,
+      {...payloadChara, unitId, videos: 'videoEdit', editNote: 'mod'},
+    );
+
+    expect(fnSendPostEditedEmail).toHaveBeenCalledTimes(1);
   });
 });

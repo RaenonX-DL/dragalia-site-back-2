@@ -5,6 +5,8 @@ import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import * as sendEmailEdited from '../../../thirdparty/mail/send/post/edited';
+import * as sendEmailPublished from '../../../thirdparty/mail/send/post/published';
 import {SeqIdSkippingError} from '../error';
 import {MiscPostController} from './controller';
 import {MiscPost, MiscPostDocument} from './model';
@@ -81,9 +83,9 @@ describe('Misc post controller', () => {
   });
 
   it('publishes', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    expect(newSeqId).toBe(1);
+    expect(seqId).toBe(1);
 
     const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -104,11 +106,11 @@ describe('Misc post controller', () => {
   });
 
   it('publishes a new post in an used ID but different language', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    expect(newSeqId).toBe(1);
+    expect(seqId).toBe(1);
 
-    await MiscPostController.publishPost(app.mongoClient, {...payload2, seqId: newSeqId});
+    await MiscPostController.publishPost(app.mongoClient, {...payload2, seqId});
 
     const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
@@ -335,17 +337,17 @@ describe('Misc post controller', () => {
   });
 
   it('edits a post', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const editResult = await MiscPostController.editMiscPost(
+    const {updated} = await MiscPostController.editMiscPost(
       app.mongoClient,
-      {...payload, title: 'TT', seqId: newSeqId, editNote: 'mod'},
+      {...payload, title: 'TT', seqId, editNote: 'mod'},
     );
 
-    expect(editResult).toBe('UPDATED');
+    expect(updated).toBe('UPDATED');
 
     const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
-      [SequentialDocumentKey.sequenceId]: newSeqId,
+      [SequentialDocumentKey.sequenceId]: seqId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     const post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
@@ -357,31 +359,31 @@ describe('Misc post controller', () => {
   });
 
   it('edits a post even if no changes were made', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const editResult = await MiscPostController.editMiscPost(
+    const {updated} = await MiscPostController.editMiscPost(
       app.mongoClient,
-      {...payload, seqId: newSeqId, editNote: 'mod'},
+      {...payload, seqId, editNote: 'mod'},
     );
 
-    expect(editResult).toBe('NO_CHANGE');
+    expect(updated).toBe('NO_CHANGE');
   });
 
   it('returns `NOT_FOUND` if the post to be edited is not found', async () => {
     await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const editResult = await MiscPostController.editMiscPost(
+    const {updated} = await MiscPostController.editMiscPost(
       app.mongoClient,
       {...payload, title: 'TT', seqId: 8, editNote: 'mod'},
     );
 
-    expect(editResult).toBe('NOT_FOUND');
+    expect(updated).toBe('NOT_FOUND');
   });
 
   it('returns available for the next unused ID in the same language', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId + 1);
+    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, seqId + 1);
 
     expect(availability).toBe(true);
   });
@@ -395,37 +397,37 @@ describe('Misc post controller', () => {
   });
 
   it('returns available for an unused language in the same ID', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, SupportedLanguages.EN, newSeqId);
+    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, SupportedLanguages.EN, seqId);
 
     expect(availability).toBe(true);
   });
 
   it('returns unavailable for an unused language in the next unused ID', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
     const availability = await MiscPostController.isPostIdAvailable(
       app.mongoClient,
       SupportedLanguages.EN,
-      newSeqId + 1,
+      seqId + 1,
     );
 
     expect(availability).toBe(false);
   });
 
   it('returns unavailable for a skipping ID', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId + 2);
+    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, seqId + 2);
 
     expect(availability).toBe(false);
   });
 
   it('returns unavailable for an existing ID', async () => {
-    const newSeqId = await MiscPostController.publishPost(app.mongoClient, payload);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
-    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, newSeqId);
+    const availability = await MiscPostController.isPostIdAvailable(app.mongoClient, payload.lang, seqId);
 
     expect(availability).toBe(false);
   });
@@ -453,11 +455,11 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
 
-    const newPostId = await MiscPostController.publishPost(
+    const {seqId} = await MiscPostController.publishPost(
       app.mongoClient, {...payload, lang: SupportedLanguages.CHT},
     );
 
-    expect(newPostId).toBe(3);
+    expect(seqId).toBe(3);
   });
 
   it('publishes successfully (1C - 2C - 1E - 2E)', async () => {
@@ -465,11 +467,11 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
 
-    const newPostId = await MiscPostController.publishPost(
+    const {seqId} = await MiscPostController.publishPost(
       app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.EN},
     );
 
-    expect(newPostId).toBe(2);
+    expect(seqId).toBe(2);
   });
 
   it('publishes successfully (1C - 2C - 1E - E)', async () => {
@@ -477,10 +479,33 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 2, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.EN});
 
-    const newPostId = await MiscPostController.publishPost(
+    const {seqId} = await MiscPostController.publishPost(
       app.mongoClient, {...payload, lang: SupportedLanguages.EN},
     );
 
-    expect(newPostId).toBe(2);
+    expect(seqId).toBe(2);
+  });
+
+  it('sends an email on published', async () => {
+    const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
+      .mockResolvedValue({accepted: [], rejected: []});
+
+    await MiscPostController.publishPost(app.mongoClient, payload);
+
+    expect(fnSendPostPublishedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends an email on edited', async () => {
+    const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
+      .mockResolvedValue({accepted: [], rejected: []});
+
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
+
+    await MiscPostController.editMiscPost(
+      app.mongoClient,
+      {...payload, title: 'TT', seqId, editNote: 'mod'},
+    );
+
+    expect(fnSendPostEditedEmail).toHaveBeenCalledTimes(1);
   });
 });

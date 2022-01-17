@@ -90,7 +90,7 @@ describe(`Misc post getting EP`, () => {
   });
 
   test('timestamp of edited post is using epoch', async () => {
-    const seqId = await MiscPostController.publishPost(app.mongoClient, payloadPost);
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payloadPost);
     await MiscPostController.editMiscPost(app.mongoClient, {...payloadPost, seqId, title: 'TT', editNote: 'edit'});
 
     const result = await app.app.inject().get(ApiEndPoints.POST_MISC_GET).query(payloadGet);

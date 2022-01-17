@@ -1,18 +1,20 @@
 import {MongoClient} from 'mongodb';
 
 import {
-  SequencedPostInfo,
+  EmailSendResult,
+  PostType,
   QuestPostEditPayload,
   QuestPostPublishPayload,
+  SequencedPostInfo,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
-import {UpdateResult} from '../../../base/enum/updateResult';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {PostGetResult} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
 import {PostDocumentKey} from '../base/model';
+import {SequencedEditResult, SequencedPublishResult} from '../base/type';
 import {QuestGetResponse} from './get/response';
 import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
 
@@ -73,9 +75,11 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostPublishPayload} payload payload for creating a quest post
-   * @return {Promise<number>} post sequential ID
+   * @return {Promise<SequencedPublishResult>} post publish result
    */
-  static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
+  static async publishPost(
+    mongoClient: MongoClient, payload: QuestPostPublishPayload,
+  ): Promise<SequencedPublishResult> {
     const {seqId, lang} = payload;
 
     const post: QuestPost = QuestPost.fromPayload({
@@ -83,9 +87,12 @@ export class QuestPostController extends PostController implements SequencedCont
       seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId, lang}),
     });
 
-    await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
+    const [emailResult] = await Promise.all([
+      SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.QUEST, post.seqId),
+      QuestPost.getCollection(mongoClient).insertOne(post.toObject()),
+    ]);
 
-    return post.seqId;
+    return {seqId: post.seqId, emailResult};
   }
 
   /**
@@ -93,20 +100,40 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostEditPayload} editPayload payload to edit a quest post
-   * @return {Promise<UpdateResult>} result of editing a quest post
+   * @return {Promise<SequencedEditResult>} result of editing a quest post
    */
-  static async editQuestPost(mongoClient: MongoClient, editPayload: QuestPostEditPayload): Promise<UpdateResult> {
+  static async editQuestPost(
+    mongoClient: MongoClient, editPayload: QuestPostEditPayload,
+  ): Promise<SequencedEditResult> {
+    const {lang, editNote} = editPayload;
+
     const post: QuestPost = QuestPost.fromPayload(editPayload);
 
-    return await QuestPostController.editPost(
+    const updated = await QuestPostController.editPost(
       QuestPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
-      editPayload.lang,
+      lang,
       post.toObject(),
       editPayload.editNote,
     );
+
+    let emailResult: EmailSendResult = {
+      accepted: [],
+      rejected: [],
+    };
+    if (updated === 'UPDATED') {
+      emailResult = await SequencedController.sendPostEditedEmail(
+        mongoClient, lang, PostType.QUEST, post.seqId, editNote,
+      );
+    }
+
+    return {
+      seqId: post.seqId,
+      updated,
+      emailResult,
+    };
   }
 
   /**

@@ -1,4 +1,7 @@
-import {SequencedPostPublishResponse as SequencedPostPublishResponseApi} from '../../../../../../api-def/api';
+import {
+  PostPublishResult,
+  SequencedPostPublishResponse as SequencedPostPublishResponseApi,
+} from '../../../../../../api-def/api';
 import {PostPublishResponse} from './common';
 
 
@@ -12,9 +15,10 @@ export abstract class SequencedPostPublishResponse extends PostPublishResponse {
    * Construct a successful post publishing API response.
    *
    * @param {number} seqId sequential ID of the newly published post
+   * @param {PostPublishResult} result sequenced post publishing result
    */
-  protected constructor(seqId: number) {
-    super();
+  protected constructor(seqId: number, result: PostPublishResult) {
+    super(result);
 
     this.seqId = seqId;
   }

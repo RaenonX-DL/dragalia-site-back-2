@@ -134,29 +134,25 @@ describe('Misc post publishing EP', () => {
     expect(json.success).toBe(false);
   });
 
-  it(
-    'blocks publishing a quest post with skipping sequential ID',
-    async () => {
-      const result = await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload4);
-      expect(result.statusCode).toBe(200);
+  it('blocks publishing a quest post with skipping sequential ID', async () => {
+    const result = await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload4);
+    expect(result.statusCode).toBe(200);
 
-      const json: BaseResponse = result.json() as BaseResponse;
-      expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
-      expect(json.success).toBe(false);
-    });
+    const json: BaseResponse = result.json() as BaseResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_POST_NOT_PUBLISHED_ID_SKIPPED);
+    expect(json.success).toBe(false);
+  });
 
-  it(
-    'blocks publishing a quest post with duplicated ID and language',
-    async () => {
-      await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload7);
+  it('blocks publishing a quest post with duplicated ID and language', async () => {
+    await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload7);
 
-      const result = await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload7);
-      expect(result.statusCode).toBe(200);
+    const result = await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload7);
+    expect(result.statusCode).toBe(200);
 
-      const json: BaseResponse = result.json() as BaseResponse;
-      expect(json.code).toBe(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
-      expect(json.success).toBe(false);
-    });
+    const json: BaseResponse = result.json() as BaseResponse;
+    expect(json.code).toBe(ApiResponseCode.FAILED_POST_ALREADY_EXISTS);
+    expect(json.success).toBe(false);
+  });
 
   test('if the published quest post exists in the database', async () => {
     await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload2);

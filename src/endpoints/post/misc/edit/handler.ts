@@ -16,6 +16,6 @@ export const handleEditMiscPost = async (
     mongoClient,
     payload,
     MiscPostController.editMiscPost,
-    ({seqId}) => new MiscPostEditResponse(seqId),
+    ({seqId}, result) => new MiscPostEditResponse(seqId, result),
   );
 };

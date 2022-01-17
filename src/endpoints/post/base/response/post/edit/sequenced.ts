@@ -16,11 +16,11 @@ export abstract class SequencedPostEditResponse extends PostEditResponse {
   /**
    * Construct a successful post editing API response.
    *
-   * @param {SequencedPostEditResponseParams} params parameters to construct a sequenced post editing response
+   * @param {SequencedPostEditResponseParams} params parameters to construct a sequenced post editing response=
    * @protected
    */
   protected constructor(params: SequencedPostEditResponseParams) {
-    super();
+    super(params);
 
     this.seqId = +params.seqId;
   }

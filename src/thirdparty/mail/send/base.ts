@@ -1,4 +1,5 @@
 import {SupportedLanguages} from '../../../api-def/api';
+import {isCi} from '../../../api-def/utils';
 import {emailSenderAddress, mailTransporter} from '../client';
 import {senderName} from '../const';
 import {MailContent} from '../type';
@@ -17,6 +18,15 @@ type SendMailReturn = {
 export const sendMail = async ({
   lang, to, subject, text, html,
 }: SendMailOptions): Promise<SendMailReturn> => {
+  if (isCi()) {
+    // Assume all sent in CI
+    return {accepted: to, rejected: []};
+  }
+
+  if (!to.length) {
+    return {accepted: [], rejected: []};
+  }
+
   const {accepted, rejected} = await mailTransporter.sendMail({
     from: {name: senderName[lang], address: emailSenderAddress},
     to,

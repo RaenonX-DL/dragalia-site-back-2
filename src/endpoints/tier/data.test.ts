@@ -1,5 +1,5 @@
 import {mongoExecInTransaction} from '../../../test/utils/mongo';
-import {SupportedLanguages} from '../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../api-def/api';
 import {Application, createApp} from '../../app';
 import {TierNote, UnitTierNote, UnitTierNoteDocumentKey} from './notes/model';
 import {KeyPointController} from './points/controller';

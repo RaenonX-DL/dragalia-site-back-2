@@ -6,7 +6,7 @@ export const makeMailContentPublishedText = ({
   lang, title, sitePath,
 }: MakeMailContentPublishedOpts): string => {
   if (lang === SupportedLanguages.EN) {
-    return `Post with title: ${title} have been published. Link: ${sitePath}.`;
+    return `Post: ${title} has published. Link: ${sitePath}.`;
   }
 
   return `文章: ${title} 已發布。連結: ${sitePath}`;

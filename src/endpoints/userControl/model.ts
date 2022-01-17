@@ -1,6 +1,6 @@
 import {Collection, MongoClient, ObjectId} from 'mongodb';
 
-import {SupportedLanguages} from '../../api-def/api/other/lang';
+import {SupportedLanguages} from '../../api-def/api';
 import {AUTH_DB, AUTH_USER_COLLECTION, UserDocument, UserDocumentKey, DocumentBaseKey} from '../../api-def/models';
 import {CollectionInfo} from '../../base/controller/info';
 import {Document} from '../../base/model/base';
