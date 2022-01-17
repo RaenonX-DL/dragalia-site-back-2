@@ -5,6 +5,7 @@ import {isCi} from '../api-def/utils';
 
 
 const allowedOrigins = env.get('CORS_ALLOWED_ORIGINS')
+  .default('')
   .required(!isCi())
   .asArray();
 
