@@ -1,7 +1,9 @@
 import React from 'react';
 
 import {SupportedLanguages} from '../../../../api-def/api';
+import {GeneralPath} from '../../../../api-def/paths';
 import {I18nData} from '../../../../i18n/trans/mail/data';
+import {makeLink} from './link';
 import {styles} from './styles';
 
 
@@ -27,6 +29,9 @@ export const EmailContent: React.FunctionComponent<EmailContentProps> = ({
         <div style={styles.titleImage}/>
         <h2>{title}</h2>
         <p>{content}</p>
+        <footer>
+          {I18nData.mail.notifications[lang]}{makeLink(GeneralPath.USER_NOTIFICATION)}
+        </footer>
       </body>
     </html>
   );

@@ -6,7 +6,7 @@ import {GenerateMailContentOpts, GenerateMailOpts} from './type';
 export const generateMailContent = <T extends GenerateMailOpts>(
   opts: GenerateMailContentOpts<T>,
 ): MailContent => {
-  const {lang, getSubject, getText, getHtml} = opts;
+  const {getSubject, getText, getHtml} = opts;
 
   const subject = getSubject(opts);
   const text = getText(opts);
@@ -15,7 +15,7 @@ export const generateMailContent = <T extends GenerateMailOpts>(
     subject,
     text,
     html: generateMailHTML({
-      lang,
+      ...opts,
       title: subject,
       content: getHtml({...opts, subject}),
     }),
