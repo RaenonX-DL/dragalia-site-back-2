@@ -42,7 +42,9 @@ import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
-import {handlerSubscriptionUpdate} from './userControl/notifications/update/handler';
+import {handleSubscriptionAdd} from './userControl/notifications/add/handler';
+import {handleSubscriptionRemove} from './userControl/notifications/remove/handler';
+import {handleSubscriptionUpdate} from './userControl/notifications/update/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -98,7 +100,9 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
-  [ApiEndPoints.USER_SUBSCRIPTIONS]: {POST: handlerSubscriptionUpdate},
+  [ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE]: {POST: handleSubscriptionUpdate},
+  [ApiEndPoints.USER_SUBSCRIPTIONS_ADD]: {POST: handleSubscriptionAdd},
+  [ApiEndPoints.USER_SUBSCRIPTIONS_REMOVE]: {POST: handleSubscriptionRemove},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(

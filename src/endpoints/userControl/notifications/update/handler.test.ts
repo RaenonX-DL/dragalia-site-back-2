@@ -1,6 +1,5 @@
 import {ObjectId} from 'mongodb';
 
-import {insertMockUser} from '../../../../../test/data/user';
 import {
   ApiEndPoints,
   ApiResponseCode,
@@ -18,10 +17,10 @@ import {
 } from '../../../../thirdparty/mail/data/subscription/model';
 
 
-describe('Tier note updating handler', () => {
+describe('Subscription batch update handler', () => {
   let app: Application;
 
-  const uidAdmin = new ObjectId();
+  const uid = new ObjectId();
 
   const subKeys: SubscriptionKey[] = [
     {type: 'const', name: 'ALL_QUEST'},
@@ -35,7 +34,6 @@ describe('Tier note updating handler', () => {
 
   beforeEach(async () => {
     await app.reset();
-    await insertMockUser(app.mongoClient, {id: uidAdmin, isAdmin: true});
   });
 
   afterAll(async () => {
@@ -43,8 +41,8 @@ describe('Tier note updating handler', () => {
   });
 
   it('adds new subscriptions of a user if not existed before', async () => {
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS).payload({
-      uid: uidAdmin,
+    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+      uid,
       lang: SupportedLanguages.CHT,
       subKeysBase64,
     });
@@ -65,7 +63,7 @@ describe('Tier note updating handler', () => {
 
     expect(docs).toStrictEqual(subKeys.map((key) => ({
       [SubscriptionRecordDocumentKey.key]: key,
-      [SubscriptionRecordDocumentKey.uid]: uidAdmin,
+      [SubscriptionRecordDocumentKey.uid]: uid,
     })));
   });
 
@@ -73,16 +71,16 @@ describe('Tier note updating handler', () => {
     await SubscriptionRecord.getCollection(app.mongoClient).insertMany([
       {
         [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_QUEST'},
-        [SubscriptionRecordDocumentKey.uid]: uidAdmin,
+        [SubscriptionRecordDocumentKey.uid]: uid,
       },
       {
         [SubscriptionRecordDocumentKey.key]: {type: 'post', postType: PostType.QUEST, id: 8},
-        [SubscriptionRecordDocumentKey.uid]: uidAdmin,
+        [SubscriptionRecordDocumentKey.uid]: uid,
       },
     ]);
 
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS).payload({
-      uid: uidAdmin,
+    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+      uid,
       lang: SupportedLanguages.CHT,
       subKeysBase64,
     });
@@ -103,18 +101,18 @@ describe('Tier note updating handler', () => {
 
     expect(docs).toStrictEqual(subKeys.map((key) => ({
       [SubscriptionRecordDocumentKey.key]: key,
-      [SubscriptionRecordDocumentKey.uid]: uidAdmin,
+      [SubscriptionRecordDocumentKey.uid]: uid,
     })));
   });
 
   it('completely removes the subscriptions of a user', async () => {
     await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subKeys.map((key) => ({
       [SubscriptionRecordDocumentKey.key]: key,
-      [SubscriptionRecordDocumentKey.uid]: uidAdmin,
+      [SubscriptionRecordDocumentKey.uid]: uid,
     })));
 
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS).payload({
-      uid: uidAdmin,
+    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+      uid,
       lang: SupportedLanguages.CHT,
       subKeysBase64: Buffer.from('[]', 'base64url').toString(),
     });

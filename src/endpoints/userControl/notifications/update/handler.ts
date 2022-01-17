@@ -4,7 +4,7 @@ import {HandlerParams} from '../../../lookup';
 import {SubscriptionUpdateResponse} from './response';
 
 
-export const handlerSubscriptionUpdate = async ({
+export const handleSubscriptionUpdate = async ({
   payload,
   mongoClient,
 }: HandlerParams<SubscriptionUpdatePayload>): Promise<SubscriptionUpdateResponse> => {

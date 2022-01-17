@@ -1,6 +1,12 @@
-import {MongoClient, ObjectId} from 'mongodb';
+import {MongoClient, MongoError, ObjectId} from 'mongodb';
 
-import {SubscriptionUpdatePayload, SupportedLanguages, SubscriptionKey} from '../../../../api-def/api';
+import {
+  SubscriptionAddPayload,
+  SubscriptionKey,
+  SubscriptionRemovePayload,
+  SubscriptionUpdatePayload,
+  SupportedLanguages,
+} from '../../../../api-def/api';
 import {UserDocumentKey} from '../../../../api-def/models';
 import {UserController} from '../../../../endpoints/userControl/controller';
 import {execTransaction} from '../../../../utils/mongodb';
@@ -69,5 +75,51 @@ export class SubscriptionRecordController {
         {session},
       );
     });
+  }
+
+  /**
+   * Adds a subscription.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SubscriptionAddPayload} payload subscription addition payload
+   * @return {Promise<void>}
+   */
+  static async addSubscription(mongoClient: MongoClient, payload: SubscriptionAddPayload): Promise<void> {
+    const {uid, subKeyBase64} = payload;
+
+    const subKey = JSON.parse(Buffer.from(subKeyBase64, 'base64url').toString()) as SubscriptionKey;
+
+    try {
+      await SubscriptionRecord.getCollection(mongoClient)
+        .insertOne({
+          [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
+          [SubscriptionRecordDocumentKey.key]: subKey,
+        });
+    } catch (e) {
+      if (e instanceof MongoError && e.code === 11000) {
+        return;
+      }
+
+      throw e;
+    }
+  }
+
+  /**
+   * Removes a subscription.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SubscriptionRemovePayload} payload subscription removing payload
+   * @return {Promise<void>}
+   */
+  static async removeSubscription(mongoClient: MongoClient, payload: SubscriptionRemovePayload): Promise<void> {
+    const {uid, subKeyBase64} = payload;
+
+    const subKey = JSON.parse(Buffer.from(subKeyBase64, 'base64url').toString()) as SubscriptionKey;
+
+    await SubscriptionRecord.getCollection(mongoClient)
+      .deleteOne({
+        [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
+        [SubscriptionRecordDocumentKey.key]: subKey,
+      });
   }
 }

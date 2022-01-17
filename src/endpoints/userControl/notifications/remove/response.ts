@@ -3,13 +3,13 @@ import {ApiResponse} from '../../../../base/response';
 
 
 /**
- * Subscription update response class.
+ * Subscription remove response class.
  *
  * This always returns `ApiResponseCode.SUCCESS` if used.
  */
-export class SubscriptionUpdateResponse extends ApiResponse {
+export class SubscriptionRemoveResponse extends ApiResponse {
   /**
-   * Construct a user subscription update response class.
+   * Construct a user subscription remove response class.
    */
   constructor() {
     super(ApiResponseCode.SUCCESS);
