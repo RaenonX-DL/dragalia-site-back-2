@@ -15,13 +15,9 @@ export const handleGetAnalysis = async (
   return handleGetPost(
     mongoClient,
     payload,
-    (payload) => (
-      AnalysisController.getAnalysis(mongoClient, payload.unitId, payload.lang, true)
-    ),
-    (getResult) => {
-      return new AnalysisGetResponse(
-        getResult.toResponseReady(),
-      );
-    },
+    ({uid, unitId, lang}) => AnalysisController.getAnalysis({
+      mongoClient, uid, unitIdentifier: unitId, lang, incCount: true,
+    }),
+    (getResult) => new AnalysisGetResponse(getResult.toResponseReady()),
   );
 };

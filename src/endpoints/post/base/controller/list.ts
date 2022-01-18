@@ -1,44 +1,55 @@
-import {Document} from 'mongodb';
-
-import {PostInfo} from '../../../../api-def/api';
+import {PostInfo, PostType, SubscriptionKey} from '../../../../api-def/api';
 import {EditableDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
+import {PostDocumentBase} from '../model/sequencedPost';
+import {PostEntryTransformFunction} from './type';
 
 
-type PostEntryTransformFunction<E extends PostInfo> = (post: Document) => E;
+type PostListResultInitOpts<E extends PostInfo> = {
+  posts: Array<PostDocumentBase>,
+  docTransformFunction: PostEntryTransformFunction<E>,
+  subscriptionKeys: SubscriptionKey[],
+  globalSubscriptionKey: SubscriptionKey,
+  postType: PostType,
+};
 
 /**
  * Result object of getting a post list.
  */
 export class PostListResult<E extends PostInfo> {
-  posts: Array<Document>;
+  posts: Array<PostDocumentBase>;
   postListEntries: Array<E>;
 
   /**
    * Construct a post list getting result.
    *
-   * @param {Array<Document>} posts posts returned from document
-   * @param {PostEntryTransformFunction} docTransformFunction function to transform the document into an entry
+   * @param {Array<PostListResultInitOpts>} options options to create a post list result
    */
-  constructor(
-    posts: Array<Document>,
-    docTransformFunction: PostEntryTransformFunction<E>,
-  ) {
+  constructor({
+    posts,
+    docTransformFunction,
+    subscriptionKeys,
+    globalSubscriptionKey,
+    postType,
+  }: PostListResultInitOpts<E>) {
     this.posts = posts;
-    this.postListEntries = posts.map((post) => docTransformFunction(post));
+
+    const isGlobalSubscription = subscriptionKeys.includes(globalSubscriptionKey);
+
+    this.postListEntries = posts.map((post) => docTransformFunction(
+      post,
+      isGlobalSubscription ||
+        subscriptionKeys.includes({type: 'post', postType, id: post[SequentialDocumentKey.sequenceId]}),
+    ));
   }
 }
 
-export type PostControllerListOptions<E extends PostInfo, D extends Document> = {
-  projection?: {[K in keyof D]?: 0 | 1},
-  transformFunc: PostEntryTransformFunction<E>,
-  limit?: number,
-};
-
-export const defaultTransformFunction = (post: Document): PostInfo => ({
+export const defaultTransformFunction = (post: PostDocumentBase, userSubscribed: boolean): PostInfo => ({
   lang: post[MultiLingualDocumentKey.language],
   viewCount: post[ViewCountableDocumentKey.viewCount],
   modifiedEpoch: post[EditableDocumentKey.dateModifiedEpoch],
   publishedEpoch: post[EditableDocumentKey.datePublishedEpoch],
+  userSubscribed,
 });

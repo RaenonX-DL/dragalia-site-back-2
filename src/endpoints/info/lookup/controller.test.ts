@@ -76,15 +76,21 @@ describe('Unit info lookup controller', () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: 10950101});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, unitId: 10950102});
 
-    const postListResult = await UnitInfoLookupController.getAnalysisLookup(
-      app.mongoClient, SupportedLanguages.CHT,
-    );
+    const postListResult = await UnitInfoLookupController.getAnalysisLookup({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(Object.values(postListResult).map((post) => post.unitId)).toStrictEqual([10950101, 10950102]);
   });
 
   it('returns without any error if no analysis available', async () => {
-    const postListResult = await UnitInfoLookupController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
+    const postListResult = await UnitInfoLookupController.getAnalysisLookup({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(Object.keys(postListResult).length).toBe(0);
   });
@@ -92,7 +98,11 @@ describe('Unit info lookup controller', () => {
   it('returns without any error if no analysis matching the language', async () => {
     await insert3Chara();
 
-    const postListResult = await UnitInfoLookupController.getAnalysisLookup(app.mongoClient, SupportedLanguages.EN);
+    const postListResult = await UnitInfoLookupController.getAnalysisLookup({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.EN,
+    });
 
     expect(Object.keys(postListResult).length).toBe(0);
   });
@@ -100,7 +110,11 @@ describe('Unit info lookup controller', () => {
   it('returns analysis type for each post entry', async () => {
     await insert3Chara3Dragon();
 
-    const postListResult = await UnitInfoLookupController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
+    const postListResult = await UnitInfoLookupController.getAnalysisLookup({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(Object.values(postListResult).filter((entry) => entry.type === UnitType.CHARACTER).length).toBe(3);
     expect(Object.values(postListResult).filter((entry) => entry.type === UnitType.DRAGON).length).toBe(3);
@@ -109,7 +123,11 @@ describe('Unit info lookup controller', () => {
   it('returns modification and publish timestamps for each post entry', async () => {
     await insert3Chara3Dragon();
 
-    const postListResult = await UnitInfoLookupController.getAnalysisLookup(app.mongoClient, SupportedLanguages.CHT);
+    const postListResult = await UnitInfoLookupController.getAnalysisLookup({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(
       Object.values(postListResult)

@@ -289,9 +289,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await AnalysisController.getAnalysis(
-        app.mongoClient, payloadAnalysis.unitId, SupportedLanguages.EN, false,
-      );
+      const post = await AnalysisController.getAnalysis({
+        mongoClient: app.mongoClient,
+        uid: '',
+        unitIdentifier: payloadAnalysis.unitId,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });
@@ -351,7 +355,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await QuestPostController.getQuestPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+      const post = await QuestPostController.getQuestPost({
+        mongoClient: app.mongoClient,
+        uid: '',
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });
@@ -433,7 +443,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+      const post = await MiscPostController.getMiscPost({
+        mongoClient: app.mongoClient,
+        uid: '',
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });

@@ -11,10 +11,13 @@ import {ParamGetterFunction} from './types';
 
 const getAnalysisMeta: ParamGetterFunction = async ({
   mongoClient,
+  uid,
   postIdentifier,
   lang,
 }) => {
-  const analysis = await AnalysisController.getAnalysis(mongoClient, postIdentifier, lang, false);
+  const analysis = await AnalysisController.getAnalysis({
+    mongoClient, uid, unitIdentifier: postIdentifier, lang, incCount: false,
+  });
 
   if (!analysis) {
     return null;
@@ -31,6 +34,7 @@ const getAnalysisMeta: ParamGetterFunction = async ({
 
 const getQuestGuideMeta: ParamGetterFunction = async ({
   mongoClient,
+  uid,
   postIdentifier,
   lang,
 }) => {
@@ -38,7 +42,9 @@ const getQuestGuideMeta: ParamGetterFunction = async ({
     return null;
   }
 
-  const post = await QuestPostController.getQuestPost(mongoClient, postIdentifier, lang, false);
+  const post = await QuestPostController.getQuestPost({
+    mongoClient, uid, seqId: postIdentifier, lang, incCount: false,
+  });
 
   if (!post) {
     return null;
@@ -51,6 +57,7 @@ const getQuestGuideMeta: ParamGetterFunction = async ({
 
 const getMiscMeta: ParamGetterFunction = async ({
   mongoClient,
+  uid,
   postIdentifier,
   lang,
 }) => {
@@ -58,7 +65,9 @@ const getMiscMeta: ParamGetterFunction = async ({
     return null;
   }
 
-  const post = await MiscPostController.getMiscPost(mongoClient, postIdentifier, lang, false);
+  const post = await MiscPostController.getMiscPost({
+    mongoClient, uid, seqId: postIdentifier, lang, incCount: false,
+  });
 
   if (!post) {
     return null;

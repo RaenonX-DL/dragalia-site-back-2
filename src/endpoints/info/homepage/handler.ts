@@ -14,18 +14,20 @@ export const handleHomepageLanding = async ({
 }: HandlerParams<HomepageLandingPayload>): Promise<HomepageLandingResponse> => {
   const gaData = await getGaData(mongoClient);
 
+  const {uid, lang} = payload;
+
   const data: HomepageData = {
     posts: {
       [PostType.QUEST]: transformSequencedPostInfo(
-        await QuestPostController.getPostList(mongoClient, payload.lang, 5),
+        await QuestPostController.getPostList({mongoClient, uid, lang, limit: 5}),
         PostType.QUEST,
       ),
       [PostType.ANALYSIS]: await transformAnalysisInfo(
-        await UnitInfoLookupController.getRecentlyModifiedAnalyses(mongoClient, payload.lang, 5),
-        payload.lang,
+        await UnitInfoLookupController.getRecentlyModifiedAnalyses({mongoClient, uid, lang, maxCount: 5}),
+        lang,
       ),
       [PostType.MISC]: transformSequencedPostInfo(
-        await MiscPostController.getPostList(mongoClient, payload.lang, 5),
+        await MiscPostController.getPostList({mongoClient, uid, lang, limit: 5}),
         PostType.MISC,
       ),
     },

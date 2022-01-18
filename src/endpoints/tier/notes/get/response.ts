@@ -14,6 +14,7 @@ type UnitTierNoteGetResponseOptions = Omit<UnitTierNoteGetResponseApi, keyof Bas
  */
 export class UnitTierNoteGetResponse extends ApiResponse {
   data: UnitTierData;
+  userSubscribed: boolean;
 
   /**
    * Construct a unit tier notes fetching endpoint API response.
@@ -26,6 +27,7 @@ export class UnitTierNoteGetResponse extends ApiResponse {
     super(responseCode);
 
     this.data = options.data;
+    this.userSubscribed = options.userSubscribed;
   }
 
   /**
@@ -35,6 +37,7 @@ export class UnitTierNoteGetResponse extends ApiResponse {
     return {
       ...super.toJson(),
       data: this.data,
+      userSubscribed: this.userSubscribed,
     };
   }
 }

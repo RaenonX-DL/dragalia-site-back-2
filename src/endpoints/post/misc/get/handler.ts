@@ -20,13 +20,9 @@ export const handleGetMiscPost = async (
   return handleGetPost(
     mongoClient,
     payload,
-    (payload) => (
-      MiscPostController.getMiscPost(mongoClient, payload.seqId, payload.lang, true)
+    ({uid, seqId, lang}) => (
+      MiscPostController.getMiscPost({mongoClient, uid, seqId, lang, incCount: true})
     ),
-    (getResult) => {
-      return new MiscPostGetResponse(
-        getResult.toResponseReady(),
-      );
-    },
+    (getResult) => new MiscPostGetResponse(getResult.toResponseReady()),
   );
 };

@@ -7,6 +7,7 @@ import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import * as sendEmailEdited from '../../../thirdparty/mail/send/post/edited';
 import * as sendEmailPublished from '../../../thirdparty/mail/send/post/published';
+import {GetSequentialPostOptions} from '../base/controller/type';
 import {SeqIdSkippingError} from '../error';
 import {MiscPostController} from './controller';
 import {MiscPost, MiscPostDocument} from './model';
@@ -15,12 +16,21 @@ import {MiscPost, MiscPostDocument} from './model';
 describe('Misc post controller', () => {
   let app: Application;
 
+  let getPostOpts: GetSequentialPostOptions;
+
   beforeAll(async () => {
     app = await createApp();
   });
 
   beforeEach(async () => {
     await app.reset();
+
+    getPostOpts = {
+      mongoClient: app.mongoClient,
+      uid: '',
+      seqId: 1,
+      lang: SupportedLanguages.CHT,
+    };
   });
 
   afterAll(async () => {
@@ -208,7 +218,11 @@ describe('Misc post controller', () => {
       await MiscPostController.publishPost(app.mongoClient, payload);
     }
 
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT);
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5, 4, 3, 2, 1]);
   });
@@ -218,13 +232,22 @@ describe('Misc post controller', () => {
       await MiscPostController.publishPost(app.mongoClient, payload);
     }
 
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT, 3);
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+      limit: 3,
+    });
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([7, 6, 5]);
   });
 
   it('returns without any error if no posts available yet', async () => {
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.CHT);
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
   });
@@ -234,7 +257,11 @@ describe('Misc post controller', () => {
       await MiscPostController.publishPost(app.mongoClient, payload);
     }
 
-    const postListResult = await MiscPostController.getPostList(app.mongoClient, SupportedLanguages.EN);
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.EN,
+    });
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
   });
@@ -242,11 +269,11 @@ describe('Misc post controller', () => {
   it('increases the view count of a post after getting it', async () => {
     await MiscPostController.publishPost(app.mongoClient, payload);
 
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    const getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    await MiscPostController.getMiscPost(getPostOpts);
+    await MiscPostController.getMiscPost(getPostOpts);
+    await MiscPostController.getMiscPost(getPostOpts);
+    await MiscPostController.getMiscPost(getPostOpts);
+    const getResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(4);
   });
@@ -254,11 +281,11 @@ describe('Misc post controller', () => {
   it('does not increase the view count of a post if specified', async () => {
     await MiscPostController.publishPost(app.mongoClient, payload);
 
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    const getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    await MiscPostController.getMiscPost({...getPostOpts, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, incCount: false});
+    const getResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
@@ -266,7 +293,7 @@ describe('Misc post controller', () => {
   it('returns the post in an alternative language if main is not available', async () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.EN});
 
-    const getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    const getResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(getResult?.isAltLang).toBe(true);
     expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);
@@ -274,7 +301,7 @@ describe('Misc post controller', () => {
   });
 
   it('returns an empty response if the post does not exist', async () => {
-    const getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    const getResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(getResult).toBeNull();
   });
@@ -284,7 +311,7 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.JP});
 
-    const postListResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    const postListResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(postListResult?.isAltLang).toBe(false);
     expect(postListResult?.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
@@ -295,7 +322,7 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.JP});
 
-    const postListResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
+    const postListResult = await MiscPostController.getMiscPost({...getPostOpts, incCount: false});
 
     expect(postListResult?.isAltLang).toBe(false);
     expect(postListResult?.otherLangs).toStrictEqual([]);
@@ -306,30 +333,32 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.JP});
 
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.JP);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.JP);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.JP, false);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.JP, false);
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.EN});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.EN});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.CHT});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.CHT, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.CHT, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.JP});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.JP});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.JP, incCount: false});
+    await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.JP, incCount: false});
 
-    let getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+    let getResult = await MiscPostController.getMiscPost({
+      ...getPostOpts, lang: SupportedLanguages.EN, incCount: false,
+    });
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
-    getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT, false);
+    getResult = await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.CHT, incCount: false});
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(1);
-    getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.JP, false);
+    getResult = await MiscPostController.getMiscPost({...getPostOpts, lang: SupportedLanguages.JP, incCount: false});
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
 
   test('if view count behaves correctly when returning the alternative version', async () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.EN});
 
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
-    const getResult = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.CHT);
+    await MiscPostController.getMiscPost(getPostOpts);
+    await MiscPostController.getMiscPost(getPostOpts);
+    const getResult = await MiscPostController.getMiscPost(getPostOpts);
 
     expect(getResult?.isAltLang).toBe(true);
     expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);

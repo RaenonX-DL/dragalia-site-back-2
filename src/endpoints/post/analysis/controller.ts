@@ -9,10 +9,11 @@ import {
   EmailSendResult,
   PostBodyBase,
   PostType,
+  SubscriptionKey,
   SupportedLanguages,
   UnitType,
 } from '../../../api-def/api';
-import {PostPath, makePostUrl} from '../../../api-def/paths';
+import {makePostUrl, PostPath} from '../../../api-def/paths';
 import {UpdateResult} from '../../../base/enum/updateResult';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
@@ -20,8 +21,9 @@ import {sendMailPostEdited} from '../../../thirdparty/mail/send/post/edited';
 import {sendMailPostPublished} from '../../../thirdparty/mail/send/post/published';
 import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {getUnitIdByName} from '../../../utils/resources/loader/unitName2Id';
-import {PostGetResult} from '../base/controller/get';
+import {PostGetResult, PostGetResultOpts} from '../base/controller/get';
 import {PostController} from '../base/controller/main';
+import {InternalGetPostOptions} from '../base/controller/type';
 import {PostEditResultCommon} from '../base/type';
 import {AnalysisBodyWithInfo} from './base/response/types';
 import {UnhandledUnitTypeError, UnitNotExistsError, UnitTypeMismatchError} from './error';
@@ -38,7 +40,7 @@ import {
   UnitAnalysisDocumentKey,
 } from './model';
 import {AnalysisDocument} from './model/type';
-import {AnalysisPublishResult} from './type';
+import {AnalysisPublishResult, GetAnalysisOptions} from './type';
 
 
 /**
@@ -48,12 +50,10 @@ class AnalysisGetResult extends PostGetResult<AnalysisDocument> {
   /**
    * Construct an analysis get result object.
    *
-   * @param {AnalysisDocument} post
-   * @param {boolean} isAltLang
-   * @param {Array<SupportedLanguages>} otherLangs
+   * @param {PostGetResultOpts} options options to construct analysis get result
    */
-  constructor(post: AnalysisDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
-    super(post, isAltLang, otherLangs);
+  constructor(options: PostGetResultOpts<AnalysisDocument>) {
+    super(options);
   }
 
   /**
@@ -319,15 +319,18 @@ export class AnalysisController extends PostController {
    *
    * The analysis which sequential ID matches ``unitIdentifier`` will also be returned for legacy usages.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {string | number} unitIdentifier unit identifier of the post
-   * @param {SupportedLanguages} lang language code of the post
-   * @param {boolean} incCount if to increase the view count of the post or not
+   * @param {GetAnalysisOptions} options options to get an analysis
    * @return {Promise<PostGetResult<QuestPostDocument>>} result of getting a quest post
    */
-  static async getAnalysis(
-    mongoClient: MongoClient, unitIdentifier: string | number, lang: SupportedLanguages, incCount = true,
-  ): Promise<AnalysisGetResult | null> {
+  static async getAnalysis(options: GetAnalysisOptions): Promise<AnalysisGetResult | null> {
+    let {
+      mongoClient,
+      uid,
+      unitIdentifier,
+      lang = SupportedLanguages.CHT,
+      incCount = true,
+    } = options;
+
     // Convert string identifier to unit ID, if needed
     if (typeof unitIdentifier === 'string') {
       const unitId = await getUnitIdByName(unitIdentifier, mongoClient);
@@ -341,16 +344,28 @@ export class AnalysisController extends PostController {
 
     const collection = UnitAnalysis.getCollection(mongoClient);
 
-    // Tries to get the analysis using `unitIdentifier` (indexed)
-    const result = await super.getPost(
+    const isSubscribed = (key: SubscriptionKey, analysis: AnalysisDocument): boolean => {
+      const subKeys: SubscriptionKey[] = [
+        {type: 'const', name: 'ALL_ANALYSIS'},
+        {type: 'post', postType: PostType.ANALYSIS, id: analysis[UnitAnalysisDocumentKey.unitId]},
+      ];
+
+      return subKeys.includes(key);
+    };
+
+    const getAnalysisOptions: InternalGetPostOptions<AnalysisDocument, AnalysisGetResult> = {
+      mongoClient,
       collection,
-      {[UnitAnalysisDocumentKey.unitId]: unitIdentifier},
+      uid,
+      findCondition: {[UnitAnalysisDocumentKey.unitId]: unitIdentifier},
+      resultConstructFunction: (options) => new AnalysisGetResult(options),
+      isSubscribed,
       lang,
       incCount,
-      (post, isAltLang, otherLangs) => (
-        new AnalysisGetResult(post, isAltLang, otherLangs)
-      ),
-    );
+    };
+
+    // Tries to get the analysis using `unitIdentifier` (indexed)
+    const result = await super.getPost(getAnalysisOptions);
 
     // Early return if found
     if (result) {
@@ -358,15 +373,10 @@ export class AnalysisController extends PostController {
     }
 
     // Otherwise, use sequential ID to get the analysis instead
-    return super.getPost(
-      collection,
-      {[SequentialDocumentKey.sequenceId]: unitIdentifier},
-      lang,
-      incCount,
-      (post, isAltLang, otherLangs) => (
-        new AnalysisGetResult(post, isAltLang, otherLangs)
-      ),
-    );
+    return super.getPost({
+      ...getAnalysisOptions,
+      findCondition: {[SequentialDocumentKey.sequenceId]: unitIdentifier},
+    });
   }
 
   /**

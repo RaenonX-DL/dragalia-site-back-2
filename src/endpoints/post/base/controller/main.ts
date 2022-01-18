@@ -6,10 +6,12 @@ import {UpdateResult} from '../../../../base/enum/updateResult';
 import {EditableDocumentKey, EditNoteDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
+import {SubscriptionRecordController} from '../../../../thirdparty/mail/data/subscription/controller';
 import {getCurrentEpoch} from '../../../../utils/misc';
 import {PostDocumentBase, PostDocumentBaseNoTitle} from '../model';
-import {PostGetResult, ResultConstructFunction} from './get';
-import {PostControllerListOptions, PostListResult} from './list';
+import {PostGetResult} from './get';
+import {PostListResult} from './list';
+import {InternalGetPostOptions, InternalListPostOptions} from './type';
 
 
 /**
@@ -19,66 +21,131 @@ export abstract class PostController {
   /**
    * Get a list of posts.
    *
-   * @param {Collection} collection collection to perform the post listing
-   * @param {SupportedLanguages} lang language of the posts
-   * @param {PostControllerListOptions} options additional options for listing the posts
-   * @return {Promise<PostListResult>} promise containing a list of post documents
+   * @param {InternalListPostOptions} options options for getting the post list
    * @protected
    */
   protected static async listPosts<E extends PostInfo, D extends PostDocumentBase>(
-    collection: Collection<D>, lang: SupportedLanguages, options: PostControllerListOptions<E, D>,
+    options: InternalListPostOptions<E, D>,
   ): Promise<PostListResult<E>> {
     const {
+      mongoClient,
+      uid,
+      lang,
+      postCollection,
+      postType,
       projection = {},
       transformFunc,
+      limit,
+      globalSubscriptionKey,
     } = options;
 
-    const query = {[MultiLingualDocumentKey.language]: lang} as Filter<D>;
+    const [subscriptionKeys, posts] = await Promise.all([
+      SubscriptionRecordController.getSubscriptionsOfUser(mongoClient, uid),
+      postCollection.find(
+        {[MultiLingualDocumentKey.language]: lang} as Filter<D>,
+        {
+          projection: {
+            ...projection,
+            [MultiLingualDocumentKey.language]: 1,
+            [EditableDocumentKey.dateModifiedEpoch]: 1,
+            [EditableDocumentKey.datePublishedEpoch]: 1,
+            [ViewCountableDocumentKey.viewCount]: 1,
+          },
+          sort: {[EditableDocumentKey.dateModifiedEpoch]: 'desc'},
+          limit,
+        })
+        .toArray(),
+    ]);
 
-    const posts = await collection.find(
-      query,
-      {
-        projection: {
-          ...projection,
-          [MultiLingualDocumentKey.language]: 1,
-          [EditableDocumentKey.dateModifiedEpoch]: 1,
-          [EditableDocumentKey.datePublishedEpoch]: 1,
-          [ViewCountableDocumentKey.viewCount]: 1,
-        },
-        sort: {[EditableDocumentKey.dateModifiedEpoch]: 'desc'},
-        limit: options.limit,
-      })
-      .toArray();
-
-    return new PostListResult<E>(
+    return new PostListResult<E>({
       posts,
-      transformFunc,
-    );
+      docTransformFunction: transformFunc,
+      subscriptionKeys,
+      globalSubscriptionKey,
+      postType,
+    });
   }
 
   /**
    * Get a specific post.
    *
-   * If this is called for post displaying purpose, incCount should be true. Otherwise, it should be false.
+   * If this is called for post displaying purpose, incCount should be `true`.
+   * Otherwise, it should be `false`.
    *
-   * @param {Collection} collection mongo collection for getting the post
-   * @param {Filter} findCondition base condition to use for finding the desired post
-   * @param {SupportedLanguages} lang language of the post
-   * @param {boolean} incCount if to increase the view count of the post or not
-   * @param {ResultConstructFunction} resultConstructFunction function to construct the result object
+   * @param {InternalGetPostOptions} options options to get a post
    * @return {Promise<PostGetResult>} result of getting a post
    * @protected
    */
   protected static async getPost<
     D extends PostDocumentBaseNoTitle,
-    T extends PostGetResult<D>>(
-    collection: Collection<D>,
-    findCondition: Filter<D>,
-    lang = SupportedLanguages.CHT,
-    incCount = true,
-    resultConstructFunction: ResultConstructFunction<D, T>,
-  ): Promise<T | null> {
-    // Get the code of other available languages
+    T extends PostGetResult<D>
+  >(options: InternalGetPostOptions<D, T>): Promise<T | null> {
+    const {
+      mongoClient,
+      collection,
+      uid,
+      findCondition,
+      resultConstructFunction,
+      isSubscribed,
+      lang = SupportedLanguages.CHT,
+      incCount = true,
+    } = options;
+
+    const postDataUpdate = {
+      $inc: {[ViewCountableDocumentKey.viewCount]: incCount ? 1 : 0},
+    } as unknown as UpdateFilter<D>;
+
+    let isAltLang = false;
+    let [postDoc, otherLangs, subscriptionKeys] = await Promise.all([
+      collection.findOneAndUpdate(
+        {...findCondition, [MultiLingualDocumentKey.language]: lang} as Filter<D>,
+        postDataUpdate,
+      ),
+      PostController.getOtherAvailableLangOfPost(options),
+      SubscriptionRecordController.getSubscriptionsOfUser(mongoClient, uid),
+    ]);
+
+    if (!postDoc.value) {
+      // Update the post in alt lang
+      (postDoc = await collection.findOneAndUpdate(
+        findCondition,
+        postDataUpdate,
+      ));
+      if (!postDoc.value) { // Post with the given ID not found
+        return null;
+      }
+
+      isAltLang = true;
+    }
+
+    const post = postDoc.value as D;
+
+    return resultConstructFunction({
+      post,
+      isAltLang,
+      otherLangs,
+      userSubscribed: subscriptionKeys.some((key) => isSubscribed(key, post)),
+    });
+  }
+
+  /**
+   * Get the other available language of a post.
+   *
+   * @param {InternalGetPostOptions} options options to get a post
+   * @return {Promise<SupportedLanguages[]>} available languages of a post
+   * @private
+   */
+  private static async getOtherAvailableLangOfPost<
+    D extends PostDocumentBaseNoTitle,
+    T extends PostGetResult<D>
+  >(options: InternalGetPostOptions<D, T>): Promise<SupportedLanguages[]> {
+    const {
+      collection,
+      findCondition,
+      lang = SupportedLanguages.CHT,
+      incCount = true,
+    } = options;
+
     let otherLangs: SupportedLanguages[] = [];
     if (incCount) {
       // Only get the other available languages when incCount is true,
@@ -92,29 +159,7 @@ export abstract class PostController {
       otherLangs = langsAvailable.map((doc) => doc[MultiLingualDocumentKey.language]);
     }
 
-    const postDataUpdate = {
-      $inc: {[ViewCountableDocumentKey.viewCount]: incCount ? 1 : 0},
-    } as unknown as UpdateFilter<D>;
-
-    let isAltLang = false;
-    let post = await collection.findOneAndUpdate(
-      {...findCondition, [MultiLingualDocumentKey.language]: lang} as Filter<D>,
-      postDataUpdate,
-    );
-
-    if (!post.value) {
-      post = await collection.findOneAndUpdate(
-        findCondition,
-        postDataUpdate,
-      );
-      if (!post.value) { // Post with the given ID not found
-        return null;
-      }
-
-      isAltLang = true;
-    }
-
-    return resultConstructFunction(post.value as D, isAltLang, otherLangs);
+    return otherLangs;
   }
 
   /**

@@ -5,12 +5,12 @@ import {UnitInfoLookupController} from '../controller';
 import {UnitInfoLookupLandingResponse} from './response';
 
 
-export const handleUnitInfoLookupLanding = async (
-  {payload, mongoClient}: HandlerParams<UnitInfoLookupLandingPayload>,
-): Promise<UnitInfoLookupLandingResponse> => {
-  payload = processLookupAnalysisPayload(payload);
+export const handleUnitInfoLookupLanding = async ({
+  payload, mongoClient,
+}: HandlerParams<UnitInfoLookupLandingPayload>): Promise<UnitInfoLookupLandingResponse> => {
+  const {uid, lang} = processLookupAnalysisPayload(payload);
 
   return new UnitInfoLookupLandingResponse({
-    analyses: await UnitInfoLookupController.getRecentlyModifiedAnalyses(mongoClient, payload.lang),
+    analyses: await UnitInfoLookupController.getRecentlyModifiedAnalyses({mongoClient, uid, lang}),
   });
 };

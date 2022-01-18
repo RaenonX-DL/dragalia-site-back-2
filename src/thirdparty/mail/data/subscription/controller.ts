@@ -122,4 +122,44 @@ export class SubscriptionRecordController {
         [SubscriptionRecordDocumentKey.key]: subKey,
       });
   }
+
+  /**
+   * Checks if the user has subscribed to any of the given keys.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} uid user to check against
+   * @param {SubscriptionKey[]} keys subscription keys to check against
+   * @return {Promise<boolean>} if the user has subscribed
+   */
+  static async isUserSubscribed(mongoClient: MongoClient, uid: string, keys: SubscriptionKey[]): Promise<boolean> {
+    const userData = await UserController.getUserData(mongoClient, uid);
+
+    if (!userData) {
+      return false;
+    }
+
+    return !!await SubscriptionRecord.getCollection(mongoClient).findOne({
+      [SubscriptionRecordDocumentKey.key]: {$in: keys},
+      [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
+    });
+  }
+
+  /**
+   * Get the subscription keys of a user.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {string} uid user ID to check the subscription
+   * @return {Promise<SubscriptionKey[]>} subscription keys of a user
+   */
+  static async getSubscriptionsOfUser(mongoClient: MongoClient, uid: string): Promise<SubscriptionKey[]> {
+    if (!uid) {
+      // `uid` could be an empty string
+      return [];
+    }
+
+    return await SubscriptionRecord.getCollection(mongoClient)
+      .find({[SubscriptionRecordDocumentKey.uid]: new ObjectId(uid)})
+      .map((doc) => doc[SubscriptionRecordDocumentKey.key])
+      .toArray();
+  }
 }

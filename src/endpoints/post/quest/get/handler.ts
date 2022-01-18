@@ -20,13 +20,8 @@ export const handleGetQuestPost = async (
   return handleGetPost(
     mongoClient,
     payload,
-    (payload) => (
-      QuestPostController.getQuestPost(mongoClient, payload.seqId, payload.lang, true)
+    ({uid, seqId, lang}) => (
+      QuestPostController.getQuestPost({mongoClient, uid, seqId, lang, incCount: true})
     ),
-    (getResult) => {
-      return new QuestPostGetResponse(
-        getResult.toResponseReady(),
-      );
-    },
-  );
+    (getResult) => new QuestPostGetResponse(getResult.toResponseReady()));
 };
