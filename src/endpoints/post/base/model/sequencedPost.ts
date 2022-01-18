@@ -66,15 +66,18 @@ export abstract class SequencedPost extends PostNoTitle implements SequentialDoc
   static getCollectionWithInfo<T extends SequentialDocumentBase>(
     mongoClient: MongoClient, dbInfo: CollectionInfo,
   ): Collection<T> {
-    return getCollection(mongoClient, dbInfo, ((collection) => {
+    return getCollection(mongoClient, dbInfo, (collection) => {
       collection.createIndex(
         [
           {[SequentialDocumentKey.sequenceId]: -1},
           {[MultiLingualDocumentKey.language]: 1},
         ],
         {unique: true},
+        // Empty function to avoid `createdIndex` returning promise
+        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
+        () => void 0,
       );
-    }));
+    });
   }
 
   /**

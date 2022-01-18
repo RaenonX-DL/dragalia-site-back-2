@@ -24,7 +24,13 @@ export type GACacheDocument = {
 const getCacheCollection = (mongoClient: MongoClient): Collection<GACacheDocument> => {
   return getCollection<GACacheDocument>(mongoClient, dbInfo, (collection) => {
     // Enable data auto-expiration
-    collection.createIndex(GACacheKey.generationTimestamp, {expireAfterSeconds: CACHE_LIFE_SECS});
+    collection.createIndex(
+      GACacheKey.generationTimestamp,
+      {expireAfterSeconds: CACHE_LIFE_SECS},
+      // Empty function to avoid `createdIndex` returning promise
+      // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
+      () => void 0,
+    );
   });
 };
 

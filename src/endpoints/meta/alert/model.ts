@@ -69,12 +69,15 @@ export class AlertEntry extends Document {
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection<AlertEntryDocument> {
-    return getCollection<AlertEntryDocument>(mongoClient, dbInfo, ((collection) => {
+    return getCollection<AlertEntryDocument>(mongoClient, dbInfo, (collection) => {
       collection.createIndex(
         {[AlertEntryKey.priority]: 1, [MultiLingualDocumentKey.language]: 1},
         {unique: true, partialFilterExpression: {houseName: {$type: 'number'}}},
+        // Empty function to avoid `createdIndex` returning promise
+        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
+        () => void 0,
       );
-    }));
+    });
   }
 
   /**

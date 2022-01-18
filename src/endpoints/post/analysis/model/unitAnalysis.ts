@@ -93,15 +93,18 @@ export abstract class UnitAnalysis extends PostNoTitle {
    * @inheritDoc
    */
   static getCollection(mongoClient: MongoClient): Collection<AnalysisDocument> {
-    return getCollection<AnalysisDocument>(mongoClient, dbInfo, ((collection) => {
+    return getCollection<AnalysisDocument>(mongoClient, dbInfo, (collection) => {
       collection.createIndex(
         [
           {[UnitAnalysisDocumentKey.unitId]: 1},
           {[MultiLingualDocumentKey.language]: 1},
         ],
         {unique: true},
+        // Empty function to avoid `createdIndex` returning promise
+        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
+        () => void 0,
       );
-    }));
+    });
   }
 
   /**
