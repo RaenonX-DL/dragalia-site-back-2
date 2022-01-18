@@ -56,7 +56,7 @@ export class KeyPointController {
    * @return {Array<number>} unit IDs that shares the requested key point
    */
   static async getEntry(mongoClient: MongoClient, id: string): Promise<KeyPointEntry | null> {
-    const entry = await (KeyPointEntry.getCollection(mongoClient) as unknown as Collection<KeyPointEntryDocument>)
+    const entry = await KeyPointEntry.getCollection(mongoClient)
       .findOne({[DocumentBaseKey.id]: new ObjectId(id)});
 
     if (!entry) {

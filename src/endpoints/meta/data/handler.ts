@@ -19,5 +19,5 @@ export const handleDataMeta = async ({
 
   const user = await UserController.getUserData(mongoClient, payload.uid);
 
-  return dataMetaHandlers[payload.type]({mongoClient, payload, user});
+  return await dataMetaHandlers[payload.type]({mongoClient, payload, user});
 };

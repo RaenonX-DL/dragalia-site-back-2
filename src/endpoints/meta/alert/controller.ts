@@ -19,7 +19,7 @@ export class AlertController {
    * @return {Promise<Array<AlertEntry>>}
    */
   static async getSiteAlerts(mongoClient: MongoClient, lang: SupportedLanguages): Promise<Array<AlertEntryApi>> {
-    return AlertEntry.getCollection(mongoClient)
+    return await AlertEntry.getCollection(mongoClient)
       .find({[MultiLingualDocumentKey.language]: lang}, {sort: {[AlertEntryKey.priority]: 'desc'}})
       .map((doc) => AlertEntry.fromDocument(doc as AlertEntryDocument).toApiEntry())
       .toArray();
