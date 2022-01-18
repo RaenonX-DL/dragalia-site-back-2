@@ -73,8 +73,8 @@ the MongoDB instance **MUST** be deployed in the following configuration:
 [back-ci-main-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_build/latest?definitionId=2&branchName=main
 [back-ci-dev]: https://dev.azure.com/RaenonX-DL/DL-Site/_apis/build/status/dragalia-site-back%20(Build)?branchName=dev
 [back-ci-dev-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_build/latest?definitionId=2&branchName=dev
-[back-cd]: https://vsrm.dev.azure.com/RaenonX-DL/_apis/public/Release/badge/0159375c-7a21-49a8-88d5-9af78c5f2150/4/4
-[back-cd-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_release?definitionId=4
+[back-cd]: https://vsrm.dev.azure.com/RaenonX-DL/_apis/public/Release/badge/0159375c-7a21-49a8-88d5-9af78c5f2150/7/7
+[back-cd-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_release?definitionId=7
 [back-time-badge]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2.svg
 [back-time-link]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2
 [back-site-status]: https://badgen.net/uptime-robot/status/m787223687-0bc3d1f09f7bf2b07ed95c85?cache=300
