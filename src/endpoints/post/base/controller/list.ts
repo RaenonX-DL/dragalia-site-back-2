@@ -1,4 +1,4 @@
-import {PostInfo, PostType, SubscriptionKey} from '../../../../api-def/api';
+import {PostInfo, PostType, subKeysInclude, SubscriptionKey} from '../../../../api-def/api';
 import {EditableDocumentKey} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../../base/model/seq';
@@ -36,12 +36,12 @@ export class PostListResult<E extends PostInfo> {
   }: PostListResultInitOpts<E>) {
     this.posts = posts;
 
-    const isGlobalSubscription = subscriptionKeys.includes(globalSubscriptionKey);
+    const isGlobalSubscription = subKeysInclude(subscriptionKeys, globalSubscriptionKey);
 
     this.postListEntries = posts.map((post) => docTransformFunction(
       post,
       isGlobalSubscription ||
-        subscriptionKeys.includes({type: 'post', postType, id: post[SequentialDocumentKey.sequenceId]}),
+        subKeysInclude(subscriptionKeys, {type: 'post', postType, id: post[SequentialDocumentKey.sequenceId]}),
     ));
   }
 }

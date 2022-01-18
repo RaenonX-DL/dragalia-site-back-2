@@ -8,7 +8,7 @@ import {
   DragonAnalysisPublishPayload,
   EmailSendResult,
   PostBodyBase,
-  PostType,
+  PostType, subKeysInclude,
   SubscriptionKey,
   SupportedLanguages,
   UnitType,
@@ -350,7 +350,7 @@ export class AnalysisController extends PostController {
         {type: 'post', postType: PostType.ANALYSIS, id: analysis[UnitAnalysisDocumentKey.unitId]},
       ];
 
-      return subKeys.includes(key);
+      return subKeysInclude(subKeys, key);
     };
 
     const getAnalysisOptions: InternalGetPostOptions<AnalysisDocument, AnalysisGetResult> = {

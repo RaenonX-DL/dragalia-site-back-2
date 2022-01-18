@@ -1,10 +1,11 @@
-import {MongoError} from 'mongodb';
+import {MongoError, ObjectId} from 'mongodb';
 
-import {MiscPostPublishPayload, SupportedLanguages} from '../../../api-def/api';
+import {MiscPostPublishPayload, PostType, SupportedLanguages} from '../../../api-def/api';
 import {Application, createApp} from '../../../app';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
 import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
+import {SubscriptionRecord, SubscriptionRecordDocumentKey} from '../../../thirdparty/mail/data/subscription/model';
 import * as sendEmailEdited from '../../../thirdparty/mail/send/post/edited';
 import * as sendEmailPublished from '../../../thirdparty/mail/send/post/published';
 import {GetSequentialPostOptions} from '../base/controller/type';
@@ -264,6 +265,64 @@ describe('Misc post controller', () => {
     });
 
     expect(postListResult.postListEntries.map((entry) => entry.seqId)).toStrictEqual([]);
+  });
+
+  it('returns correct subscription status if user ID is empty', async () => {
+    for (let i = 0; i < 7; i++) {
+      await MiscPostController.publishPost(app.mongoClient, payload);
+    }
+
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: '',
+      lang: SupportedLanguages.CHT,
+    });
+
+    expect(postListResult.postListEntries.every((entry) => !entry.userSubscribed)).toBeTruthy();
+  });
+
+  it('returns correct subscription status if the user has global subscription', async () => {
+    const uid = new ObjectId();
+
+    for (let i = 0; i < 7; i++) {
+      await MiscPostController.publishPost(app.mongoClient, payload);
+    }
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
+      [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_MISC'},
+      [SubscriptionRecordDocumentKey.uid]: uid,
+    });
+
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: uid.toHexString(),
+      lang: SupportedLanguages.CHT,
+    });
+
+    expect(postListResult.postListEntries.every((entry) => entry.userSubscribed)).toBeTruthy();
+  });
+
+  it('returns correct subscription status if the user has specific subscription', async () => {
+    const uid = new ObjectId();
+
+    for (let i = 0; i < 7; i++) {
+      await MiscPostController.publishPost(app.mongoClient, payload);
+    }
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
+      [SubscriptionRecordDocumentKey.key]: {type: 'post', postType: PostType.MISC, id: 6},
+      [SubscriptionRecordDocumentKey.uid]: uid,
+    });
+
+    const postListResult = await MiscPostController.getPostList({
+      mongoClient: app.mongoClient,
+      uid: uid.toHexString(),
+      lang: SupportedLanguages.CHT,
+    });
+
+    expect(postListResult.postListEntries.length).toBeGreaterThan(0);
+    expect(postListResult.postListEntries.filter(({seqId}) => seqId !== 6).every(({userSubscribed}) => !userSubscribed))
+      .toBeTruthy();
+    expect(postListResult.postListEntries.filter(({seqId}) => seqId === 6).every(({userSubscribed}) => userSubscribed))
+      .toBeTruthy();
   });
 
   it('increases the view count of a post after getting it', async () => {

@@ -298,7 +298,7 @@ describe('Quest post controller', () => {
     const postListResult = await QuestPostController.getPostList({
       mongoClient: app.mongoClient,
       uid: '',
-      lang: SupportedLanguages.EN,
+      lang: SupportedLanguages.CHT,
     });
 
     expect(postListResult.postListEntries.every((entry) => !entry.userSubscribed)).toBeTruthy();
@@ -317,8 +317,8 @@ describe('Quest post controller', () => {
 
     const postListResult = await QuestPostController.getPostList({
       mongoClient: app.mongoClient,
-      uid: '',
-      lang: SupportedLanguages.EN,
+      uid: uid.toHexString(),
+      lang: SupportedLanguages.CHT,
     });
 
     expect(postListResult.postListEntries.every((entry) => entry.userSubscribed)).toBeTruthy();
@@ -337,12 +337,15 @@ describe('Quest post controller', () => {
 
     const postListResult = await QuestPostController.getPostList({
       mongoClient: app.mongoClient,
-      uid: '',
-      lang: SupportedLanguages.EN,
+      uid: uid.toHexString(),
+      lang: SupportedLanguages.CHT,
     });
 
-    expect(postListResult.postListEntries.every((entry) => entry.seqId !== 6 && !entry.userSubscribed)).toBeTruthy();
-    expect(postListResult.postListEntries.every((entry) => entry.seqId === 6 && entry.userSubscribed)).toBeTruthy();
+    expect(postListResult.postListEntries.length).toBeGreaterThan(0);
+    expect(postListResult.postListEntries.filter(({seqId}) => seqId !== 6).every(({userSubscribed}) => !userSubscribed))
+      .toBeTruthy();
+    expect(postListResult.postListEntries.filter(({seqId}) => seqId === 6).every(({userSubscribed}) => userSubscribed))
+      .toBeTruthy();
   });
 
   it('increases the view count of a post after getting it', async () => {

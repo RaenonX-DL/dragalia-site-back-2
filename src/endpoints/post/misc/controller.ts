@@ -5,7 +5,9 @@ import {
   MiscPostEditPayload,
   MiscPostPublishPayload,
   PostType,
-  SequencedPostInfo, SubscriptionKey,
+  SequencedPostInfo,
+  subKeysInclude,
+  SubscriptionKey,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
@@ -191,7 +193,7 @@ export class MiscPostController extends PostController implements SequencedContr
           {type: 'post', postType: PostType.ANALYSIS, id: post[SequentialDocumentKey.sequenceId]},
         ];
 
-        return subKeys.includes(key);
+        return subKeysInclude(subKeys, key);
       },
       lang,
       incCount,

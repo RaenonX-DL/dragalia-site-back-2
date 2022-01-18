@@ -1,4 +1,10 @@
-import {PostType, SubscriptionKey, UnitInfoLookupAnalyses, UnitInfoLookupEntry} from '../../../api-def/api';
+import {
+  PostType,
+  subKeysInclude,
+  SubscriptionKey,
+  UnitInfoLookupAnalyses,
+  UnitInfoLookupEntry,
+} from '../../../api-def/api';
 import {EditableDocumentKey} from '../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../base/model/multiLang';
 import {SequentialDocumentKey} from '../../../base/model/seq';
@@ -96,7 +102,7 @@ export class UnitInfoLookupController {
           {type: 'post', postType: PostType.ANALYSIS, id: post[UnitAnalysisDocumentKey.unitId]},
         ];
 
-        return subKeys.includes(key);
+        return subKeysInclude(subKeys, key);
       }),
     }));
   }
