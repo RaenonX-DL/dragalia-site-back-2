@@ -1,24 +1,28 @@
-import {SequencedPostListResponse, ApiResponseCode, SequencedPostInfo} from '../../../../../api-def/api';
+import {SequencedPostListResponse, ApiResponseCode, SequencedPostInfo, BaseResponse} from '../../../../../api-def/api';
 import {ApiResponse} from '../../../../../base/response';
 
+
+export type PostListResponseOptions<E extends SequencedPostInfo> =
+  Omit<SequencedPostListResponse<E>, keyof BaseResponse>;
 
 /**
  * API response class for a successful post listing.
  */
-export abstract class PostListResponse extends ApiResponse {
-  posts: Array<SequencedPostInfo>;
+export abstract class PostListResponse<E extends SequencedPostInfo> extends ApiResponse {
+  posts: Array<E>;
+  userSubscribed: boolean;
 
   /**
-   * Construct a successful post listing API response.
+   * Construct a successful post list API response.
    *
-   * @param {boolean} isAdmin if the user requested this is an admin
-   * @param {Array<SequencedPostInfo>} posts post entries to be listed
+   * @param {PostListResponseOptions} options options to construct a post list API response.
    * @protected
    */
-  constructor(isAdmin: boolean, posts: Array<SequencedPostInfo>) {
+  constructor({posts, userSubscribed}: PostListResponseOptions<E>) {
     super(ApiResponseCode.SUCCESS);
 
     this.posts = posts;
+    this.userSubscribed = userSubscribed;
   }
 
   /**
@@ -28,6 +32,7 @@ export abstract class PostListResponse extends ApiResponse {
     return {
       ...super.toJson(),
       posts: this.posts,
+      userSubscribed: this.userSubscribed,
     };
   }
 }

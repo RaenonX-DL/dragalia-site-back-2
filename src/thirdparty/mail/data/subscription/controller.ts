@@ -132,9 +132,8 @@ export class SubscriptionRecordController {
    * @return {Promise<boolean>} if the user has subscribed
    */
   static async isUserSubscribed(mongoClient: MongoClient, uid: string, keys: SubscriptionKey[]): Promise<boolean> {
-    const userData = await UserController.getUserData(mongoClient, uid);
-
-    if (!userData) {
+    if (!uid) {
+      // No need to check if the UID is empty
       return false;
     }
 

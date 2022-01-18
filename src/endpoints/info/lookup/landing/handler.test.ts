@@ -10,6 +10,7 @@ import {
   UnitType,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
+import {SubscriptionRecord, SubscriptionRecordDocumentKey} from '../../../../thirdparty/mail/data/subscription/model';
 import {AnalysisController} from '../../../post/analysis/controller';
 
 
@@ -116,5 +117,39 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis looku
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(Object.values(json.analyses).map((entry) => entry.unitId)).toStrictEqual([]);
+  });
+
+  it('returns that the user has subscribed', async () => {
+    const uid = new ObjectId();
+
+    await SubscriptionRecord.getCollection(app.mongoClient).insertOne({
+      [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_ANALYSIS'},
+      [SubscriptionRecordDocumentKey.uid]: uid,
+    });
+
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING)
+      .query({...payloadLookup, uid: uid.toHexString()});
+    expect(result.statusCode).toBe(200);
+
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeTruthy();
+  });
+
+  it('returns that the user is not subscribed', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950201});
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadPost, unitId: 10950101});
+
+    const result = await app.app.inject().get(ApiEndPoints.INFO_UNIT_LOOKUP_LANDING).query(payloadLookup);
+    expect(result.statusCode).toBe(200);
+
+    const json: UnitInfoLookupLandingResponse = result.json() as UnitInfoLookupLandingResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeFalsy();
   });
 });

@@ -11,12 +11,11 @@ export const handleListQuestPost = async ({
 }: HandlerParams<QuestPostListPayload>): Promise<QuestPostListResponse> => {
   payload = processQuestListPayload(payload);
 
-  return handleListPost(
+  return handleListPost({
     mongoClient,
     payload,
-    QuestPostController.getPostList,
-    (userData, postUnits) => {
-      return new QuestPostListResponse(userData ? userData.isAdmin : false, postUnits);
-    },
-  );
+    fnGetPostList: QuestPostController.getPostList,
+    fnConstructResponse: (options) => new QuestPostListResponse(options),
+    globalSubscriptionKeyName: 'ALL_QUEST',
+  });
 };

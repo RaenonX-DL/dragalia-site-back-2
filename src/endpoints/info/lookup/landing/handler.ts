@@ -1,4 +1,5 @@
 import {UnitInfoLookupLandingPayload} from '../../../../api-def/api';
+import {SubscriptionRecordController} from '../../../../thirdparty/mail/data/subscription/controller';
 import {processLookupAnalysisPayload} from '../../../../utils/payload';
 import {HandlerParams} from '../../../lookup';
 import {UnitInfoLookupController} from '../controller';
@@ -10,7 +11,10 @@ export const handleUnitInfoLookupLanding = async ({
 }: HandlerParams<UnitInfoLookupLandingPayload>): Promise<UnitInfoLookupLandingResponse> => {
   const {uid, lang} = processLookupAnalysisPayload(payload);
 
-  return new UnitInfoLookupLandingResponse({
-    analyses: await UnitInfoLookupController.getRecentlyModifiedAnalyses({mongoClient, uid, lang}),
-  });
+  const [analyses, userSubscribed] = await Promise.all([
+    UnitInfoLookupController.getRecentlyModifiedAnalyses({mongoClient, uid, lang}),
+    SubscriptionRecordController.isUserSubscribed(mongoClient, uid, [{type: 'const', name: 'ALL_ANALYSIS'}]),
+  ]);
+
+  return new UnitInfoLookupLandingResponse({analyses, userSubscribed});
 };

@@ -2,29 +2,30 @@ import {
   ApiResponseCode,
   UnitInfoLookupLandingResponse as UnitInfoLookupLandingResponseApi,
   UnitInfoLookupEntry,
+  BaseResponse,
 } from '../../../../api-def/api';
 import {ApiResponse} from '../../../../base/response';
 
 
-type ConstructOptions = {
-  analyses: Array<UnitInfoLookupEntry>
-};
+type UnitInfoLookupLandingResponseOptions = Omit<UnitInfoLookupLandingResponseApi, keyof BaseResponse>;
 
 /**
  * API response class for getting the info to be used upon landing on analysis lookup.
  */
 export class UnitInfoLookupLandingResponse extends ApiResponse {
   analyses: Array<UnitInfoLookupEntry>;
+  userSubscribed: boolean;
 
   /**
    * Construct an analysis lookup landing info API response.
    *
-   * @param {ConstructOptions} options options to construct the response
+   * @param {UnitInfoLookupLandingResponseOptions} options options to construct the response
    */
-  constructor(options: ConstructOptions) {
+  constructor({analyses, userSubscribed}: UnitInfoLookupLandingResponseOptions) {
     super(ApiResponseCode.SUCCESS);
 
-    this.analyses = options.analyses;
+    this.analyses = analyses;
+    this.userSubscribed = userSubscribed;
   }
 
   /**
@@ -34,6 +35,7 @@ export class UnitInfoLookupLandingResponse extends ApiResponse {
     return {
       ...super.toJson(),
       analyses: this.analyses,
+      userSubscribed: this.userSubscribed,
     };
   }
 }

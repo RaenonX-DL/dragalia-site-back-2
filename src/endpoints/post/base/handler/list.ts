@@ -1,34 +1,49 @@
 import {MongoClient} from 'mongodb';
 
-import {SequencedPostListPayload, SequencedPostInfo} from '../../../../api-def/api';
-import {UserController} from '../../../userControl/controller';
-import {User} from '../../../userControl/model';
+import {
+  SequencedPostListPayload,
+  SequencedPostInfo,
+  SubscriptionKeyConstName,
+} from '../../../../api-def/api';
+import {SubscriptionRecordController} from '../../../../thirdparty/mail/data/subscription/controller';
 import {PostListResult} from '../controller/list';
 import {ListPostOptions} from '../controller/type';
-import {PostListResponse} from '../response/post/list';
+import {PostListResponse, PostListResponseOptions} from '../response/post/list';
 
 
 type FunctionGetPostList<E extends SequencedPostInfo> = (options: ListPostOptions) => Promise<PostListResult<E>>;
 
-type FunctionConstructResponse<R extends PostListResponse> = (
-  userData: User | null, postUnits: Array<SequencedPostInfo>
+type FunctionConstructResponse<E extends SequencedPostInfo, R extends PostListResponse<E>> = (
+  options: PostListResponseOptions<E>
 ) => R;
 
-export const handleListPost = async <P extends SequencedPostListPayload,
-  R extends PostListResponse,
-  E extends SequencedPostInfo>(
+type ListPostHandlerOptions<
+  P extends SequencedPostListPayload,
+  R extends PostListResponse<E>,
+  E extends SequencedPostInfo
+> = {
   mongoClient: MongoClient,
   payload: P,
   fnGetPostList: FunctionGetPostList<E>,
-  fnConstructResponse: FunctionConstructResponse<R>,
-): Promise<R> => {
+  fnConstructResponse: FunctionConstructResponse<E, R>,
+  globalSubscriptionKeyName: SubscriptionKeyConstName,
+};
+
+export const handleListPost = async <
+  P extends SequencedPostListPayload,
+  R extends PostListResponse<E>,
+  E extends SequencedPostInfo
+>(options: ListPostHandlerOptions<P, R, E>): Promise<R> => {
+  const {mongoClient, payload, fnGetPostList, fnConstructResponse, globalSubscriptionKeyName} = options;
+
   const {uid, lang} = payload;
 
   // Get a list of posts
-  const {postListEntries} = await fnGetPostList({mongoClient, uid, lang});
+  const {postListEntries: posts} = await fnGetPostList({mongoClient, uid, lang});
 
-  // Get the data of the user who send this request
-  const userData = await UserController.getUserData(mongoClient, uid);
+  const userSubscribed = await SubscriptionRecordController.isUserSubscribed(
+    mongoClient, uid, [{type: 'const', name: globalSubscriptionKeyName}],
+  );
 
-  return fnConstructResponse(userData, postListEntries);
+  return fnConstructResponse({posts, userSubscribed});
 };
