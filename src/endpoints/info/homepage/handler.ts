@@ -12,7 +12,7 @@ export const handleHomepageLanding = async ({
   payload,
   mongoClient,
 }: HandlerParams<HomepageLandingPayload>): Promise<HomepageLandingResponse> => {
-  const gaData = await getGaData();
+  const gaData = await getGaData(mongoClient);
 
   const data: HomepageData = {
     posts: {
