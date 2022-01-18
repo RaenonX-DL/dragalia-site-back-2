@@ -121,7 +121,7 @@ export class SequentialDocument extends Document {
   private static async init(
     mongoClient: MongoClient, dbInfo: CollectionInfo, lang?: SupportedLanguages,
   ): Promise<void> {
-    this.seqCollection = getCollection(mongoClient, {...dbInfo, collectionName: counterCollectionName});
+    this.seqCollection = await getCollection(mongoClient, {...dbInfo, collectionName: counterCollectionName});
 
     // Initialize the counter field, if not yet available
     await this.seqCollection.updateOne(

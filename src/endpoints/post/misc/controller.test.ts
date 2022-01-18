@@ -97,7 +97,7 @@ describe('Misc post controller', () => {
 
     expect(seqId).toBe(1);
 
-    const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -122,7 +122,7 @@ describe('Misc post controller', () => {
 
     await MiscPostController.publishPost(app.mongoClient, {...payload2, seqId});
 
-    const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
@@ -145,7 +145,7 @@ describe('Misc post controller', () => {
       .rejects
       .toThrow(MongoError);
 
-    const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -174,17 +174,17 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, lang: SupportedLanguages.JP});
 
-    let postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
     expect(post.seqId).toBe(1);
-    postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
     expect(post.seqId).toBe(1);
-    postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
@@ -196,17 +196,17 @@ describe('Misc post controller', () => {
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.CHT});
     await MiscPostController.publishPost(app.mongoClient, {...payload, seqId: 1, lang: SupportedLanguages.JP});
 
-    let postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
     expect(post.seqId).toBe(1);
-    postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
     expect(post.seqId).toBe(1);
-    postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = MiscPost.fromDocument(postDoc as unknown as MiscPostDocument);
@@ -375,7 +375,7 @@ describe('Misc post controller', () => {
 
     expect(updated).toBe('UPDATED');
 
-    const postDoc = await MiscPost.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: seqId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });

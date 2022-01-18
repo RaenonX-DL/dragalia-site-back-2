@@ -156,8 +156,8 @@ export class UnitTierNote extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<UnitTierNoteDocument> {
-    return getCollection<UnitTierNoteDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<UnitTierNoteDocument>> {
+    return await getCollection<UnitTierNoteDocument>(mongoClient, dbInfo);
   }
 
   /**

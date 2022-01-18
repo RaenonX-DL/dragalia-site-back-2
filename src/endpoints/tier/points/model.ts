@@ -50,8 +50,8 @@ export class KeyPointEntry extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<KeyPointEntryDocument> {
-    return getCollection<KeyPointEntryDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<KeyPointEntryDocument>> {
+    return await getCollection<KeyPointEntryDocument>(mongoClient, dbInfo);
   }
 
   /**

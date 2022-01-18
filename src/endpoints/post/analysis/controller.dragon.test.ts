@@ -46,7 +46,7 @@ describe('Dragon Analysis Controller', () => {
 
     expect(unitId).toBe(payloadDragon.unitId);
 
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -79,7 +79,7 @@ describe('Dragon Analysis Controller', () => {
       passives: 'passive-en',
     });
 
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
@@ -105,7 +105,7 @@ describe('Dragon Analysis Controller', () => {
       .rejects
       .toThrow(MongoError);
 
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -145,17 +145,17 @@ describe('Dragon Analysis Controller', () => {
     await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: SupportedLanguages.CHT});
     await AnalysisController.publishDragonAnalysis(app.mongoClient, {...payloadDragon, lang: SupportedLanguages.JP});
 
-    let postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
     expect(post.unitId).toBe(payloadDragon.unitId);
-    postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
     expect(post.unitId).toBe(payloadDragon.unitId);
-    postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
@@ -176,17 +176,17 @@ describe('Dragon Analysis Controller', () => {
       {...payloadDragon, unitId: 20030402, lang: SupportedLanguages.JP},
     );
 
-    let postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
     expect(post.unitId).toBe(20030102);
-    postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
     expect(post.unitId).toBe(20030202);
-    postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = DragonAnalysis.fromDocument(postDoc as unknown as DragonAnalysisDocument);
@@ -203,7 +203,7 @@ describe('Dragon Analysis Controller', () => {
 
     expect(updated).toBe('UPDATED');
 
-    const postDoc = await DragonAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await DragonAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadDragon.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });

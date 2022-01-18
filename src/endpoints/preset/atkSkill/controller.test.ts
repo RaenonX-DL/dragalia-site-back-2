@@ -21,7 +21,7 @@ describe('ATK skill input preset controller', () => {
   });
 
   it('returns the preset if found', async () => {
-    const insertResult = await AtkSkillPreset.getCollection(app.mongoClient)
+    const insertResult = await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const preset = await AtkSkillPresetController.getPreset(app.mongoClient, insertResult.insertedId.toHexString());
@@ -34,7 +34,7 @@ describe('ATK skill input preset controller', () => {
   });
 
   it('returns null if the preset ID is not a valid object ID', async () => {
-    await AtkSkillPreset.getCollection(app.mongoClient)
+    await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const preset = await AtkSkillPresetController.getPreset(app.mongoClient, 'a');

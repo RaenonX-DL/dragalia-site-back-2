@@ -44,7 +44,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       const data = await TierNoteController.getAllTierNotes(app.mongoClient, SupportedLanguages.CHT);
 
@@ -68,7 +68,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       const data = await TierNoteController.getAllTierNotes(app.mongoClient, SupportedLanguages.EN);
 
@@ -106,7 +106,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       const data = await TierNoteController.getUnitTierNoteSingle(app.mongoClient, SupportedLanguages.CHT, 10950101);
 
@@ -130,7 +130,7 @@ describe('Tier note data controller', () => {
         },
       );
 
-      const doc = await UnitTierNote.getCollection(app.mongoClient)
+      const doc = await (await UnitTierNote.getCollection(app.mongoClient))
         .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
       delete doc[DocumentBaseKey.id];
@@ -162,7 +162,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
         app.mongoClient, SupportedLanguages.CHT, 10950101,
@@ -172,7 +172,7 @@ describe('Tier note data controller', () => {
         },
       );
 
-      const doc = await UnitTierNote.getCollection(app.mongoClient)
+      const doc = await (await UnitTierNote.getCollection(app.mongoClient))
         .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
       delete doc[DocumentBaseKey.id];
@@ -204,7 +204,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
         app.mongoClient, SupportedLanguages.CHT, 10950101,
@@ -214,7 +214,7 @@ describe('Tier note data controller', () => {
         },
       );
 
-      const doc = await UnitTierNote.getCollection(app.mongoClient)
+      const doc = await (await UnitTierNote.getCollection(app.mongoClient))
         .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
       delete doc[DocumentBaseKey.id];
@@ -244,7 +244,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
         app.mongoClient, SupportedLanguages.CHT, 10950101,
@@ -254,7 +254,7 @@ describe('Tier note data controller', () => {
         },
       );
 
-      const doc = await UnitTierNote.getCollection(app.mongoClient)
+      const doc = await (await UnitTierNote.getCollection(app.mongoClient))
         .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
       delete doc[DocumentBaseKey.id];
@@ -290,7 +290,7 @@ describe('Tier note data controller', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
         app.mongoClient, SupportedLanguages.CHT, 10950101,
@@ -300,7 +300,7 @@ describe('Tier note data controller', () => {
         },
       );
 
-      const doc = await UnitTierNote.getCollection(app.mongoClient)
+      const doc = await (await UnitTierNote.getCollection(app.mongoClient))
         .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
       delete doc[DocumentBaseKey.id];

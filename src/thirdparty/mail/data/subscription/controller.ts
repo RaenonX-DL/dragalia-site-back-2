@@ -32,7 +32,7 @@ export class SubscriptionRecordController {
     lang: SupportedLanguages,
     keys: SubscriptionKey[],
   ): Promise<string[]> {
-    const uidSubscribed = await SubscriptionRecord.getCollection(mongoClient)
+    const uidSubscribed = await (await SubscriptionRecord.getCollection(mongoClient))
       .find({[SubscriptionRecordDocumentKey.key]: {$in: keys}})
       .map((doc) => doc[SubscriptionRecordDocumentKey.uid].toHexString())
       .toArray();
@@ -59,7 +59,7 @@ export class SubscriptionRecordController {
 
     await execTransaction(mongoClient, async (session) => {
       const uidObjectId = new ObjectId(uid);
-      const collection = SubscriptionRecord.getCollection(mongoClient);
+      const collection = await SubscriptionRecord.getCollection(mongoClient);
 
       await collection.deleteMany({[SubscriptionRecordDocumentKey.uid]: new ObjectId(uid)}, {session});
 
@@ -90,7 +90,7 @@ export class SubscriptionRecordController {
     const subKey = JSON.parse(Buffer.from(subKeyBase64, 'base64url').toString()) as SubscriptionKey;
 
     try {
-      await SubscriptionRecord.getCollection(mongoClient)
+      await (await SubscriptionRecord.getCollection(mongoClient))
         .insertOne({
           [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
           [SubscriptionRecordDocumentKey.key]: subKey,
@@ -116,7 +116,7 @@ export class SubscriptionRecordController {
 
     const subKey = JSON.parse(Buffer.from(subKeyBase64, 'base64url').toString()) as SubscriptionKey;
 
-    await SubscriptionRecord.getCollection(mongoClient)
+    await (await SubscriptionRecord.getCollection(mongoClient))
       .deleteOne({
         [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
         [SubscriptionRecordDocumentKey.key]: subKey,
@@ -137,7 +137,7 @@ export class SubscriptionRecordController {
       return false;
     }
 
-    return !!await SubscriptionRecord.getCollection(mongoClient).findOne({
+    return !!await (await SubscriptionRecord.getCollection(mongoClient)).findOne({
       [SubscriptionRecordDocumentKey.key]: {$in: keys},
       [SubscriptionRecordDocumentKey.uid]: new ObjectId(uid),
     });
@@ -156,7 +156,7 @@ export class SubscriptionRecordController {
       return [];
     }
 
-    return await SubscriptionRecord.getCollection(mongoClient)
+    return await (await SubscriptionRecord.getCollection(mongoClient))
       .find({[SubscriptionRecordDocumentKey.uid]: new ObjectId(uid)})
       .map((doc) => doc[SubscriptionRecordDocumentKey.key])
       .toArray();

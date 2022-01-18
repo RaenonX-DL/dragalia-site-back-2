@@ -63,7 +63,7 @@ export class UnitInfoLookupController {
 
     const query = {[MultiLingualDocumentKey.language]: lang};
 
-    const analyses = UnitAnalysis.getCollection(mongoClient)
+    const analyses = (await UnitAnalysis.getCollection(mongoClient))
       .find(
         query,
         {

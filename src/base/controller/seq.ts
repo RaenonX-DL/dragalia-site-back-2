@@ -16,7 +16,7 @@ export type NextSeqIdOptions = {
   lang?: SupportedLanguages,
 };
 
-type FuncGetCollection<T extends DocumentBase> = (mongoClient: MongoClient) => Collection<T>;
+type FuncGetCollection<T extends DocumentBase> = (mongoClient: MongoClient) => Promise<Collection<T>>;
 
 type FuncGetNextSeqId = (mongoClient: MongoClient, options: NextSeqIdOptions) => Promise<number>;
 
@@ -70,7 +70,7 @@ export abstract class SequencedController {
     // ------------
     // False-negative of the inspection
     // noinspection JSVoidFunctionReturnValueUsed
-    return !await getCollection(mongoClient).findOne(filter);
+    return !await (await getCollection(mongoClient)).findOne(filter);
   }
 
   /**

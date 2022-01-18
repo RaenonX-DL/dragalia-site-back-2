@@ -30,6 +30,6 @@ export const insertMockUser = async (mongoClient: MongoClient, options?: MockUse
     user.adsFreeExpiry = new Date(new Date().getTime() + 20000);
   }
 
-  const insertResult = await User.getCollection(mongoClient).insertOne(user);
+  const insertResult = await (await User.getCollection(mongoClient)).insertOne(user);
   return insertResult.insertedId;
 };

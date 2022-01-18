@@ -149,7 +149,7 @@ export class AnalysisController extends PostController {
 
     const [emailResult] = await Promise.all([
       AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
-      CharaAnalysis.getCollection(mongoClient).insertOne(analysis.toObject()),
+      (await CharaAnalysis.getCollection(mongoClient)).insertOne(analysis.toObject()),
     ]);
 
     return {unitId: analysis.unitId, emailResult};
@@ -173,7 +173,7 @@ export class AnalysisController extends PostController {
 
     const [emailResult] = await Promise.all([
       AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
-      DragonAnalysis.getCollection(mongoClient).insertOne(analysis.toObject()),
+      (await DragonAnalysis.getCollection(mongoClient)).insertOne(analysis.toObject()),
     ]);
 
     return {unitId: analysis.unitId, emailResult};
@@ -194,7 +194,7 @@ export class AnalysisController extends PostController {
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
     const updated = await AnalysisController.editPost(
-      CharaAnalysis.getCollection(mongoClient),
+      await CharaAnalysis.getCollection(mongoClient),
       {
         [UnitAnalysisDocumentKey.unitId]: payload.unitId,
       },
@@ -226,7 +226,7 @@ export class AnalysisController extends PostController {
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
     const updated = await AnalysisController.editPost(
-      DragonAnalysis.getCollection(mongoClient),
+      await DragonAnalysis.getCollection(mongoClient),
       {
         [UnitAnalysisDocumentKey.unitId]: payload.unitId,
       },
@@ -342,7 +342,7 @@ export class AnalysisController extends PostController {
       unitIdentifier = unitId;
     }
 
-    const collection = UnitAnalysis.getCollection(mongoClient);
+    const collection = await UnitAnalysis.getCollection(mongoClient);
 
     const isSubscribed = (key: SubscriptionKey, analysis: AnalysisDocument): boolean => {
       const subKeys: SubscriptionKey[] = [
@@ -398,7 +398,7 @@ export class AnalysisController extends PostController {
       return false;
     }
 
-    return !await UnitAnalysis.getCollection(mongoClient)
+    return !await (await UnitAnalysis.getCollection(mongoClient))
       .findOne({
         [UnitAnalysisDocumentKey.unitId]: unitId,
         [MultiLingualDocumentKey.language]: lang,

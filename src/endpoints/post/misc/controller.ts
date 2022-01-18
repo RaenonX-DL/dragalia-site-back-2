@@ -83,7 +83,7 @@ export class MiscPostController extends PostController implements SequencedContr
 
     const [emailResult] = await Promise.all([
       SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.MISC, post.seqId),
-      MiscPost.getCollection(mongoClient).insertOne(post.toObject()),
+      (await MiscPost.getCollection(mongoClient)).insertOne(post.toObject()),
     ]);
 
     return {seqId: post.seqId, emailResult};
@@ -102,7 +102,7 @@ export class MiscPostController extends PostController implements SequencedContr
     const post: MiscPost = MiscPost.fromPayload(editPayload);
 
     const updated = await MiscPostController.editPost(
-      MiscPost.getCollection(mongoClient),
+      await MiscPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
@@ -139,7 +139,7 @@ export class MiscPostController extends PostController implements SequencedContr
 
     return MiscPostController.listPosts({
       ...options,
-      postCollection: MiscPost.getCollection(mongoClient),
+      postCollection: await MiscPost.getCollection(mongoClient),
       postType: PostType.MISC,
       projection: {
         [SequentialDocumentKey.sequenceId]: 1,
@@ -181,7 +181,7 @@ export class MiscPostController extends PostController implements SequencedContr
 
     return super.getPost<MiscPostDocument, MiscPostGetResult>({
       mongoClient,
-      collection: MiscPost.getCollection(mongoClient),
+      collection: await MiscPost.getCollection(mongoClient),
       uid,
       findCondition: {[SequentialDocumentKey.sequenceId]: seqId},
       resultConstructFunction: (options) => new MiscPostGetResult(options),

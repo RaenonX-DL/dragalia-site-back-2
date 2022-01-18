@@ -43,7 +43,7 @@ describe('Post meta EP', () => {
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 
@@ -247,7 +247,7 @@ describe('Post meta EP', () => {
     });
 
     it('returns correct analysis meta using manual unit name reference', async () => {
-      await UnitNameRefEntry.getCollection(app.mongoClient)
+      await (await UnitNameRefEntry.getCollection(app.mongoClient))
         .insertOne(new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}).toObject());
 
       const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({

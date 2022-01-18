@@ -28,7 +28,7 @@ describe('Tier note data control', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
     const pointIds = Object
-      .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(pointArray)).insertedIds)
+      .values((await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(pointArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const noteArray = [
@@ -41,7 +41,7 @@ describe('Tier note data control', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(noteArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(noteArray);
 
     await KeyPointController.updateEntries(
       app.mongoClient,
@@ -53,12 +53,12 @@ describe('Tier note data control', () => {
     );
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const points = (await KeyPointEntry.getCollection(app.mongoClient).find().toArray())
+      const points = (await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray())
         .map((entry) => entry[KeyPointEntryDocumentKey.description][SupportedLanguages.CHT])
         .sort();
       expect(points).toStrictEqual(['CHT 4', 'CHT 5']);
 
-      const notes = (await UnitTierNote.getCollection(app.mongoClient).find().toArray())
+      const notes = (await (await UnitTierNote.getCollection(app.mongoClient)).find().toArray())
         .map((entry) => entry[UnitTierNoteDocumentKey.points])
         .sort();
       expect(notes).toStrictEqual([[]]);
@@ -75,7 +75,7 @@ describe('Tier note data control', () => {
         new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
       ].map((entry) => entry.toObject());
       pointIds = Object
-        .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(pointArray)).insertedIds)
+        .values((await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(pointArray)).insertedIds)
         .map((id) => id.toHexString());
 
       const noteArray = [
@@ -96,7 +96,7 @@ describe('Tier note data control', () => {
           lastUpdateEpoch: 0,
         }),
       ].map((entry) => entry.toObject());
-      await UnitTierNote.getCollection(app.mongoClient).insertMany(noteArray);
+      await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(noteArray);
     });
 
     it('returns unit IDs that references a certain key point', async () => {

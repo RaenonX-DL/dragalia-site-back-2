@@ -39,9 +39,9 @@ export abstract class Document {
    *
    * @param {MongoClient} mongoClient mongo client instance
    */
-  static getCollection(
+  static async getCollection(
     mongoClient: MongoClient, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Collection<any> {
+  ): Promise<Collection<any>> {
     throw new NotImplementedError('`getCollection()` must be overridden');
   }
 

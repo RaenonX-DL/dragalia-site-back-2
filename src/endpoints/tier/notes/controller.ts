@@ -29,7 +29,7 @@ export class TierNoteController {
    */
   static async getAllTierNotes(mongoClient: MongoClient, lang: SupportedLanguages): Promise<UnitTierData> {
     return Object.fromEntries(
-      await UnitTierNote.getCollection(mongoClient)
+      await (await UnitTierNote.getCollection(mongoClient))
         .find()
         .map((doc) => [
           doc[UnitTierNoteDocumentKey.unitId],
@@ -50,7 +50,7 @@ export class TierNoteController {
   static async getUnitTierNoteSingle(
     mongoClient: MongoClient, lang: SupportedLanguages, unitId: number,
   ): Promise<UnitTierNoteApi | null> {
-    const tierNoteDoc = await UnitTierNote.getCollection(mongoClient)
+    const tierNoteDoc = await (await UnitTierNote.getCollection(mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId});
 
     if (!tierNoteDoc) {
@@ -76,7 +76,7 @@ export class TierNoteController {
     tierNote: Omit<UnitTierNoteApi, 'lastUpdateEpoch'>,
   ): Promise<void> {
     // Get the original document
-    const original: UnitTierNoteDocument = await UnitTierNote.getCollection(mongoClient)
+    const original: UnitTierNoteDocument = await (await UnitTierNote.getCollection(mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId}) as UnitTierNoteDocument;
 
     await sendMailTierUpdated({
@@ -88,7 +88,7 @@ export class TierNoteController {
 
     if (!original) {
       // Original not available - create one and insert it
-      await UnitTierNote.getCollection(mongoClient)
+      await (await UnitTierNote.getCollection(mongoClient))
         .insertOne(UnitTierNote.fromTierNote(unitId, tierNote, lang).toObject());
       return;
     }
@@ -158,7 +158,7 @@ export class TierNoteController {
       [UnitTierNoteDocumentKey.lastUpdateEpoch]: lastUpdateEpoch,
     };
 
-    await UnitTierNote.getCollection(mongoClient)
+    await (await UnitTierNote.getCollection(mongoClient))
       .updateOne(
         {[UnitTierNoteDocumentKey.unitId]: unitId},
         {$set: updateDoc},

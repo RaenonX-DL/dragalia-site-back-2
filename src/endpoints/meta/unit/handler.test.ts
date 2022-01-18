@@ -35,7 +35,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_UNIT} - unit page meta`, () => {
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 

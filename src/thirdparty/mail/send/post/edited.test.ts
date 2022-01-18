@@ -59,8 +59,8 @@ describe('Email sending on post edited', () => {
   beforeEach(async () => {
     await app.reset();
 
-    await User.getCollection(app.mongoClient).insertMany(users);
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subRecs);
+    await (await User.getCollection(app.mongoClient)).insertMany(users);
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany(subRecs);
 
     jest.spyOn(sendFuncBase, 'sendMail').mockImplementation(async ({to}) => ({accepted: to, rejected: []}));
   });

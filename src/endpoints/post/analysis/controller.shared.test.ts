@@ -72,8 +72,8 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   it('returns correct analysis using sequential ID', async () => {
     // Insert analysis with seq ID
     const analysis = CharaAnalysis.fromPayload(payloadChara);
-    await UnitAnalysis
-      .getCollection(app.mongoClient)
+    await (await UnitAnalysis
+      .getCollection(app.mongoClient))
       .insertOne({...analysis.toObject(), [SequentialDocumentKey.sequenceId]: 1});
 
     const analysisFromDb = await AnalysisController.getAnalysis({

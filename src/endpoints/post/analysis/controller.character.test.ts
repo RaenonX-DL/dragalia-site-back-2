@@ -52,7 +52,7 @@ describe('Character Analysis Controller', () => {
 
     expect(unitId).toBe(10950101);
 
-    const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -91,7 +91,7 @@ describe('Character Analysis Controller', () => {
       passives: 'passive-en',
     });
 
-    const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
@@ -133,17 +133,17 @@ describe('Character Analysis Controller', () => {
       lang: SupportedLanguages.JP,
     });
 
-    let postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
     expect(post.unitId).toBe(10950101);
-    postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
     expect(post.unitId).toBe(10950102);
-    postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
@@ -156,7 +156,7 @@ describe('Character Analysis Controller', () => {
       .rejects
       .toThrow(MongoError);
 
-    const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -203,17 +203,17 @@ describe('Character Analysis Controller', () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.CHT});
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.JP});
 
-    let postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    let postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.EN,
     });
     let post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
     expect(post.unitId).toBe(payloadChara.unitId);
-    postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
     post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
     expect(post.unitId).toBe(payloadChara.unitId);
-    postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: SupportedLanguages.JP,
     });
     post = CharaAnalysis.fromDocument(postDoc as unknown as CharaAnalysisDocument);
@@ -230,7 +230,7 @@ describe('Character Analysis Controller', () => {
 
     expect(updated).toBe('UPDATED');
 
-    const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });
@@ -252,7 +252,7 @@ describe('Character Analysis Controller', () => {
 
     expect(updated).toBe('NO_CHANGE');
 
-    const postDoc = await CharaAnalysis.getCollection(app.mongoClient).findOne({
+    const postDoc = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payloadChara.unitId,
       [MultiLingualDocumentKey.language]: SupportedLanguages.CHT,
     });

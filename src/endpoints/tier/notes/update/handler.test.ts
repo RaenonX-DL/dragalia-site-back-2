@@ -57,7 +57,7 @@ describe('Tier note updating handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await (await UnitTierNote.getCollection(app.mongoClient)))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];
@@ -89,7 +89,7 @@ describe('Tier note updating handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: uidAdmin,
@@ -106,7 +106,7 @@ describe('Tier note updating handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await UnitTierNote.getCollection(app.mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];
@@ -136,7 +136,7 @@ describe('Tier note updating handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: uidAdmin,
@@ -153,7 +153,7 @@ describe('Tier note updating handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await UnitTierNote.getCollection(app.mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];
@@ -188,7 +188,7 @@ describe('Tier note updating handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: uidAdmin,
@@ -205,7 +205,7 @@ describe('Tier note updating handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await UnitTierNote.getCollection(app.mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];
@@ -236,7 +236,7 @@ describe('Tier note updating handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: uidAdmin,
@@ -253,7 +253,7 @@ describe('Tier note updating handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await UnitTierNote.getCollection(app.mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];
@@ -302,7 +302,7 @@ describe('Tier note updating handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_NOTE).payload({
       uid: '',
@@ -315,7 +315,7 @@ describe('Tier note updating handler', () => {
     });
     expect(response.statusCode).toBe(403);
 
-    const doc = await UnitTierNote.getCollection(app.mongoClient)
+    const doc = await (await UnitTierNote.getCollection(app.mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: 10950101}) as UnitTierNoteDocument;
 
     delete doc[DocumentBaseKey.id];

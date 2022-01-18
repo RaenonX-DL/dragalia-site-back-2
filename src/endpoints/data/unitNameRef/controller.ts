@@ -24,7 +24,7 @@ export class UnitNameRefController {
     const ret: UnitNameRefData = {};
     const filter = lang ? {[MultiLingualDocumentKey.language]: lang} : {};
 
-    await UnitNameRefEntry.getCollection(mongoClient)
+    await (await UnitNameRefEntry.getCollection(mongoClient))
       .find(filter)
       .forEach((data) => {
         ret[data[UnitNameRefEntryDocumentKey.name]] = data[UnitNameRefEntryDocumentKey.unitId];
@@ -41,7 +41,7 @@ export class UnitNameRefController {
    * @return {Promise<Array<UnitNameRefEntryApi>>} list of unit name references
    */
   static async getEntries(mongoClient: MongoClient, lang: SupportedLanguages): Promise<Array<UnitNameRefEntryApi>> {
-    return await UnitNameRefEntry.getCollection(mongoClient)
+    return await (await UnitNameRefEntry.getCollection(mongoClient))
       .find({[MultiLingualDocumentKey.language]: lang})
       .map((data) => ({
         unitId: data[UnitNameRefEntryDocumentKey.unitId],
@@ -64,7 +64,7 @@ export class UnitNameRefController {
     refs: Array<UnitNameRefEntryApi>,
   ): Promise<void> {
     await execTransaction(mongoClient, async (session) => {
-      const collection = UnitNameRefEntry.getCollection(mongoClient);
+      const collection = await UnitNameRefEntry.getCollection(mongoClient);
 
       await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
 

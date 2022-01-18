@@ -27,7 +27,7 @@ describe('Alert controller', () => {
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 
@@ -52,7 +52,7 @@ describe('Alert controller', () => {
   ];
 
   const insertPrioritizedAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(prioritizedAlerts);
   };
 
@@ -76,7 +76,7 @@ describe('Alert controller', () => {
   ];
 
   const insertMixedAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(mixedAlerts);
   };
 
@@ -140,7 +140,7 @@ describe('Alert controller', () => {
   });
 
   it('separates priority between languages', async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany([
       {
         [MultiLingualDocumentKey.language]: SupportedLanguages.EN,

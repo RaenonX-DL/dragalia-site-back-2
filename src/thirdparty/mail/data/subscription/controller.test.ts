@@ -57,8 +57,8 @@ describe('Subscription record controller', () => {
   beforeEach(async () => {
     await app.reset();
 
-    await User.getCollection(app.mongoClient).insertMany(users);
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subRecs);
+    await (await User.getCollection(app.mongoClient)).insertMany(users);
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany(subRecs);
   });
 
   afterAll(async () => {

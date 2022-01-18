@@ -108,7 +108,7 @@ describe('Misc post listing EP', () => {
   it('returns that the user has subscribed', async () => {
     const uid = new ObjectId();
 
-    await SubscriptionRecord.getCollection(app.mongoClient).insertOne({
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
       [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_MISC'},
       [SubscriptionRecordDocumentKey.uid]: uid,
     });

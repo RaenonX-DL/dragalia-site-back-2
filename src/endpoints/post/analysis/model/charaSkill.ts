@@ -68,8 +68,8 @@ export class CharaAnalysisSkill extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<CharaAnalysisSkillDocument> {
-    return getCollection<CharaAnalysisSkillDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<CharaAnalysisSkillDocument>> {
+    return await getCollection<CharaAnalysisSkillDocument>(mongoClient, dbInfo);
   }
 
   /**

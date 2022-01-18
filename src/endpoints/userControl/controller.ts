@@ -25,7 +25,7 @@ export class UserController {
     }
 
     try {
-      const data = await User.getCollection(mongoClient).findOne({
+      const data = await (await User.getCollection(mongoClient)).findOne({
         // Ensure `uid` is converted to `ObjectId`
         [DocumentBaseKey.id]: new ObjectId(uid),
       });
@@ -86,7 +86,7 @@ export class UserController {
       return;
     }
 
-    await User.getCollection(mongoClient).updateOne(
+    await (await User.getCollection(mongoClient)).updateOne(
       {
         // Ensure `uid` is converted to `ObjectId`
         [DocumentBaseKey.id]: new ObjectId(uid),
@@ -106,7 +106,7 @@ export class UserController {
   static async getUserDataOfLang(
     mongoClient: MongoClient, uids: ObjectId[], lang: SupportedLanguages,
   ): Promise<UserDocument[]> {
-    return await User.getCollection(mongoClient)
+    return await (await User.getCollection(mongoClient))
       .find({[DocumentBaseKey.id]: {$in: uids}, [UserDocumentKey.lang]: lang})
       .toArray();
   }

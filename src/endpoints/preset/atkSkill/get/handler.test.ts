@@ -41,7 +41,7 @@ describe('Get ATK skill preset handler', () => {
   it('returns the preset if found', async () => {
     mockGetUser();
 
-    const insertResult = await AtkSkillPreset.getCollection(app.mongoClient)
+    const insertResult = await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const response = await app.app.inject().get(ApiEndPoints.PRESET_ATK_SKILL_INPUT).query({
@@ -73,7 +73,7 @@ describe('Get ATK skill preset handler', () => {
   it('returns null if the preset ID is not a valid object ID', async () => {
     mockGetUser();
 
-    await AtkSkillPreset.getCollection(app.mongoClient)
+    await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const response = await app.app.inject().get(ApiEndPoints.PRESET_ATK_SKILL_INPUT).query({

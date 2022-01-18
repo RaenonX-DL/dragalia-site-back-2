@@ -88,8 +88,8 @@ export class QuestPosition extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<QuestPositionDocument> {
-    return getCollection<QuestPositionDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<QuestPositionDocument>> {
+    return await getCollection<QuestPositionDocument>(mongoClient, dbInfo);
   }
 
   /**
@@ -201,8 +201,8 @@ export class QuestPost extends SequencedPost {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<QuestPostDocument> {
-    return super.getCollectionWithInfo<QuestPostDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<QuestPostDocument>> {
+    return await super.getCollectionWithInfo<QuestPostDocument>(mongoClient, dbInfo);
   }
 
   /**

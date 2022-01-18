@@ -114,7 +114,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
   it('returns that the user has subscribed', async () => {
     const uid = new ObjectId();
 
-    await SubscriptionRecord.getCollection(app.mongoClient).insertOne({
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
       [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_QUEST'},
       [SubscriptionRecordDocumentKey.uid]: uid,
     });

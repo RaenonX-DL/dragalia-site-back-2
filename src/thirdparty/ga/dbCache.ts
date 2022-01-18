@@ -21,21 +21,18 @@ export type GACacheDocument = {
   [GACacheKey.generationTimestamp]: Date,
 };
 
-const getCacheCollection = (mongoClient: MongoClient): Collection<GACacheDocument> => {
-  return getCollection<GACacheDocument>(mongoClient, dbInfo, (collection) => {
+const getCacheCollection = async (mongoClient: MongoClient): Promise<Collection<GACacheDocument>> => {
+  return await getCollection<GACacheDocument>(mongoClient, dbInfo, async (collection) => {
     // Enable data auto-expiration
-    collection.createIndex(
+    await collection.createIndex(
       GACacheKey.generationTimestamp,
       {expireAfterSeconds: CACHE_LIFE_SECS},
-      // Empty function to avoid `createdIndex` returning promise
-      // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
-      () => void 0,
     );
   });
 };
 
 export const getCache = async (mongoClient: MongoClient): Promise<GACache | null> => {
-  const collection = getCacheCollection(mongoClient);
+  const collection = await getCacheCollection(mongoClient);
 
   const cacheEntry = await collection.findOne();
 
@@ -47,7 +44,7 @@ export const getCache = async (mongoClient: MongoClient): Promise<GACache | null
 };
 
 export const setCache = async (mongoClient: MongoClient, data: GACache): Promise<void> => {
-  const collection = getCacheCollection(mongoClient);
+  const collection = await getCacheCollection(mongoClient);
 
   await collection.insertOne({
     [GACacheKey.data]: data,
@@ -56,7 +53,7 @@ export const setCache = async (mongoClient: MongoClient, data: GACache): Promise
 };
 
 export const resetCache = async (mongoClient: MongoClient): Promise<void> => {
-  const collection = getCacheCollection(mongoClient);
+  const collection = await getCacheCollection(mongoClient);
 
   await collection.deleteMany({});
 };

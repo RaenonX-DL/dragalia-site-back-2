@@ -38,7 +38,7 @@ describe('Subscription remove handler', () => {
   beforeEach(async () => {
     await app.reset();
 
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subRecs);
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany(subRecs);
   });
 
   afterAll(async () => {
@@ -57,7 +57,7 @@ describe('Subscription remove handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const doc = await SubscriptionRecord.getCollection(app.mongoClient).findOne();
+    const doc = await (await SubscriptionRecord.getCollection(app.mongoClient)).findOne();
 
     expect(doc).toStrictEqual(subRecs[1]);
   });
@@ -74,7 +74,7 @@ describe('Subscription remove handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const docCount = await SubscriptionRecord.getCollection(app.mongoClient).countDocuments();
+    const docCount = await (await SubscriptionRecord.getCollection(app.mongoClient)).countDocuments();
 
     expect(docCount).toStrictEqual(2);
   });

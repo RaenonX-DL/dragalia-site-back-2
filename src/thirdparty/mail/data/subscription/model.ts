@@ -61,15 +61,12 @@ export class SubscriptionRecord extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<SubscriptionRecordDocument> {
-    return getCollection<SubscriptionRecordDocument>(mongoClient, dbInfo, (collection) => {
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<SubscriptionRecordDocument>> {
+    return await getCollection<SubscriptionRecordDocument>(mongoClient, dbInfo, async (collection) => {
       // For preventing duplicated entries
-      collection.createIndex(
+      await collection.createIndex(
         [SubscriptionRecordDocumentKey.key, SubscriptionRecordDocumentKey.uid],
         {unique: true},
-        // Empty function to avoid `createdIndex` returning promise
-        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
-        () => void 0,
       );
     });
   }

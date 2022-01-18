@@ -48,16 +48,10 @@ export class AtkSkillPreset extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<AtkSkillPresetDocument> {
-    return getCollection<AtkSkillPresetDocument>(mongoClient, dbInfo, (collection) => {
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<AtkSkillPresetDocument>> {
+    return await getCollection<AtkSkillPresetDocument>(mongoClient, dbInfo, async (collection) => {
       // Expire after 30 days
-      collection.createIndex(
-        AtkSkillPresetDocumentKey.lastUsed,
-        {expireAfterSeconds: 30 * 86400},
-        // Empty function to avoid `createdIndex` returning promise
-        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
-        () => void 0,
-      );
+      await collection.createIndex(AtkSkillPresetDocumentKey.lastUsed, {expireAfterSeconds: 30 * 86400});
     });
   }
 

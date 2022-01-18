@@ -157,7 +157,7 @@ describe('Misc post publishing EP', () => {
   test('if the published quest post exists in the database', async () => {
     await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload2);
 
-    const docQuery = await MiscPost.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: miscPayload2.lang,
     });
@@ -181,7 +181,7 @@ describe('Misc post publishing EP', () => {
     // Normal & change title (expect to fail)
     await app.app.inject().post(ApiEndPoints.POST_MISC_PUBLISH).payload(miscPayload6);
 
-    const docQuery = await MiscPost.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await MiscPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: miscPayload2.lang,
       [PostDocumentKey.title]: miscPayload2.title,

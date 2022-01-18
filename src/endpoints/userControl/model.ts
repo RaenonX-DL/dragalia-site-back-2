@@ -61,8 +61,8 @@ export class User extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<UserDocument> {
-    return getCollection<UserDocument>(mongoClient, dbInfo);
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<UserDocument>> {
+    return await getCollection<UserDocument>(mongoClient, dbInfo);
   }
 
   /**

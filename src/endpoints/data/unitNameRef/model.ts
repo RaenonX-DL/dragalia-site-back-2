@@ -53,23 +53,15 @@ export class UnitNameRefEntry extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection<UnitNameRefEntryDocument> {
-    return getCollection<UnitNameRefEntryDocument>(mongoClient, dbInfo, (collection) => {
-      // For getting the unit references
-      collection.createIndex(
-        MultiLingualDocumentKey.language,
-        // Empty function to avoid `createdIndex` returning promise
-        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
-        () => void 0,
-      );
-      // For preventing duplicated entries
-      collection.createIndex(
-        [UnitNameRefEntryDocumentKey.name, MultiLingualDocumentKey.language],
-        {unique: true},
-        // Empty function to avoid `createdIndex` returning promise
-        // https://github.com/nodkz/mongodb-memory-server/issues/598#issuecomment-1015311729
-        () => void 0,
-      );
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<UnitNameRefEntryDocument>> {
+    return await getCollection<UnitNameRefEntryDocument>(mongoClient, dbInfo, async (collection) => {
+      await Promise.all([
+        collection.createIndex(MultiLingualDocumentKey.language),
+        collection.createIndex(
+          [UnitNameRefEntryDocumentKey.name, MultiLingualDocumentKey.language],
+          {unique: true},
+        ),
+      ]);
     });
   }
 

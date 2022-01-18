@@ -88,7 +88,7 @@ export class QuestPostController extends PostController implements SequencedCont
 
     const [emailResult] = await Promise.all([
       SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.QUEST, post.seqId),
-      QuestPost.getCollection(mongoClient).insertOne(post.toObject()),
+      (await QuestPost.getCollection(mongoClient)).insertOne(post.toObject()),
     ]);
 
     return {seqId: post.seqId, emailResult};
@@ -109,7 +109,7 @@ export class QuestPostController extends PostController implements SequencedCont
     const post: QuestPost = QuestPost.fromPayload(editPayload);
 
     const updated = await QuestPostController.editPost(
-      QuestPost.getCollection(mongoClient),
+      await QuestPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
@@ -146,7 +146,7 @@ export class QuestPostController extends PostController implements SequencedCont
 
     return QuestPostController.listPosts({
       ...options,
-      postCollection: QuestPost.getCollection(mongoClient),
+      postCollection: await QuestPost.getCollection(mongoClient),
       postType: PostType.QUEST,
       projection: {
         [SequentialDocumentKey.sequenceId]: 1,
@@ -188,7 +188,7 @@ export class QuestPostController extends PostController implements SequencedCont
 
     return super.getPost<QuestPostDocument, QuestPostGetResult>({
       mongoClient,
-      collection: QuestPost.getCollection(mongoClient),
+      collection: await QuestPost.getCollection(mongoClient),
       uid,
       findCondition: {[SequentialDocumentKey.sequenceId]: seqId},
       resultConstructFunction: (options) => new QuestPostGetResult(options),

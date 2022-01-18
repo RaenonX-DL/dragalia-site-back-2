@@ -62,7 +62,7 @@ describe(`[Controller] ${UserController.name}`, () => {
         isAdmin: false,
         lang: num % 2 === 0 ? SupportedLanguages.CHT : SupportedLanguages.EN,
       }));
-    await User.getCollection(app.mongoClient).insertMany(users);
+    await (await User.getCollection(app.mongoClient)).insertMany(users);
 
     const dataArray = await UserController.getUserDataOfLang(
       app.mongoClient,

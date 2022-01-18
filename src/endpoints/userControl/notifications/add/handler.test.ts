@@ -38,7 +38,7 @@ describe('Subscription add handler', () => {
   beforeEach(async () => {
     await app.reset();
 
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subRecs);
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany(subRecs);
   });
 
   afterAll(async () => {
@@ -60,7 +60,7 @@ describe('Subscription add handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const docCount = await SubscriptionRecord.getCollection(app.mongoClient).countDocuments();
+    const docCount = await (await SubscriptionRecord.getCollection(app.mongoClient)).countDocuments();
 
     expect(docCount).toBe(3);
   });
@@ -77,7 +77,7 @@ describe('Subscription add handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const docs = await SubscriptionRecord.getCollection(app.mongoClient).find().toArray();
+    const docs = await (await SubscriptionRecord.getCollection(app.mongoClient)).find().toArray();
 
     expect(docs).toStrictEqual(subRecs);
   });

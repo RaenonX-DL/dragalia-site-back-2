@@ -52,7 +52,7 @@ describe('Subscription batch update handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const docs = (await SubscriptionRecord.getCollection(app.mongoClient)
+    const docs = (await (await SubscriptionRecord.getCollection(app.mongoClient))
       .find()
       .toArray() as SubscriptionRecordDocument[])
       .map((entry) => {
@@ -68,7 +68,7 @@ describe('Subscription batch update handler', () => {
   });
 
   it('updates the subscriptions of a user', async () => {
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany([
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany([
       {
         [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_QUEST'},
         [SubscriptionRecordDocumentKey.uid]: uid,
@@ -90,7 +90,7 @@ describe('Subscription batch update handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const docs = (await SubscriptionRecord.getCollection(app.mongoClient)
+    const docs = (await (await SubscriptionRecord.getCollection(app.mongoClient))
       .find()
       .toArray() as SubscriptionRecordDocument[])
       .map((entry) => {
@@ -106,7 +106,7 @@ describe('Subscription batch update handler', () => {
   });
 
   it('completely removes the subscriptions of a user', async () => {
-    await SubscriptionRecord.getCollection(app.mongoClient).insertMany(subKeys.map((key) => ({
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany(subKeys.map((key) => ({
       [SubscriptionRecordDocumentKey.key]: key,
       [SubscriptionRecordDocumentKey.uid]: uid,
     })));
@@ -122,7 +122,7 @@ describe('Subscription batch update handler', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
-    const count = await SubscriptionRecord.getCollection(app.mongoClient).countDocuments();
+    const count = await (await SubscriptionRecord.getCollection(app.mongoClient)).countDocuments();
 
     expect(count).toBe(0);
   });

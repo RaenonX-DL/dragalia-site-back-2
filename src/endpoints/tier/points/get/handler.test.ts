@@ -42,7 +42,8 @@ describe('Key point data getting handler', () => {
       new KeyPointEntry({type: 'weakness', description: {[SupportedLanguages.CHT]: 'CHT W1'}}),
       new KeyPointEntry({type: 'weakness', description: {[SupportedLanguages.CHT]: 'CHT W2'}}),
     ].map((entry) => entry.toObject());
-    const ids = Object.values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+    const keyPointCol = await KeyPointEntry.getCollection(app.mongoClient);
+    const ids = Object.values((await keyPointCol.insertMany(dataArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().get(ApiEndPoints.TIER_KEY_POINTS).query({
@@ -68,7 +69,8 @@ describe('Key point data getting handler', () => {
       new KeyPointEntry({type: 'weakness', description: {[SupportedLanguages.CHT]: 'CHT W1'}}),
       new KeyPointEntry({type: 'weakness', description: {[SupportedLanguages.EN]: 'EN W2'}}),
     ].map((entry) => entry.toObject());
-    const ids = Object.values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+    const keyPointCol = await KeyPointEntry.getCollection(app.mongoClient);
+    const ids = Object.values((await keyPointCol.insertMany(dataArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().get(ApiEndPoints.TIER_KEY_POINTS).query({
