@@ -35,6 +35,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
   let getAnalysisOpts: GetAnalysisOptions;
 

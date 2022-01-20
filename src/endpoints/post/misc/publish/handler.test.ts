@@ -36,6 +36,7 @@ describe('Misc post publishing EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const miscPayload2: MiscPostPublishPayload = {
@@ -52,6 +53,7 @@ describe('Misc post publishing EP', () => {
         content: 'B21',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const miscPayload3: MiscPostPublishPayload = {

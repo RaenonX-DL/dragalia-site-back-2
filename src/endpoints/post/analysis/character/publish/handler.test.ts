@@ -40,6 +40,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     }],
     tipsBuilds: 'tip1',
     videos: 'video1',
+    sendUpdateEmail: true,
   };
 
   const payload2: CharaAnalysisPublishPayload = {

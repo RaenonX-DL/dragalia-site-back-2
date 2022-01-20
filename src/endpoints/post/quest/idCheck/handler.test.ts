@@ -40,6 +40,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   let newPostSeqId: number;

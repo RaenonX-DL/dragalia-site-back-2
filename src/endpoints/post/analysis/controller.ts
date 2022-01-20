@@ -141,14 +141,16 @@ export class AnalysisController extends PostController {
   static async publishCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisPublishPayload,
   ): Promise<AnalysisPublishResult> {
-    const {lang, unitId} = payload;
+    const {lang, unitId, sendUpdateEmail} = payload;
 
     await AnalysisController.checkUnitValid(unitId, UnitType.CHARACTER);
 
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
     const [emailResult] = await Promise.all([
-      AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
+      sendUpdateEmail ?
+        AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId) :
+        Promise.resolve({accepted: [], rejected: []}),
       (await CharaAnalysis.getCollection(mongoClient)).insertOne(analysis.toObject()),
     ]);
 
@@ -165,14 +167,16 @@ export class AnalysisController extends PostController {
   static async publishDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisPublishPayload,
   ): Promise<AnalysisPublishResult> {
-    const {lang, unitId} = payload;
+    const {lang, unitId, sendUpdateEmail} = payload;
 
     await AnalysisController.checkUnitValid(unitId, UnitType.DRAGON);
 
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
     const [emailResult] = await Promise.all([
-      AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId),
+      sendUpdateEmail ?
+        AnalysisController.sendAnalysisPublishedEmail(mongoClient, lang, unitId) :
+        Promise.resolve({accepted: [], rejected: []}),
       (await DragonAnalysis.getCollection(mongoClient)).insertOne(analysis.toObject()),
     ]);
 
@@ -189,7 +193,7 @@ export class AnalysisController extends PostController {
   static async editCharaAnalysis(
     mongoClient: MongoClient, payload: CharaAnalysisEditPayload,
   ): Promise<PostEditResultCommon> {
-    const {lang, unitId, editNote} = payload;
+    const {lang, unitId, editNote, sendUpdateEmail} = payload;
 
     const analysis: CharaAnalysis = CharaAnalysis.fromPayload(payload);
 
@@ -205,9 +209,9 @@ export class AnalysisController extends PostController {
 
     return {
       updated,
-      emailResult: await AnalysisController.sendAnalysisEditedEmail(
-        mongoClient, lang, unitId, updated, editNote,
-      ),
+      emailResult: sendUpdateEmail ?
+        await AnalysisController.sendAnalysisEditedEmail(mongoClient, lang, unitId, updated, editNote) :
+        {accepted: [], rejected: []},
     };
   }
 
@@ -221,7 +225,7 @@ export class AnalysisController extends PostController {
   static async editDragonAnalysis(
     mongoClient: MongoClient, payload: DragonAnalysisEditPayload,
   ): Promise<PostEditResultCommon> {
-    const {lang, unitId, editNote} = payload;
+    const {lang, unitId, editNote, sendUpdateEmail} = payload;
 
     const analysis: DragonAnalysis = DragonAnalysis.fromPayload(payload);
 
@@ -237,9 +241,9 @@ export class AnalysisController extends PostController {
 
     return {
       updated,
-      emailResult: await AnalysisController.sendAnalysisEditedEmail(
-        mongoClient, lang, unitId, updated, editNote,
-      ),
+      emailResult: sendUpdateEmail ?
+        await AnalysisController.sendAnalysisEditedEmail(mongoClient, lang, unitId, updated, editNote) :
+        {accepted: [], rejected: []},
     };
   }
 

@@ -19,6 +19,11 @@ describe('Misc post controller', () => {
 
   let getPostOpts: GetSequentialPostOptions;
 
+  const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
+    .mockResolvedValue({accepted: [], rejected: []});
+  const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
+    .mockResolvedValue({accepted: [], rejected: []});
+
   beforeAll(async () => {
     app = await createApp();
   });
@@ -32,6 +37,9 @@ describe('Misc post controller', () => {
       seqId: 1,
       lang: SupportedLanguages.CHT,
     };
+
+    fnSendPostPublishedEmail.mockReset();
+    fnSendPostEditedEmail.mockReset();
   });
 
   afterAll(async () => {
@@ -52,6 +60,7 @@ describe('Misc post controller', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const payload2: MiscPostPublishPayload = {
@@ -68,6 +77,7 @@ describe('Misc post controller', () => {
         content: 'B1-EN',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   it('increments `nextSeqId` per request', async () => {
@@ -574,26 +584,37 @@ describe('Misc post controller', () => {
     expect(seqId).toBe(2);
   });
 
-  it('sends an email on published', async () => {
-    const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
-      .mockResolvedValue({accepted: [], rejected: []});
-
-    await MiscPostController.publishPost(app.mongoClient, payload);
+  it('sends an email on publish', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, sendUpdateEmail: true});
 
     expect(fnSendPostPublishedEmail).toHaveBeenCalledTimes(1);
   });
 
-  it('sends an email on edited', async () => {
-    const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
-      .mockResolvedValue({accepted: [], rejected: []});
+  it('does not send email on publish', async () => {
+    await MiscPostController.publishPost(app.mongoClient, {...payload, sendUpdateEmail: false});
 
+    expect(fnSendPostPublishedEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends an email on edit', async () => {
     const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
 
     await MiscPostController.editMiscPost(
       app.mongoClient,
-      {...payload, title: 'TT', seqId, editNote: 'mod'},
+      {...payload, title: 'TT', seqId, editNote: 'mod', sendUpdateEmail: true},
     );
 
     expect(fnSendPostEditedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not send email on edit', async () => {
+    const {seqId} = await MiscPostController.publishPost(app.mongoClient, payload);
+
+    await MiscPostController.editMiscPost(
+      app.mongoClient,
+      {...payload, title: 'TT', seqId, editNote: 'mod', sendUpdateEmail: false},
+    );
+
+    expect(fnSendPostEditedEmail).not.toHaveBeenCalled();
   });
 });

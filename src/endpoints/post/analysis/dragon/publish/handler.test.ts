@@ -35,6 +35,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_DRAGON} - publish d
     notes: 'dragonNotes',
     suitableCharacters: 'dragonChara',
     videos: 'dragonVideo',
+    sendUpdateEmail: true,
   };
 
   const payload2: DragonAnalysisPublishPayload = {

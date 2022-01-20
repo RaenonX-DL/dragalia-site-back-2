@@ -19,6 +19,11 @@ describe('Quest post controller', () => {
 
   let getPostOpts: GetSequentialPostOptions;
 
+  const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
+    .mockResolvedValue({accepted: [], rejected: []});
+  const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
+    .mockResolvedValue({accepted: [], rejected: []});
+
   beforeAll(async () => {
     app = await createApp();
   });
@@ -32,6 +37,9 @@ describe('Quest post controller', () => {
       seqId: 1,
       lang: SupportedLanguages.CHT,
     };
+
+    fnSendPostPublishedEmail.mockReset();
+    fnSendPostEditedEmail.mockReset();
   });
 
   afterAll(async () => {
@@ -59,6 +67,7 @@ describe('Quest post controller', () => {
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   const payload2: QuestPostPublishPayload = {
@@ -82,6 +91,7 @@ describe('Quest post controller', () => {
       },
     ],
     addendum: 'addendum-en',
+    sendUpdateEmail: true,
   };
 
   it('increments `nextSeqId` per request', async () => {
@@ -574,25 +584,36 @@ describe('Quest post controller', () => {
   });
 
   it('sends an email on published', async () => {
-    const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
-      .mockResolvedValue({accepted: [], rejected: []});
-
-    await QuestPostController.publishPost(app.mongoClient, payload);
+    await QuestPostController.publishPost(app.mongoClient, {...payload, sendUpdateEmail: true});
 
     expect(fnSendPostPublishedEmail).toHaveBeenCalledTimes(1);
   });
 
-  it('sends an email on edited', async () => {
-    const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
-      .mockResolvedValue({accepted: [], rejected: []});
+  it('does not send email on published', async () => {
+    await QuestPostController.publishPost(app.mongoClient, {...payload, sendUpdateEmail: false});
 
+    expect(fnSendPostPublishedEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends an email on edited', async () => {
     const {seqId} = await QuestPostController.publishPost(app.mongoClient, payload);
 
     await QuestPostController.editQuestPost(
       app.mongoClient,
-      {...payload, title: 'TT', seqId, editNote: 'mod'},
+      {...payload, title: 'TT', seqId, editNote: 'mod', sendUpdateEmail: true},
     );
 
     expect(fnSendPostEditedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not send email on edited', async () => {
+    const {seqId} = await QuestPostController.publishPost(app.mongoClient, payload);
+
+    await QuestPostController.editQuestPost(
+      app.mongoClient,
+      {...payload, title: 'TT', seqId, editNote: 'mod', sendUpdateEmail: false},
+    );
+
+    expect(fnSendPostEditedEmail).not.toHaveBeenCalled();
   });
 });

@@ -48,6 +48,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   beforeAll(async () => {

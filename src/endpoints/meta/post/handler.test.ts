@@ -83,6 +83,7 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -189,6 +190,7 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -324,6 +326,7 @@ describe('Post meta EP', () => {
         },
       ],
       addendum: 'addendum',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -412,6 +415,7 @@ describe('Post meta EP', () => {
           content: 'B1',
         },
       ],
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {

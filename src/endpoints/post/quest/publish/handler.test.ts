@@ -23,6 +23,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   const uidAdmin = new ObjectId().toHexString();
 
   const questPayload1: QuestPostPublishPayload = {
+    uid: uidNormal,
     lang: SupportedLanguages.CHT,
     title: 'post1',
     general: 'gen1',
@@ -42,10 +43,11 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add1',
-    uid: uidNormal,
+    sendUpdateEmail: true,
   };
 
   const questPayload2: QuestPostPublishPayload = {
+    uid: uidAdmin,
     lang: SupportedLanguages.CHT,
     title: 'post2',
     general: 'gen2',
@@ -59,7 +61,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add2',
-    uid: uidAdmin,
+    sendUpdateEmail: true,
   };
 
   const questPayload3: QuestPostPublishPayload = {

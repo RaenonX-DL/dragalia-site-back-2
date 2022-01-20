@@ -41,6 +41,7 @@ describe(`Misc post getting EP`, () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   beforeAll(async () => {

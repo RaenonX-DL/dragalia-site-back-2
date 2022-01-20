@@ -36,6 +36,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   const payloadList: QuestPostListPayload = {

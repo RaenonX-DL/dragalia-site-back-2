@@ -39,6 +39,7 @@ describe(`Homepage landing info endpoint`, () => {
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   beforeAll(async () => {

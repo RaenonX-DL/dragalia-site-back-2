@@ -30,6 +30,7 @@ describe('Unit info lookup controller', () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
 
   const payloadDragon: DragonAnalysisPublishPayload = {
@@ -45,6 +46,7 @@ describe('Unit info lookup controller', () => {
     notes: 'dragonNotes',
     suitableCharacters: 'dragonChara',
     videos: 'dragonVideo',
+    sendUpdateEmail: true,
   };
 
   const insert3Chara = async () => {

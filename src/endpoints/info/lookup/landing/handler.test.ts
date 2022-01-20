@@ -35,6 +35,7 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP_LANDING} - analysis looku
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
 
   const payloadLookup: UnitInfoLookupLandingPayload = {

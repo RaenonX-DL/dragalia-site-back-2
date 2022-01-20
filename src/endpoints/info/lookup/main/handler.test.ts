@@ -34,6 +34,7 @@ describe(`[Server] GET ${ApiEndPoints.INFO_UNIT_LOOKUP} - unit info lookup`, () 
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
 
   const payloadList1: UnitInfoLookupPayload = {

@@ -41,6 +41,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_EDIT} - edit a specific quest 
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   const payloadEdit: QuestPostEditPayload = {

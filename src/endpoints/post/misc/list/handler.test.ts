@@ -30,6 +30,7 @@ describe('Misc post listing EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const payloadList: MiscPostListPayload = {

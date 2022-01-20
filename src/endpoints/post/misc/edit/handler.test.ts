@@ -34,6 +34,7 @@ describe('Misc post editing EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const payloadEdit: MiscPostEditPayload = {

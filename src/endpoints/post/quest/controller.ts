@@ -79,7 +79,7 @@ export class QuestPostController extends PostController implements SequencedCont
   static async publishPost(
     mongoClient: MongoClient, payload: QuestPostPublishPayload,
   ): Promise<SequencedPublishResult> {
-    const {seqId, lang} = payload;
+    const {seqId, lang, sendUpdateEmail} = payload;
 
     const post: QuestPost = QuestPost.fromPayload({
       ...payload,
@@ -87,7 +87,9 @@ export class QuestPostController extends PostController implements SequencedCont
     });
 
     const [emailResult] = await Promise.all([
-      SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.QUEST, post.seqId),
+      sendUpdateEmail ?
+        SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.QUEST, post.seqId) :
+        Promise.resolve({accepted: [], rejected: []}),
       (await QuestPost.getCollection(mongoClient)).insertOne(post.toObject()),
     ]);
 
@@ -104,7 +106,7 @@ export class QuestPostController extends PostController implements SequencedCont
   static async editQuestPost(
     mongoClient: MongoClient, editPayload: QuestPostEditPayload,
   ): Promise<SequencedEditResult> {
-    const {lang, editNote} = editPayload;
+    const {lang, editNote, sendUpdateEmail} = editPayload;
 
     const post: QuestPost = QuestPost.fromPayload(editPayload);
 
@@ -122,7 +124,7 @@ export class QuestPostController extends PostController implements SequencedCont
       accepted: [],
       rejected: [],
     };
-    if (updated === 'UPDATED') {
+    if (updated === 'UPDATED' && sendUpdateEmail) {
       emailResult = await SequencedController.sendPostEditedEmail(
         mongoClient, lang, PostType.QUEST, post.seqId, editNote,
       );

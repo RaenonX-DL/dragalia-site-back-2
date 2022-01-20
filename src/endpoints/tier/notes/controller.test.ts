@@ -1,6 +1,9 @@
+import {ObjectId} from 'mongodb';
+
 import {SupportedLanguages} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models';
 import {Application, createApp} from '../../../app';
+import * as sendEmail from '../../../thirdparty/mail/send/tier/edited';
 import * as utils from '../../../utils/misc';
 import {TierNoteController} from './controller';
 import {TierNote, TierNoteEntryDocumentKey, UnitTierNote, UnitTierNoteDocument, UnitTierNoteDocumentKey} from './model';
@@ -121,12 +124,28 @@ describe('Tier note data controller', () => {
   });
 
   describe('updateUnitTierNote()', () => {
+    const fnSendEmail: jest.SpyInstance = jest.spyOn(sendEmail, 'sendMailTierUpdated')
+      .mockResolvedValue({accepted: [], rejected: []});
+    const payloadCommon = {
+      uid: new ObjectId().toHexString(),
+      lang: SupportedLanguages.CHT,
+      unitId: 10950101,
+    };
+
+    beforeEach(() => {
+      fnSendEmail.mockReset();
+    });
+
     it('adds new tier note if not available before', async () => {
       await TierNoteController.updateUnitTierNote(
-        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        app.mongoClient,
         {
-          points: ['idA'],
-          tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
+          },
+          sendUpdateEmail: false,
         },
       );
 
@@ -165,10 +184,14 @@ describe('Tier note data controller', () => {
       await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
-        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        app.mongoClient,
         {
-          points: ['idA'],
-          tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
+          },
+          sendUpdateEmail: false,
         },
       );
 
@@ -207,10 +230,14 @@ describe('Tier note data controller', () => {
       await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
-        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        app.mongoClient,
         {
-          points: ['idA'],
-          tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conAi: {ranking: 'A', note: 'C', isCompDependent: true}},
+          },
+          sendUpdateEmail: false,
         },
       );
 
@@ -247,10 +274,14 @@ describe('Tier note data controller', () => {
       await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
-        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        app.mongoClient,
         {
-          points: ['idA'],
-          tier: {conSolo: {ranking: 'A', note: 'C', isCompDependent: false}},
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conSolo: {ranking: 'A', note: 'C', isCompDependent: false}},
+          },
+          sendUpdateEmail: false,
         },
       );
 
@@ -293,10 +324,14 @@ describe('Tier note data controller', () => {
       await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
       await TierNoteController.updateUnitTierNote(
-        app.mongoClient, SupportedLanguages.CHT, 10950101,
+        app.mongoClient,
         {
-          points: ['idA'],
-          tier: {conSolo: {ranking: 'A', note: 'B', isCompDependent: false}},
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conSolo: {ranking: 'A', note: 'B', isCompDependent: false}},
+          },
+          sendUpdateEmail: false,
         },
       );
 
@@ -317,6 +352,38 @@ describe('Tier note data controller', () => {
         },
         [UnitTierNoteDocumentKey.lastUpdateEpoch]: epoch,
       });
+    });
+
+    it('sends email on update', async () => {
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient,
+        {
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
+          },
+          sendUpdateEmail: true,
+        },
+      );
+
+      expect(fnSendEmail).toHaveBeenCalled();
+    });
+
+    it('does not send email on update', async () => {
+      await TierNoteController.updateUnitTierNote(
+        app.mongoClient,
+        {
+          ...payloadCommon,
+          data: {
+            points: ['idA'],
+            tier: {conAi: {ranking: 'S', note: 'A', isCompDependent: true}},
+          },
+          sendUpdateEmail: false,
+        },
+      );
+
+      expect(fnSendEmail).not.toHaveBeenCalled();
     });
   });
 });

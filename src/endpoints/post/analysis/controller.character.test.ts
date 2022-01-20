@@ -33,7 +33,13 @@ describe('Character Analysis Controller', () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
+
+  const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
+    .mockResolvedValue({accepted: [], rejected: []});
+  const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
+    .mockResolvedValue({accepted: [], rejected: []});
 
   beforeAll(async () => {
     app = await createApp();
@@ -41,6 +47,9 @@ describe('Character Analysis Controller', () => {
 
   beforeEach(async () => {
     await app.reset();
+
+    fnSendPostEditedEmail.mockReset();
+    fnSendPostPublishedEmail.mockReset();
   });
 
   afterAll(async () => {
@@ -273,25 +282,36 @@ describe('Character Analysis Controller', () => {
   });
 
   it('sends an email on published', async () => {
-    const fnSendPostPublishedEmail = jest.spyOn(sendEmailPublished, 'sendMailPostPublished')
-      .mockResolvedValue({accepted: [], rejected: []});
-
-    await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, sendUpdateEmail: true});
 
     expect(fnSendPostPublishedEmail).toHaveBeenCalledTimes(1);
   });
 
-  it('sends an email on edited', async () => {
-    const fnSendPostEditedEmail = jest.spyOn(sendEmailEdited, 'sendMailPostEdited')
-      .mockResolvedValue({accepted: [], rejected: []});
+  it('does not send email on published', async () => {
+    await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, sendUpdateEmail: false});
 
+    expect(fnSendPostPublishedEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends an email on edited', async () => {
     const {unitId} = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
     await AnalysisController.editCharaAnalysis(
       app.mongoClient,
-      {...payloadChara, unitId, videos: 'videoEdit', editNote: 'mod'},
+      {...payloadChara, unitId, videos: 'videoEdit', editNote: 'mod', sendUpdateEmail: true},
     );
 
     expect(fnSendPostEditedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not send email on edited', async () => {
+    const {unitId} = await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
+
+    await AnalysisController.editCharaAnalysis(
+      app.mongoClient,
+      {...payloadChara, unitId, videos: 'videoEdit', editNote: 'mod', sendUpdateEmail: false},
+    );
+
+    expect(fnSendPostEditedEmail).not.toHaveBeenCalled();
   });
 });

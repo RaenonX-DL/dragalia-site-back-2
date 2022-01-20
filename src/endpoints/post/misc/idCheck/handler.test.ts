@@ -35,6 +35,7 @@ describe('Misc post ID check EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   let newPostSeqId: number;

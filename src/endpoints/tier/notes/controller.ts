@@ -1,6 +1,12 @@
 import {MongoClient} from 'mongodb';
 
-import {DimensionKey, SupportedLanguages, UnitTierData, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
+import {
+  DimensionKey,
+  SupportedLanguages,
+  UnitTierData,
+  UnitTierNote as UnitTierNoteApi,
+  UnitTierNoteUpdatePayload,
+} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models';
 import {UnitPath, makeUnitUrl} from '../../../api-def/paths';
 import {sendMailTierUpdated} from '../../../thirdparty/mail/send/tier/edited';
@@ -64,27 +70,24 @@ export class TierNoteController {
    * Update the tier note of a certain unit.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {SupportedLanguages} lang language of the tier note to update
-   * @param {number} unitId unit ID of the tier note to update
-   * @param {Omit<UnitTierNoteApi, 'lastUpdateEpoch'>} tierNote updated tier note
+   * @param {UnitTierNoteUpdatePayload} payload unit tier note update payload
    * @return {Promise<void>}
    */
-  static async updateUnitTierNote(
-    mongoClient: MongoClient,
-    lang: SupportedLanguages,
-    unitId: number,
-    tierNote: Omit<UnitTierNoteApi, 'lastUpdateEpoch'>,
-  ): Promise<void> {
+  static async updateUnitTierNote(mongoClient: MongoClient, payload: UnitTierNoteUpdatePayload): Promise<void> {
+    const {unitId, lang, data: tierNote, sendUpdateEmail} = payload;
+
     // Get the original document
     const original: UnitTierNoteDocument = await (await UnitTierNote.getCollection(mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId}) as UnitTierNoteDocument;
 
-    await sendMailTierUpdated({
-      mongoClient,
-      lang,
-      sitePath: makeUnitUrl(UnitPath.UNIT_TIER, {lang, id: unitId}),
-      title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
-    });
+    if (sendUpdateEmail) {
+      await sendMailTierUpdated({
+        mongoClient,
+        lang,
+        sitePath: makeUnitUrl(UnitPath.UNIT_TIER, {lang, id: unitId}),
+        title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
+      });
+    }
 
     if (!original) {
       // Original not available - create one and insert it
