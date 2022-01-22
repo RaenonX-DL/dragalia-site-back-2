@@ -30,7 +30,7 @@ export const EmailContent: React.FunctionComponent<EmailContentProps> = ({
         <h2>{title}</h2>
         <p>{content}</p>
         <footer>
-          {I18nData.mail.manageSubscription[lang]}{makeLink(GeneralPath.USER_SUBSCRIPTION)}
+          {I18nData.mail.manageSubscription[lang]}{makeLink(GeneralPath.USER_SETTINGS)}
         </footer>
       </body>
     </html>
