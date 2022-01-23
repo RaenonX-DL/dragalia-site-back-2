@@ -11,7 +11,7 @@ export const handleAdminSendAnnouncement = async ({
   payload,
   mongoClient,
 }: HandlerParams<SiteAnnouncementPayload>): Promise<AdminSendAnnouncementResponse | ApiFailedResponse> => {
-  const {uid, lang, title, markdownBase64} = processPayloadBase(payload);
+  const {uid, lang, title, markdown} = processPayloadBase(payload);
 
   const isAdmin = await UserController.isAdmin(mongoClient, uid);
 
@@ -19,12 +19,7 @@ export const handleAdminSendAnnouncement = async ({
     return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 
-  const result = await sendMailSiteAnnouncement({
-    mongoClient,
-    lang,
-    markdown: Buffer.from(markdownBase64, 'base64url').toString(),
-    title,
-  });
+  const result = await sendMailSiteAnnouncement({mongoClient, lang, markdown, title});
 
   return new AdminSendAnnouncementResponse({result});
 };
