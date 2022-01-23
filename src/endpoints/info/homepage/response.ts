@@ -2,7 +2,7 @@ import {
   ApiResponseCode,
   BaseResponse,
   HomepageData,
-  HomepageLandingResponse as HomepageLandingResponseApi, PostType,
+  HomepageLandingResponse as HomepageLandingResponseApi,
 } from '../../../api-def/api';
 import {ApiResponse} from '../../../base/response';
 
@@ -14,18 +14,18 @@ type HomepageLandingResponseOptions = Omit<HomepageLandingResponseApi, keyof Bas
  */
 export class HomepageLandingResponse extends ApiResponse {
   data: HomepageData;
-  userSubscribed: {[type in PostType]: boolean};
+  subscribed: HomepageLandingResponseApi['subscribed'];
 
   /**
    * Construct a homepage landing endpoint API response.
    *
    * @param {HomepageLandingResponseOptions} options options to construct homepage landing response
    */
-  constructor({data, userSubscribed}: HomepageLandingResponseOptions) {
+  constructor({data, subscribed}: HomepageLandingResponseOptions) {
     super(ApiResponseCode.SUCCESS);
 
     this.data = data;
-    this.userSubscribed = userSubscribed;
+    this.subscribed = subscribed;
   }
 
   /**
@@ -35,7 +35,7 @@ export class HomepageLandingResponse extends ApiResponse {
     return {
       ...super.toJson(),
       data: this.data,
-      userSubscribed: this.userSubscribed,
+      subscribed: this.subscribed,
     };
   }
 }

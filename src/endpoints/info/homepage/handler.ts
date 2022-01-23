@@ -41,11 +41,14 @@ export const handleHomepageLanding = async ({
     },
   };
 
-  const userSubscribed: HomepageLandingResponseApi['userSubscribed'] = {
-    [PostType.QUEST]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_QUEST'}),
-    [PostType.ANALYSIS]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_ANALYSIS'}),
-    [PostType.MISC]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_MISC'}),
+  const subscribed: HomepageLandingResponseApi['subscribed'] = {
+    post: {
+      [PostType.QUEST]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_QUEST'}),
+      [PostType.ANALYSIS]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_ANALYSIS'}),
+      [PostType.MISC]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_MISC'}),
+    },
+    announcement: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ANNOUNCEMENT'}),
   };
 
-  return new HomepageLandingResponse({data, userSubscribed});
+  return new HomepageLandingResponse({data, subscribed});
 };
