@@ -42,10 +42,10 @@ import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
+import {handleUserConfigGet} from './userControl/config/get/handler';
+import {handleUserConfigUpdate} from './userControl/config/update/handler';
 import {handleSubscriptionAdd} from './userControl/subscriptions/add/handler';
-import {handleSubscriptionGet} from './userControl/subscriptions/get/handler';
 import {handleSubscriptionRemove} from './userControl/subscriptions/remove/handler';
-import {handleSubscriptionUpdate} from './userControl/subscriptions/update/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -101,8 +101,8 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
-  [ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE]: {POST: handleSubscriptionUpdate},
-  [ApiEndPoints.USER_SUBSCRIPTIONS_GET]: {GET: handleSubscriptionGet},
+  [ApiEndPoints.USER_CONFIG_UPDATE]: {POST: handleUserConfigUpdate},
+  [ApiEndPoints.USER_CONFIG_GET]: {GET: handleUserConfigGet},
   [ApiEndPoints.USER_SUBSCRIPTIONS_ADD]: {POST: handleSubscriptionAdd},
   [ApiEndPoints.USER_SUBSCRIPTIONS_REMOVE]: {POST: handleSubscriptionRemove},
 };

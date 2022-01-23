@@ -1,15 +1,15 @@
-import {ApiResponseCode, SubscriptionGetPayload} from '../../../../api-def/api';
+import {ApiResponseCode, UserConfigGetPayload} from '../../../../api-def/api';
 import {SubscriptionRecordController} from '../../../../thirdparty/mail/data/subscription/controller';
 import {processPayloadBase} from '../../../../utils/payload/base';
 import {HandlerParams} from '../../../lookup';
 import {ApiFailedResponse} from '../../../post/base/response/failed';
-import {SubscriptionGetResponse} from './response';
+import {UserConfigGetResponse} from './response';
 
 
-export const handleSubscriptionGet = async ({
+export const handleUserConfigGet = async ({
   payload,
   mongoClient,
-}: HandlerParams<SubscriptionGetPayload>): Promise<SubscriptionGetResponse | ApiFailedResponse> => {
+}: HandlerParams<UserConfigGetPayload>): Promise<UserConfigGetResponse | ApiFailedResponse> => {
   payload = processPayloadBase(payload);
 
   if (!payload.uid) {
@@ -18,5 +18,5 @@ export const handleSubscriptionGet = async ({
 
   const subscriptionKeys = await SubscriptionRecordController.getSubscriptionsOfUser(mongoClient, payload.uid);
 
-  return new SubscriptionGetResponse({subscriptionKeys});
+  return new UserConfigGetResponse({subscriptionKeys});
 };

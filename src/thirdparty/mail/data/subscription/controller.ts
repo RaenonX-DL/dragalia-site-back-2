@@ -4,7 +4,6 @@ import {
   SubscriptionAddPayload,
   SubscriptionKey,
   SubscriptionRemovePayload,
-  SubscriptionUpdatePayload,
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {UserDocumentKey} from '../../../../api-def/models';
@@ -49,26 +48,27 @@ export class SubscriptionRecordController {
    * Update the user subscriptions by payload.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {SubscriptionUpdatePayload} payload user subscription update payload
+   * @param {string} uid ID of the user to update the subscriptions
+   * @param {SubscriptionKey[]} subscriptionKeys user subscription keys
    * @return {Promise<void>}
    */
-  static async updateSubscriptions(mongoClient: MongoClient, payload: SubscriptionUpdatePayload): Promise<void> {
-    const {uid, subKeysBase64} = payload;
-
-    const subKeys = JSON.parse(Buffer.from(subKeysBase64, 'base64url').toString() || '[]') as SubscriptionKey[];
-
+  static async updateSubscriptions(
+    mongoClient: MongoClient,
+    uid: string,
+    subscriptionKeys: SubscriptionKey[],
+  ): Promise<void> {
     await execTransaction(mongoClient, async (session) => {
       const uidObjectId = new ObjectId(uid);
       const collection = await SubscriptionRecord.getCollection(mongoClient);
 
       await collection.deleteMany({[SubscriptionRecordDocumentKey.uid]: new ObjectId(uid)}, {session});
 
-      if (!subKeys.length) {
+      if (!subscriptionKeys.length) {
         return;
       }
 
       await collection.insertMany(
-        subKeys.map((key) => ({
+        subscriptionKeys.map((key) => ({
           [SubscriptionRecordDocumentKey.key]: key,
           [SubscriptionRecordDocumentKey.uid]: uidObjectId,
         })),

@@ -7,7 +7,7 @@ import {ApiResponse} from '../../../../base/response';
  *
  * This always returns `ApiResponseCode.SUCCESS` if used.
  */
-export class SubscriptionUpdateResponse extends ApiResponse {
+export class UserConfigUpdateResponse extends ApiResponse {
   /**
    * Construct a user subscription update response class.
    */

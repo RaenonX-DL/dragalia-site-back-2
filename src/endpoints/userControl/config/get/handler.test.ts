@@ -6,7 +6,7 @@ import {
   PostType,
   SubscriptionKey,
   SupportedLanguages,
-  SubscriptionGetResponse,
+  UserConfigGetResponse,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
 import {
@@ -45,11 +45,11 @@ describe('Subscription get all handler', () => {
   });
 
   it('gets all the subscriptions', async () => {
-    const response = await app.app.inject().get(ApiEndPoints.USER_SUBSCRIPTIONS_GET)
+    const response = await app.app.inject().get(ApiEndPoints.USER_CONFIG_GET)
       .query({uid, lang: SupportedLanguages.CHT});
     expect(response.statusCode).toBe(200);
 
-    const json: SubscriptionGetResponse = response.json() as SubscriptionGetResponse;
+    const json: UserConfigGetResponse = response.json() as UserConfigGetResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.subscriptionKeysBase64).toBe(subKeysBase64);

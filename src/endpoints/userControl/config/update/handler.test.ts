@@ -5,8 +5,8 @@ import {
   ApiResponseCode,
   PostType,
   SubscriptionKey,
-  SubscriptionUpdateResponse,
   SupportedLanguages,
+  UserConfigUpdateResponse,
 } from '../../../../api-def/api';
 import {DocumentBaseKey} from '../../../../api-def/models';
 import {Application, createApp} from '../../../../app';
@@ -26,7 +26,7 @@ describe('Subscription batch update handler', () => {
     {type: 'const', name: 'ALL_QUEST'},
     {type: 'post', postType: PostType.QUEST, id: 7},
   ];
-  const subKeysBase64: string = Buffer.from(JSON.stringify(subKeys)).toString('base64url');
+  const subscriptionKeysBase64: string = Buffer.from(JSON.stringify(subKeys)).toString('base64url');
 
   beforeAll(async () => {
     app = await createApp();
@@ -41,14 +41,14 @@ describe('Subscription batch update handler', () => {
   });
 
   it('adds new subscriptions of a user if not existed before', async () => {
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+    const response = await app.app.inject().post(ApiEndPoints.USER_CONFIG_UPDATE).payload({
       uid,
       lang: SupportedLanguages.CHT,
-      subKeysBase64,
+      subscriptionKeysBase64,
     });
     expect(response.statusCode).toBe(200);
 
-    const json: SubscriptionUpdateResponse = response.json() as SubscriptionUpdateResponse;
+    const json: UserConfigUpdateResponse = response.json() as UserConfigUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
@@ -79,14 +79,14 @@ describe('Subscription batch update handler', () => {
       },
     ]);
 
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+    const response = await app.app.inject().post(ApiEndPoints.USER_CONFIG_UPDATE).payload({
       uid,
       lang: SupportedLanguages.CHT,
-      subKeysBase64,
+      subscriptionKeysBase64,
     });
     expect(response.statusCode).toBe(200);
 
-    const json: SubscriptionUpdateResponse = response.json() as SubscriptionUpdateResponse;
+    const json: UserConfigUpdateResponse = response.json() as UserConfigUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
@@ -111,14 +111,14 @@ describe('Subscription batch update handler', () => {
       [SubscriptionRecordDocumentKey.uid]: uid,
     })));
 
-    const response = await app.app.inject().post(ApiEndPoints.USER_SUBSCRIPTIONS_UPDATE).payload({
+    const response = await app.app.inject().post(ApiEndPoints.USER_CONFIG_UPDATE).payload({
       uid,
       lang: SupportedLanguages.CHT,
-      subKeysBase64: Buffer.from('[]', 'base64url').toString(),
+      subscriptionKeysBase64: Buffer.from('[]', 'base64url').toString(),
     });
     expect(response.statusCode).toBe(200);
 
-    const json: SubscriptionUpdateResponse = response.json() as SubscriptionUpdateResponse;
+    const json: UserConfigUpdateResponse = response.json() as UserConfigUpdateResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
 
