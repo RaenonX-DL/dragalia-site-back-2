@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleAdminSendAnnouncement} from './admin/announcement/handler';
 import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
@@ -105,6 +106,7 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.USER_CONFIG_GET]: {GET: handleUserConfigGet},
   [ApiEndPoints.USER_SUBSCRIPTIONS_ADD]: {POST: handleSubscriptionAdd},
   [ApiEndPoints.USER_SUBSCRIPTIONS_REMOVE]: {POST: handleSubscriptionRemove},
+  [ApiEndPoints.ADMIN_SEND_ANNOUNCEMENT]: {POST: handleAdminSendAnnouncement},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(
