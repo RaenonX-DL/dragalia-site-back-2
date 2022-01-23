@@ -1,8 +1,13 @@
-import {Collection, MongoClient} from 'mongodb';
+import {Collection, Filter, MongoClient} from 'mongodb';
 
-import {SupportedLanguages} from '../../api-def/api';
-import {MultiLingualDocumentKey} from '../model/multiLang';
-import {SequentialDocumentKey} from '../model/seq';
+import {PostType, SupportedLanguages, EmailSendResult} from '../../api-def/api';
+import {DocumentBase} from '../../api-def/models';
+import {makePostUrl, toPostPath} from '../../api-def/paths';
+import {sendMailPostEdited} from '../../thirdparty/mail/send/post/edited';
+import {sendMailPostPublished} from '../../thirdparty/mail/send/post/published';
+import {getUnitInfo} from '../../utils/resources/loader/unitInfo';
+import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../model/multiLang';
+import {SequentialDocumentBase, SequentialDocumentKey} from '../model/seq';
 
 
 export type NextSeqIdOptions = {
@@ -11,7 +16,7 @@ export type NextSeqIdOptions = {
   lang?: SupportedLanguages,
 };
 
-type FuncGetCollection = (mongoClient: MongoClient) => Collection;
+type FuncGetCollection<T extends DocumentBase> = (mongoClient: MongoClient) => Promise<Collection<T>>;
 
 type FuncGetNextSeqId = (mongoClient: MongoClient, options: NextSeqIdOptions) => Promise<number>;
 
@@ -32,9 +37,9 @@ export abstract class SequencedController {
    * @param {number} seqId post sequential ID to be checked
    * @return {Promise<boolean>} promise containing the availability of the sequential ID
    */
-  static async isIdAvailable(
+  static async isIdAvailable<T extends SequentialDocumentBase & MultiLingualDocumentBase>(
     mongoClient: MongoClient,
-    getCollection: FuncGetCollection,
+    getCollection: FuncGetCollection<T>,
     getNextSeqId: FuncGetNextSeqId,
     lang: SupportedLanguages,
     seqId?: number,
@@ -51,16 +56,74 @@ export abstract class SequencedController {
       return false;
     }
 
+    const filter: Filter<T> = {
+      [SequentialDocumentKey.sequenceId]: seqId,
+      [MultiLingualDocumentKey.language]: lang,
+    } as Filter<T>;
+
     // Cannot directly pass in the collection because for some reason,
     // if `seqId` is negative and the function is early-terminated,
     // the mongo client will be used for getting the collection and
     // triggers session expired error.
     // This happens when calling `npm run test:ci-jest`,
     // but not when calling `npm run test` or using the IDE builtin `jest` testing config.
-    return !await getCollection(mongoClient)
-      .findOne({
-        [SequentialDocumentKey.sequenceId]: seqId,
-        [MultiLingualDocumentKey.language]: lang,
-      });
+    // ------------
+    // False-negative of the inspection
+    // noinspection JSVoidFunctionReturnValueUsed
+    return !await (await getCollection(mongoClient)).findOne(filter);
+  }
+
+  /**
+   * Sends a sequenced post published email.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the published sequenced post
+   * @param {PostType} postType type of the sequential post
+   * @param {number} seqId sequential ID of the published sequenced post
+   * @return {Promise<EmailSendResult>} email send result
+   * @private
+   */
+  static async sendPostPublishedEmail(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    postType: PostType,
+    seqId: number,
+  ): Promise<EmailSendResult> {
+    return sendMailPostPublished({
+      mongoClient,
+      lang,
+      postType,
+      sitePath: makePostUrl(toPostPath[postType], {lang, pid: seqId}),
+      title: (await getUnitInfo(seqId))?.name[lang] || `#${seqId}`,
+    });
+  }
+
+  /**
+   * Sends a sequenced post published email.
+   *
+   * @param {MongoClient} mongoClient mongo client
+   * @param {SupportedLanguages} lang language of the published sequenced post
+   * @param {PostType} postType type of the sequential post
+   * @param {number} seqId sequential ID of the published sequenced post
+   * @param {string} editNote post edit note
+   * @return {Promise<EmailSendResult>} email send result
+   * @private
+   */
+  static async sendPostEditedEmail(
+    mongoClient: MongoClient,
+    lang: SupportedLanguages,
+    postType: PostType,
+    seqId: number,
+    editNote: string,
+  ): Promise<EmailSendResult> {
+    return sendMailPostEdited({
+      mongoClient,
+      lang,
+      postType,
+      postId: seqId,
+      sitePath: makePostUrl(toPostPath[postType], {lang, pid: seqId}),
+      title: (await getUnitInfo(seqId))?.name[lang] || `#${seqId}`,
+      editNote,
+    });
   }
 }

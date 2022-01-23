@@ -23,6 +23,6 @@ export const handlePublishMiscPost = async (
     mongoClient,
     payload,
     MiscPostController.publishPost,
-    (seqId) => new MiscPostPublishResponse(seqId),
+    ({seqId, ...result}) => new MiscPostPublishResponse(seqId, result),
   );
 };

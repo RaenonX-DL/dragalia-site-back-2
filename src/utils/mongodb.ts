@@ -6,11 +6,11 @@ import {CollectionInfo} from '../base/controller/info';
 const dbPool: Record<string, Db> = {};
 const colIndicesInit: Set<CollectionInfo> = new Set<CollectionInfo>();
 
-export type IndexInitFunction = <T extends Document = Document>(collection: Collection<T>) => void;
-
-export const getCollection = <T extends Document = Document>(
-  mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunction?: IndexInitFunction,
-): Collection<T> => {
+export const getCollection = async <T extends Document>(
+  mongoClient: MongoClient,
+  dbInfo: CollectionInfo,
+  indexInitFunction?: (collection: Collection<T>) => Promise<void>,
+): Promise<Collection<T>> => {
   if (!(dbInfo.dbName in dbPool)) {
     dbPool[dbInfo.dbName] = mongoClient.db(dbInfo.dbName);
   }
@@ -18,7 +18,7 @@ export const getCollection = <T extends Document = Document>(
   const collection = dbPool[dbInfo.dbName].collection<T>(dbInfo.collectionName);
 
   if (!colIndicesInit.has(dbInfo) && indexInitFunction) {
-    indexInitFunction(collection);
+    await indexInitFunction(collection);
   }
 
   return collection;

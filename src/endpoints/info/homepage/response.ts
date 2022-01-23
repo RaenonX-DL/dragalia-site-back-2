@@ -14,18 +14,18 @@ type HomepageLandingResponseOptions = Omit<HomepageLandingResponseApi, keyof Bas
  */
 export class HomepageLandingResponse extends ApiResponse {
   data: HomepageData;
+  subscribed: HomepageLandingResponseApi['subscribed'];
 
   /**
    * Construct a homepage landing endpoint API response.
    *
    * @param {HomepageLandingResponseOptions} options options to construct homepage landing response
    */
-  constructor(options: HomepageLandingResponseOptions) {
-    const responseCode = ApiResponseCode.SUCCESS;
+  constructor({data, subscribed}: HomepageLandingResponseOptions) {
+    super(ApiResponseCode.SUCCESS);
 
-    super(responseCode);
-
-    this.data = options.data;
+    this.data = data;
+    this.subscribed = subscribed;
   }
 
   /**
@@ -35,6 +35,7 @@ export class HomepageLandingResponse extends ApiResponse {
     return {
       ...super.toJson(),
       data: this.data,
+      subscribed: this.subscribed,
     };
   }
 }

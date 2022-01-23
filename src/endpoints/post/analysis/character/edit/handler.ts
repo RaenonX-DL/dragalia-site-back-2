@@ -16,6 +16,6 @@ export const handleEditCharacterAnalysis = async (
     mongoClient,
     payload,
     AnalysisController.editCharaAnalysis,
-    ({unitId}) => new CharaAnalysisEditResponse(unitId),
+    ({unitId}, result) => new CharaAnalysisEditResponse(unitId, result),
   );
 };

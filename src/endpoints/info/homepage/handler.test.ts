@@ -1,3 +1,5 @@
+import {ObjectId} from 'mongodb';
+
 import {periodicActiveData, periodicCountryData, periodicLangData} from '../../../../test/data/thirdparty/ga';
 import {
   ApiEndPoints,
@@ -9,6 +11,7 @@ import {Application, createApp} from '../../../app';
 import * as periodicActive from '../../../thirdparty/ga/data/periodicActive';
 import * as periodicCountry from '../../../thirdparty/ga/data/periodicCountry';
 import * as periodicTotal from '../../../thirdparty/ga/data/periodicTotal';
+import {SubscriptionRecord, SubscriptionRecordDocumentKey} from '../../../thirdparty/mail/data/subscription/model';
 import {QuestPostController} from '../../post/quest/controller';
 
 
@@ -36,6 +39,7 @@ describe(`Homepage landing info endpoint`, () => {
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   beforeAll(async () => {
@@ -80,5 +84,32 @@ describe(`Homepage landing info endpoint`, () => {
     expect(json.success).toBe(true);
     expect(json.data.stats.user.perCountry).toStrictEqual(periodicCountryData);
     expect(json.data.stats.user.perLang).toStrictEqual(periodicLangData);
+  });
+
+  it('sends correct global subscription status', async () => {
+    const uid = new ObjectId();
+
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertMany([
+      {
+        [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_QUEST'},
+        [SubscriptionRecordDocumentKey.uid]: uid,
+      },
+      {
+        [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_MISC'},
+        [SubscriptionRecordDocumentKey.uid]: uid,
+      },
+    ]);
+
+    const result = await app.app.inject().get(ApiEndPoints.HOME)
+      .query({uid: uid.toHexString(), lang: SupportedLanguages.EN});
+    expect(result.statusCode).toBe(200);
+
+    const json: HomepageLandingResponse = result.json() as HomepageLandingResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.subscribed.post[PostType.ANALYSIS]).toBeFalsy();
+    expect(json.subscribed.post[PostType.QUEST]).toBeTruthy();
+    expect(json.subscribed.post[PostType.MISC]).toBeTruthy();
+    expect(json.subscribed.announcement).toBeFalsy();
   });
 });

@@ -4,6 +4,7 @@ import {InputDataPreset} from '../../../api-def/api';
 import {DocumentBase} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document, DocumentConstructParams} from '../../../base/model/base';
+import {getCollection} from '../../../utils/mongodb';
 
 
 const dbInfo: CollectionInfo = {
@@ -47,11 +48,11 @@ export class AtkSkillPreset extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<AtkSkillPresetDocument>> {
+    return await getCollection<AtkSkillPresetDocument>(mongoClient, dbInfo, async (collection) => {
       // Expire after 30 days
-      collection.createIndex(AtkSkillPresetDocumentKey.lastUsed, {expireAfterSeconds: 30 * 86400});
-    }));
+      await collection.createIndex(AtkSkillPresetDocumentKey.lastUsed, {expireAfterSeconds: 30 * 86400});
+    });
   }
 
   /**

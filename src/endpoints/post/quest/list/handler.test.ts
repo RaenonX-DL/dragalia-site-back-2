@@ -8,6 +8,7 @@ import {
   QuestPostPublishPayload, SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
+import {SubscriptionRecord, SubscriptionRecordDocumentKey} from '../../../../thirdparty/mail/data/subscription/model';
 import {QuestPostController} from '../controller';
 
 
@@ -35,6 +36,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   const payloadList: QuestPostListPayload = {
@@ -108,5 +110,33 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_LIST} - the quest post listing 
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
+  });
+
+  it('returns that the user has subscribed', async () => {
+    const uid = new ObjectId();
+
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
+      [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_QUEST'},
+      [SubscriptionRecordDocumentKey.uid]: uid,
+    });
+
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST)
+      .query({...payloadList, uid: uid.toHexString()});
+    expect(result.statusCode).toBe(200);
+
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeTruthy();
+  });
+
+  it('returns that the user is not subscribed', async () => {
+    const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_LIST).query(payloadList);
+    expect(result.statusCode).toBe(200);
+
+    const json: QuestPostListResponse = result.json() as QuestPostListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeFalsy();
   });
 });

@@ -6,7 +6,7 @@ import {
   FailedResponse,
   GetAtkSkillPresetResponse,
 } from '../../../../api-def/api';
-import {UserDocumentKey} from '../../../../api-def/models/user';
+import {UserDocumentKey} from '../../../../api-def/models';
 import {Application, createApp} from '../../../../app';
 import {UserController} from '../../../userControl/controller';
 import {User} from '../../../userControl/model';
@@ -35,15 +35,13 @@ describe('Get ATK skill preset handler', () => {
       [UserDocumentKey.email]: 'email',
       [UserDocumentKey.image]: 'image',
       [UserDocumentKey.isAdmin]: false,
-      [UserDocumentKey.createdAt]: new Date(),
-      [UserDocumentKey.updatedAt]: new Date(),
     }));
   };
 
   it('returns the preset if found', async () => {
     mockGetUser();
 
-    const insertResult = await AtkSkillPreset.getCollection(app.mongoClient)
+    const insertResult = await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const response = await app.app.inject().get(ApiEndPoints.PRESET_ATK_SKILL_INPUT).query({
@@ -75,7 +73,7 @@ describe('Get ATK skill preset handler', () => {
   it('returns null if the preset ID is not a valid object ID', async () => {
     mockGetUser();
 
-    await AtkSkillPreset.getCollection(app.mongoClient)
+    await (await AtkSkillPreset.getCollection(app.mongoClient))
       .insertOne(new AtkSkillPreset({preset: {a: 7}}).toObject());
 
     const response = await app.app.inject().get(ApiEndPoints.PRESET_ATK_SKILL_INPUT).query({

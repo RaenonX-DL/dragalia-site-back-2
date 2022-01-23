@@ -1,4 +1,4 @@
-import {AnalysisEditResponse as AnalysisEditResponseApi} from '../../../../../api-def/api';
+import {AnalysisEditResponse as AnalysisEditResponseApi, PostEditResult} from '../../../../../api-def/api';
 import {PostEditResponse} from '../../../base/response/post/edit/common';
 
 /**
@@ -11,9 +11,10 @@ export abstract class AnalysisEditResponse extends PostEditResponse {
    * Construct an analysis editing API response.
    *
    * @param {number} unitId unit ID of the edited analysis
+   * @param {PostEditResult} result analysis edit result
    */
-  constructor(unitId: number) {
-    super();
+  constructor(unitId: number, result: PostEditResult) {
+    super(result);
 
     this.unitId = unitId;
   }

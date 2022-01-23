@@ -1,18 +1,21 @@
 import {MongoClient} from 'mongodb';
 
 import {
-  SequencedPostInfo,
+  EmailSendResult,
+  PostType,
   QuestPostEditPayload,
   QuestPostPublishPayload,
+  SequencedPostInfo, subKeysInclude, SubscriptionKey,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
-import {UpdateResult} from '../../../base/enum/updateResult';
 import {SequentialDocumentKey} from '../../../base/model/seq';
-import {PostGetResult} from '../base/controller/get';
+import {PostGetResult, PostGetResultOpts} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
+import {GetSequentialPostOptions, ListPostOptions} from '../base/controller/type';
 import {PostDocumentKey} from '../base/model';
+import {SequencedEditResult, SequencedPublishResult} from '../base/type';
 import {QuestGetResponse} from './get/response';
 import {dbInfo, QuestPositionDocumentKey, QuestPost, QuestPostDocument, QuestPostDocumentKey} from './model';
 
@@ -24,12 +27,10 @@ class QuestPostGetResult extends PostGetResult<QuestPostDocument> {
   /**
    * Construct a quest post get result object.
    *
-   * @param {QuestPostDocument} post
-   * @param {boolean} isAltLang
-   * @param {Array<SupportedLanguages>} otherLangs
+   * @param {PostGetResultOpts} options options to construct quest post get result
    */
-  constructor(post: QuestPostDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
-    super(post, isAltLang, otherLangs);
+  constructor(options: PostGetResultOpts<QuestPostDocument>) {
+    super(options);
   }
 
   /**
@@ -73,19 +74,26 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostPublishPayload} payload payload for creating a quest post
-   * @return {Promise<number>} post sequential ID
+   * @return {Promise<SequencedPublishResult>} post publish result
    */
-  static async publishPost(mongoClient: MongoClient, payload: QuestPostPublishPayload): Promise<number> {
-    const {seqId, lang} = payload;
+  static async publishPost(
+    mongoClient: MongoClient, payload: QuestPostPublishPayload,
+  ): Promise<SequencedPublishResult> {
+    const {seqId, lang, sendUpdateEmail} = payload;
 
     const post: QuestPost = QuestPost.fromPayload({
       ...payload,
       seqId: await QuestPostController.getNextSeqId(mongoClient, {seqId, lang}),
     });
 
-    await QuestPost.getCollection(mongoClient).insertOne(post.toObject());
+    const [emailResult] = await Promise.all([
+      sendUpdateEmail ?
+        SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.QUEST, post.seqId) :
+        Promise.resolve({accepted: [], rejected: []}),
+      (await QuestPost.getCollection(mongoClient)).insertOne(post.toObject()),
+    ]);
 
-    return post.seqId;
+    return {seqId: post.seqId, emailResult};
   }
 
   /**
@@ -93,49 +101,67 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostEditPayload} editPayload payload to edit a quest post
-   * @return {Promise<UpdateResult>} result of editing a quest post
+   * @return {Promise<SequencedEditResult>} result of editing a quest post
    */
-  static async editQuestPost(mongoClient: MongoClient, editPayload: QuestPostEditPayload): Promise<UpdateResult> {
+  static async editQuestPost(
+    mongoClient: MongoClient, editPayload: QuestPostEditPayload,
+  ): Promise<SequencedEditResult> {
+    const {lang, editNote, sendUpdateEmail} = editPayload;
+
     const post: QuestPost = QuestPost.fromPayload(editPayload);
 
-    return await QuestPostController.editPost(
-      QuestPost.getCollection(mongoClient),
+    const updated = await QuestPostController.editPost(
+      await QuestPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
-      editPayload.lang,
+      lang,
       post.toObject(),
       editPayload.editNote,
     );
+
+    let emailResult: EmailSendResult = {
+      accepted: [],
+      rejected: [],
+    };
+    if (updated === 'UPDATED' && sendUpdateEmail) {
+      emailResult = await SequencedController.sendPostEditedEmail(
+        mongoClient, lang, PostType.QUEST, post.seqId, editNote,
+      );
+    }
+
+    return {
+      seqId: post.seqId,
+      updated,
+      emailResult,
+    };
   }
 
   /**
    * Get a list of quest posts.
    *
-   * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {SupportedLanguages} lang language code of the posts
-   * @param {number} limit result limit count
+   * @param {ListPostOptions} options options for getting the misc post list
    * @return {Promise<PostListResult>} post listing result
    */
-  static async getPostList(
-    mongoClient: MongoClient, lang: SupportedLanguages, limit?: number,
-  ): Promise<PostListResult<SequencedPostInfo>> {
-    return QuestPostController.listPosts(
-      QuestPost.getCollection(mongoClient),
-      lang,
-      {
-        projection: {
-          [SequentialDocumentKey.sequenceId]: 1,
-          [PostDocumentKey.title]: 1,
-        },
-        transformFunc: (post) => ({
-          ...defaultTransformFunction(post),
-          seqId: post[SequentialDocumentKey.sequenceId],
-          title: post[PostDocumentKey.title],
-        }),
-        limit,
+  static async getPostList(options: ListPostOptions): Promise<PostListResult<SequencedPostInfo>> {
+    const {mongoClient, limit} = options;
+
+    return QuestPostController.listPosts({
+      ...options,
+      postCollection: await QuestPost.getCollection(mongoClient),
+      postType: PostType.QUEST,
+      projection: {
+        [SequentialDocumentKey.sequenceId]: 1,
+        [PostDocumentKey.title]: 1,
       },
-    );
+      globalSubscriptionKey: {type: 'const', name: 'ALL_QUEST'},
+      transformFunc: (post, userSubscribed) => ({
+        ...defaultTransformFunction(post, userSubscribed),
+        seqId: post[SequentialDocumentKey.sequenceId],
+        title: post[PostDocumentKey.title],
+      }),
+      limit,
+    });
   }
 
   /**
@@ -150,19 +176,35 @@ export class QuestPostController extends PostController implements SequencedCont
    *
    * Returns ``null`` if the post with the given sequential ID is not found.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {number} seqId sequential ID of the post
-   * @param {SupportedLanguages} lang language of the post
-   * @param {boolean} incCount if to increase the view count of the post or not
+   * @param {GetSequentialPostOptions} options options to get a quest post
    * @return {Promise} result of getting a quest post
    */
-  static async getQuestPost(
-    mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
-  ): Promise<QuestPostGetResult | null> {
-    return super.getPost<QuestPostDocument, QuestPostGetResult>(
-      QuestPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
-      ((post, isAltLang, otherLangs) => new QuestPostGetResult(post, isAltLang, otherLangs)),
-    );
+  static async getQuestPost(options: GetSequentialPostOptions): Promise<QuestPostGetResult | null> {
+    const {
+      mongoClient,
+      uid,
+      seqId,
+      lang = SupportedLanguages.CHT,
+      incCount = true,
+    } = options;
+
+    return super.getPost<QuestPostDocument, QuestPostGetResult>({
+      mongoClient,
+      collection: await QuestPost.getCollection(mongoClient),
+      uid,
+      findCondition: {[SequentialDocumentKey.sequenceId]: seqId},
+      resultConstructFunction: (options) => new QuestPostGetResult(options),
+      isSubscribed: (key, post) => {
+        const subKeys: SubscriptionKey[] = [
+          {type: 'const', name: 'ALL_QUEST'},
+          {type: 'post', postType: PostType.ANALYSIS, id: post[SequentialDocumentKey.sequenceId]},
+        ];
+
+        return subKeysInclude(subKeys, key);
+      },
+      lang,
+      incCount,
+    });
   }
 
   /**

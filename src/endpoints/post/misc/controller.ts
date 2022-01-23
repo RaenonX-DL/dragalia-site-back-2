@@ -1,18 +1,23 @@
 import {MongoClient} from 'mongodb';
 
 import {
+  EmailSendResult,
   MiscPostEditPayload,
   MiscPostPublishPayload,
+  PostType,
   SequencedPostInfo,
+  subKeysInclude,
+  SubscriptionKey,
   SupportedLanguages,
 } from '../../../api-def/api';
 import {NextSeqIdOptions, SequencedController} from '../../../base/controller/seq';
-import {UpdateResult} from '../../../base/enum/updateResult';
 import {SequentialDocumentKey} from '../../../base/model/seq';
-import {PostGetResult} from '../base/controller/get';
+import {PostGetResult, PostGetResultOpts} from '../base/controller/get';
 import {defaultTransformFunction, PostListResult} from '../base/controller/list';
 import {PostController} from '../base/controller/main';
+import {GetSequentialPostOptions, ListPostOptions} from '../base/controller/type';
 import {PostDocumentKey} from '../base/model';
+import {SequencedEditResult, SequencedPublishResult} from '../base/type';
 import {MiscGetResponse} from './get/response';
 import {dbInfo, MiscPost, MiscPostDocument, MiscPostDocumentKey, MiscSectionDocumentKey} from './model';
 
@@ -24,12 +29,10 @@ class MiscPostGetResult extends PostGetResult<MiscPostDocument> {
   /**
    * Construct a misc post get result object.
    *
-   * @param {MiscPostDocument} post
-   * @param {boolean} isAltLang
-   * @param {Array<SupportedLanguages>} otherLangs
+   * @param {PostGetResultOpts} options options to construct misc post get result
    */
-  constructor(post: MiscPostDocument, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
-    super(post, isAltLang, otherLangs);
+  constructor(options: PostGetResultOpts<MiscPostDocument>) {
+    super(options);
   }
 
   /**
@@ -68,19 +71,26 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {QuestPostPublishPayload} payload payload for creating a misc post
-   * @return {Promise<number>} post sequential ID
+   * @return {Promise<SequencedPublishResult>} post publish result
    */
-  static async publishPost(mongoClient: MongoClient, payload: MiscPostPublishPayload): Promise<number> {
-    const {seqId, lang} = payload;
+  static async publishPost(
+    mongoClient: MongoClient, payload: MiscPostPublishPayload,
+  ): Promise<SequencedPublishResult> {
+    const {seqId, lang, sendUpdateEmail} = payload;
 
     const post: MiscPost = MiscPost.fromPayload({
       ...payload,
       seqId: await MiscPostController.getNextSeqId(mongoClient, {seqId, lang}),
     });
 
-    await MiscPost.getCollection(mongoClient).insertOne(post.toObject());
+    const [emailResult] = await Promise.all([
+      sendUpdateEmail ?
+        SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.MISC, post.seqId) :
+        Promise.resolve({accepted: [], rejected: []}),
+      (await MiscPost.getCollection(mongoClient)).insertOne(post.toObject()),
+    ]);
 
-    return post.seqId;
+    return {seqId: post.seqId, emailResult};
   }
 
   /**
@@ -88,49 +98,65 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * @param {MongoClient} mongoClient mongo client
    * @param {MiscPostEditPayload} editPayload payload to edit a misc post
-   * @return {Promise<UpdateResult>} result of editing a misc post
+   * @return {Promise<SequencedEditResult>} result of editing a misc post
    */
-  static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<UpdateResult> {
+  static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<SequencedEditResult> {
+    const {lang, editNote, sendUpdateEmail} = editPayload;
+
     const post: MiscPost = MiscPost.fromPayload(editPayload);
 
-    return await MiscPostController.editPost(
-      MiscPost.getCollection(mongoClient),
+    const updated = await MiscPostController.editPost(
+      await MiscPost.getCollection(mongoClient),
       {
         [SequentialDocumentKey.sequenceId]: editPayload.seqId,
       },
-      editPayload.lang,
+      lang,
       post.toObject(),
       editPayload.editNote,
     );
+
+    let emailResult: EmailSendResult = {
+      accepted: [],
+      rejected: [],
+    };
+    if (updated === 'UPDATED' && sendUpdateEmail) {
+      emailResult = await SequencedController.sendPostEditedEmail(
+        mongoClient, lang, PostType.MISC, post.seqId, editNote,
+      );
+    }
+
+    return {
+      seqId: post.seqId,
+      updated,
+      emailResult,
+    };
   }
 
   /**
    * Get a list of misc posts.
    *
-   * @param {MongoClient} mongoClient mongo client to perform the listing
-   * @param {SupportedLanguages} lang language code of the posts
-   * @param {number} limit result limit count
+   * @param {ListPostOptions} options options for getting the misc post list
    * @return {Promise<PostListResult>} post listing result
    */
-  static async getPostList(
-    mongoClient: MongoClient, lang: SupportedLanguages, limit?: number,
-  ): Promise<PostListResult<SequencedPostInfo>> {
-    return MiscPostController.listPosts(
-      MiscPost.getCollection(mongoClient),
-      lang,
-      {
-        projection: {
-          [SequentialDocumentKey.sequenceId]: 1,
-          [PostDocumentKey.title]: 1,
-        },
-        transformFunc: (post) => ({
-          ...defaultTransformFunction(post),
-          seqId: post[SequentialDocumentKey.sequenceId],
-          title: post[PostDocumentKey.title],
-        }),
-        limit,
+  static async getPostList(options: ListPostOptions): Promise<PostListResult<SequencedPostInfo>> {
+    const {mongoClient, limit} = options;
+
+    return MiscPostController.listPosts({
+      ...options,
+      postCollection: await MiscPost.getCollection(mongoClient),
+      postType: PostType.MISC,
+      projection: {
+        [SequentialDocumentKey.sequenceId]: 1,
+        [PostDocumentKey.title]: 1,
       },
-    );
+      globalSubscriptionKey: {type: 'const', name: 'ALL_MISC'},
+      transformFunc: (post, userSubscribed) => ({
+        ...defaultTransformFunction(post, userSubscribed),
+        seqId: post[SequentialDocumentKey.sequenceId],
+        title: post[PostDocumentKey.title],
+      }),
+      limit,
+    });
   }
 
   /**
@@ -145,19 +171,35 @@ export class MiscPostController extends PostController implements SequencedContr
    *
    * Returns ``null`` if the post with the given sequential ID is not found.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {number} seqId sequential ID of the post
-   * @param {SupportedLanguages} lang language of the post
-   * @param {boolean} incCount if to increase the view count of the post or not
+   * @param {GetSequentialPostOptions} options options to get a misc post
    * @return {Promise} result of getting a misc post
    */
-  static async getMiscPost(
-    mongoClient: MongoClient, seqId: number, lang = SupportedLanguages.CHT, incCount = true,
-  ): Promise<MiscPostGetResult | null> {
-    return super.getPost<MiscPostDocument, MiscPostGetResult>(
-      MiscPost.getCollection(mongoClient), {[SequentialDocumentKey.sequenceId]: seqId}, lang, incCount,
-      ((post, isAltLang, otherLangs) => new MiscPostGetResult(post, isAltLang, otherLangs)),
-    );
+  static async getMiscPost(options: GetSequentialPostOptions): Promise<MiscPostGetResult | null> {
+    const {
+      mongoClient,
+      uid,
+      seqId,
+      lang = SupportedLanguages.CHT,
+      incCount = true,
+    } = options;
+
+    return super.getPost<MiscPostDocument, MiscPostGetResult>({
+      mongoClient,
+      collection: await MiscPost.getCollection(mongoClient),
+      uid,
+      findCondition: {[SequentialDocumentKey.sequenceId]: seqId},
+      resultConstructFunction: (options) => new MiscPostGetResult(options),
+      isSubscribed: (key, post) => {
+        const subKeys: SubscriptionKey[] = [
+          {type: 'const', name: 'ALL_MISC'},
+          {type: 'post', postType: PostType.ANALYSIS, id: post[SequentialDocumentKey.sequenceId]},
+        ];
+
+        return subKeysInclude(subKeys, key);
+      },
+      lang,
+      incCount,
+    });
   }
 
   /**

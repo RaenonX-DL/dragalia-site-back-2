@@ -41,7 +41,10 @@ export const getPeriodicCountryUser = async (countryLimit: number): Promise<GAPe
     const periodName = name as GAPeriodKey;
 
     response.rows?.forEach((row) => {
-      if (!row.dimensionValues?.some((value) => value.value === periodName) || !row.metricValues) {
+      if (
+        !row.dimensionValues?.map(({value}) => value).includes(periodName) ||
+        !row.metricValues
+      ) {
         return;
       }
 
@@ -81,7 +84,10 @@ export const getPeriodicCountryUser = async (countryLimit: number): Promise<GAPe
   // Fill data of dimensional total
   response.totals?.forEach((total) => {
     Object.entries(GAPeriod).forEach(([name]) => {
-      if (!total.dimensionValues?.some((value) => value.value === name) || !total.metricValues) {
+      if (
+        !total.dimensionValues?.map(({value}) => value).includes(name) ||
+        !total.metricValues
+      ) {
         return;
       }
 

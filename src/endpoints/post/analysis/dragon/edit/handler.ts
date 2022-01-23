@@ -16,6 +16,6 @@ export const handleEditDragonAnalysis = async (
     mongoClient,
     payload,
     AnalysisController.editDragonAnalysis,
-    ({unitId}) => new DragonAnalysisEditResponse(unitId),
+    ({unitId}, result) => new DragonAnalysisEditResponse(unitId, result),
   );
 };

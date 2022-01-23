@@ -5,6 +5,7 @@ import {DocumentBaseKey} from '../../../api-def/models';
 import {CollectionInfo} from '../../../base/controller/info';
 import {Document} from '../../../base/model/base';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../../../base/model/multiLang';
+import {getCollection} from '../../../utils/mongodb';
 
 
 export const dbInfo: CollectionInfo = {
@@ -67,13 +68,13 @@ export class AlertEntry extends Document {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      collection.createIndex(
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<AlertEntryDocument>> {
+    return await getCollection<AlertEntryDocument>(mongoClient, dbInfo, async (collection) => {
+      await collection.createIndex(
         {[AlertEntryKey.priority]: 1, [MultiLingualDocumentKey.language]: 1},
         {unique: true, partialFilterExpression: {houseName: {$type: 'number'}}},
       );
-    }));
+    });
   }
 
   /**

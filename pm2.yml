@@ -4,7 +4,7 @@ apps:
     script: './dist/src/main.js'
     # Execution configs
     exec_mode: 'cluster'
-    instances: 6
+    instances: 10
     # Environments
     env:
       NODE_ENV: 'development'

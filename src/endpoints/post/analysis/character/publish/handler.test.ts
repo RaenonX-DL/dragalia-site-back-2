@@ -40,6 +40,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     }],
     tipsBuilds: 'tip1',
     videos: 'video1',
+    sendUpdateEmail: true,
   };
 
   const payload2: CharaAnalysisPublishPayload = {
@@ -147,7 +148,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
   test('if the published analysis exists in the database', async () => {
     await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload2);
 
-    const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
       [MultiLingualDocumentKey.language]: payload2.lang,
     });
@@ -178,7 +179,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA} - publish ch
     // Normal & change unit ID (expect to fail)
     await app.app.inject().post(ApiEndPoints.POST_ANALYSIS_PUBLISH_CHARA).payload(payload5);
 
-    const docQuery = await CharaAnalysis.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await CharaAnalysis.getCollection(app.mongoClient)).findOne({
       [MultiLingualDocumentKey.language]: payload2.lang,
       [UnitAnalysisDocumentKey.unitId]: payload2.unitId,
     });

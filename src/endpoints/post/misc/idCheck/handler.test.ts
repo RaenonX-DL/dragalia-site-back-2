@@ -35,6 +35,7 @@ describe('Misc post ID check EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   let newPostSeqId: number;
@@ -47,7 +48,7 @@ describe('Misc post ID check EP', () => {
     await app.reset();
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
-    newPostSeqId = await MiscPostController.publishPost(app.mongoClient, payloadPost);
+    newPostSeqId = (await MiscPostController.publishPost(app.mongoClient, payloadPost)).seqId;
   });
 
   afterAll(async () => {

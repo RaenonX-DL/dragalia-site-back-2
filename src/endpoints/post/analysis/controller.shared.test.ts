@@ -11,6 +11,7 @@ import {ViewCountableDocumentKey} from '../../../base/model/viewCount';
 import {AnalysisController} from './controller';
 import {CharaAnalysis} from './model/chara';
 import {UnitAnalysis, UnitAnalysisDocumentKey} from './model/unitAnalysis';
+import {GetAnalysisOptions} from './type';
 
 
 describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
@@ -34,7 +35,9 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
     }],
     tipsBuilds: 'tips',
     videos: 'video',
+    sendUpdateEmail: true,
   };
+  let getAnalysisOpts: GetAnalysisOptions;
 
   beforeAll(async () => {
     app = await createApp();
@@ -42,6 +45,13 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
 
   beforeEach(async () => {
     await app.reset();
+
+    getAnalysisOpts = {
+      mongoClient: app.mongoClient,
+      uid: '',
+      unitIdentifier: payloadChara.unitId,
+      lang: SupportedLanguages.CHT,
+    };
   });
 
   afterAll(async () => {
@@ -51,15 +61,11 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   it('increases the view count after getting it', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    const getResult = await AnalysisController.getAnalysis(
-      app.mongoClient,
-      payloadChara.unitId,
-      SupportedLanguages.CHT,
-    );
+    await AnalysisController.getAnalysis(getAnalysisOpts);
+    await AnalysisController.getAnalysis(getAnalysisOpts);
+    await AnalysisController.getAnalysis(getAnalysisOpts);
+    await AnalysisController.getAnalysis(getAnalysisOpts);
+    const getResult = await AnalysisController.getAnalysis(getAnalysisOpts);
 
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(4);
   });
@@ -67,33 +73,31 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   it('returns correct analysis using sequential ID', async () => {
     // Insert analysis with seq ID
     const analysis = CharaAnalysis.fromPayload(payloadChara);
-    await UnitAnalysis
-      .getCollection(app.mongoClient)
+    await (await UnitAnalysis
+      .getCollection(app.mongoClient))
       .insertOne({...analysis.toObject(), [SequentialDocumentKey.sequenceId]: 1});
 
-    const analysisFromDb = await AnalysisController.getAnalysis(app.mongoClient, 1, SupportedLanguages.CHT);
+    const analysisFromDb = await AnalysisController.getAnalysis({
+      ...getAnalysisOpts, unitIdentifier: 1, lang: SupportedLanguages.CHT,
+    });
     expect(analysisFromDb?.post[UnitAnalysisDocumentKey.unitId]).toBe(payloadChara.unitId);
   });
 
   it('returns correct analysis using unit ID', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    const analysisFromDb = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT,
-    );
+    const analysisFromDb = await AnalysisController.getAnalysis(getAnalysisOpts);
     expect(analysisFromDb?.post[UnitAnalysisDocumentKey.unitId]).toBe(payloadChara.unitId);
   });
 
   it('does not increase the view count if specified', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
 
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    const getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT,
-    );
+    await AnalysisController.getAnalysis({...getAnalysisOpts, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, incCount: false});
+    const getResult = await AnalysisController.getAnalysis(getAnalysisOpts);
 
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
   });
@@ -101,9 +105,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   it('returns the analysis in an alternative language if main unavailable', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.EN});
 
-    const getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT,
-    );
+    const getResult = await AnalysisController.getAnalysis(getAnalysisOpts);
 
     expect(getResult?.isAltLang).toBe(true);
     expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);
@@ -111,7 +113,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
   });
 
   it('returns an empty response for non-existed analysis', async () => {
-    const getResult = await AnalysisController.getAnalysis(app.mongoClient, 10950102, SupportedLanguages.CHT);
+    const getResult = await AnalysisController.getAnalysis({...getAnalysisOpts, unitIdentifier: 10950102});
 
     expect(getResult).toBeNull();
   });
@@ -130,9 +132,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
       lang: SupportedLanguages.JP,
     });
 
-    const postListResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT,
-    );
+    const postListResult = await AnalysisController.getAnalysis(getAnalysisOpts);
 
     expect(postListResult?.isAltLang).toBe(false);
     expect(postListResult?.otherLangs).toStrictEqual([SupportedLanguages.EN, SupportedLanguages.JP]);
@@ -152,9 +152,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
       lang: SupportedLanguages.JP,
     });
 
-    const postListResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false,
-    );
+    const postListResult = await AnalysisController.getAnalysis({...getAnalysisOpts, incCount: false});
 
     expect(postListResult?.isAltLang).toBe(false);
     expect(postListResult?.otherLangs).toStrictEqual([]);
@@ -174,38 +172,36 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
       lang: SupportedLanguages.JP,
     });
 
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.EN);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.EN);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.JP);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.JP);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.JP, false);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.JP, false);
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.EN});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.EN});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.JP});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.JP});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.JP, incCount: false});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.JP, incCount: false});
 
-    let getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.EN, false,
-    );
+    let getResult = await AnalysisController.getAnalysis({
+      ...getAnalysisOpts, lang: SupportedLanguages.EN, incCount: false,
+    });
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
-    getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT, false,
-    );
+    getResult = await AnalysisController.getAnalysis({
+      ...getAnalysisOpts, lang: SupportedLanguages.CHT, incCount: false,
+    });
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(1);
-    getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.JP, false,
-    );
+    getResult = await AnalysisController.getAnalysis({
+      ...getAnalysisOpts, lang: SupportedLanguages.JP, incCount: false,
+    });
     expect(getResult?.post[ViewCountableDocumentKey.viewCount]).toBe(2);
   });
 
   test('if view count behaves correctly when returning the alternative version', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, {...payloadChara, lang: SupportedLanguages.EN});
 
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
-    const getResult = await AnalysisController.getAnalysis(
-      app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT,
-    );
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT});
+    await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT});
+    const getResult = await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT});
 
     expect(getResult?.isAltLang).toBe(true);
     expect(getResult?.post[MultiLingualDocumentKey.language]).toBe(SupportedLanguages.EN);
@@ -258,7 +254,7 @@ describe(`[Controller] ${AnalysisController.name} (Shared / Read)`, () => {
 
   test('skill info of `responseReady()` uses response key', async () => {
     await AnalysisController.publishCharaAnalysis(app.mongoClient, payloadChara);
-    const result = await AnalysisController.getAnalysis(app.mongoClient, payloadChara.unitId, SupportedLanguages.CHT);
+    const result = await AnalysisController.getAnalysis({...getAnalysisOpts, lang: SupportedLanguages.CHT});
 
     expect(result).not.toBeNull();
 

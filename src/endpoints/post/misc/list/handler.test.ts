@@ -9,6 +9,7 @@ import {
   SupportedLanguages,
 } from '../../../../api-def/api';
 import {Application, createApp} from '../../../../app';
+import {SubscriptionRecord, SubscriptionRecordDocumentKey} from '../../../../thirdparty/mail/data/subscription/model';
 import {MiscPostController} from '../controller';
 
 
@@ -29,6 +30,7 @@ describe('Misc post listing EP', () => {
         content: 'B1',
       },
     ],
+    sendUpdateEmail: true,
   };
 
   const payloadList: MiscPostListPayload = {
@@ -102,5 +104,41 @@ describe('Misc post listing EP', () => {
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
     expect(json.posts.map((entry) => entry.seqId)).toStrictEqual([]);
+  });
+
+  it('returns that the user has subscribed', async () => {
+    const uid = new ObjectId();
+
+    await (await SubscriptionRecord.getCollection(app.mongoClient)).insertOne({
+      [SubscriptionRecordDocumentKey.key]: {type: 'const', name: 'ALL_MISC'},
+      [SubscriptionRecordDocumentKey.uid]: uid,
+    });
+
+    for (let i = 0; i < 7; i++) {
+      await MiscPostController.publishPost(app.mongoClient, payloadPost);
+    }
+
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST)
+      .query({...payloadList, uid: uid.toHexString()});
+    expect(result.statusCode).toBe(200);
+
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeTruthy();
+  });
+
+  it('returns that the user is not subscribed', async () => {
+    for (let i = 0; i < 7; i++) {
+      await MiscPostController.publishPost(app.mongoClient, payloadPost);
+    }
+
+    const result = await app.app.inject().get(ApiEndPoints.POST_MISC_LIST).query(payloadList);
+    expect(result.statusCode).toBe(200);
+
+    const json: MiscPostListResponse = result.json() as MiscPostListResponse;
+    expect(json.code).toBe(ApiResponseCode.SUCCESS);
+    expect(json.success).toBe(true);
+    expect(json.userSubscribed).toBeFalsy();
   });
 });

@@ -7,6 +7,6 @@
   "watch": [
     "src/**"
   ],
-  "exec": "ts-node ./src/main.ts",
+  "exec": "ts-node --transpile-only ./src/main.ts",
   "ext": "ts,json"
 }

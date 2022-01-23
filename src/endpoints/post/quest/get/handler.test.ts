@@ -48,6 +48,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   beforeAll(async () => {
@@ -97,7 +98,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_GET} - get a specific quest pos
   });
 
   test('timestamp of edited post is using epoch', async () => {
-    const seqId = await QuestPostController.publishPost(app.mongoClient, payloadPost);
+    const {seqId} = await QuestPostController.publishPost(app.mongoClient, payloadPost);
     await QuestPostController.editQuestPost(app.mongoClient, {...payloadPost, seqId, video: 'a', editNote: 'edit'});
 
     const result = await app.app.inject().get(ApiEndPoints.POST_QUEST_GET).query(payloadGet);

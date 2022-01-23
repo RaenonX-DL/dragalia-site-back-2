@@ -70,7 +70,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
-    await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
       uid: '',
@@ -82,7 +82,7 @@ describe('Key point updating handler', () => {
     });
     expect(response.statusCode).toBe(403);
 
-    expect(await KeyPointEntry.getCollection(app.mongoClient).find().toArray()).toHaveLength(3);
+    expect(await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray()).toHaveLength(3);
   });
 
   it('adds new entries', async () => {
@@ -92,7 +92,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
     const insertIds = Object
-      .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+      .values((await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
@@ -112,7 +112,7 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(true);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await KeyPointEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data).toHaveLength(4);
     });
   });
@@ -123,7 +123,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
-    await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
       uid: uidAdmin.toHexString(),
@@ -140,7 +140,7 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(false);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      expect((await KeyPointEntry.getCollection(app.mongoClient).find().toArray()).length).toBe(3);
+      expect((await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray()).length).toBe(3);
     });
   });
 
@@ -150,7 +150,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
-    await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
       uid: uidAdmin.toHexString(),
@@ -164,7 +164,7 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(true);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await KeyPointEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data.map((entry) => entry[KeyPointEntryDocumentKey.description]).sort()).toStrictEqual([]);
     });
   });
@@ -176,7 +176,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
     const insertIds = Object
-      .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+      .values((await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
@@ -194,7 +194,7 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(true);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = (await KeyPointEntry.getCollection(app.mongoClient).find().toArray())
+      const data = (await (await KeyPointEntry.getCollection(app.mongoClient)).find().toArray())
         .map((entry) => entry[KeyPointEntryDocumentKey.description][SupportedLanguages.CHT])
         .sort();
       expect(data).toStrictEqual(['CHT 4', 'CHT 5']);
@@ -211,7 +211,7 @@ describe('Key point updating handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
     const insertIds = Object
-      .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
+      .values((await (await KeyPointEntry.getCollection(app.mongoClient)).insertMany(dataArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const response = await app.app.inject().post(ApiEndPoints.MANAGE_TIER_POINTS).payload({
@@ -230,20 +230,20 @@ describe('Key point updating handler', () => {
     expect(json.success).toBe(true);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      let data = await KeyPointEntry.getCollection(app.mongoClient)
+      let data = await (await KeyPointEntry.getCollection(app.mongoClient))
         .findOne({[DocumentBaseKey.id]: new ObjectId(insertIds[0])});
       expect(data?.[KeyPointEntryDocumentKey.description]).toStrictEqual({
         [SupportedLanguages.CHT]: 'CHT 4',
         [SupportedLanguages.EN]: 'EN 1',
       });
 
-      data = await KeyPointEntry.getCollection(app.mongoClient)
+      data = await (await KeyPointEntry.getCollection(app.mongoClient))
         .findOne({[DocumentBaseKey.id]: new ObjectId(insertIds[1])});
       expect(data?.[KeyPointEntryDocumentKey.description]).toStrictEqual({
         [SupportedLanguages.CHT]: 'CHT 5',
       });
 
-      data = await KeyPointEntry.getCollection(app.mongoClient)
+      data = await (await KeyPointEntry.getCollection(app.mongoClient))
         .findOne({[DocumentBaseKey.id]: new ObjectId(insertIds[2])});
       expect(data?.[KeyPointEntryDocumentKey.description]).toStrictEqual({
         [SupportedLanguages.CHT]: 'CHT 3',

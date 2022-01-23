@@ -1,9 +1,9 @@
-import {Collection, MongoClient, ObjectId} from 'mongodb';
+import {MongoClient, ObjectId} from 'mongodb';
 
 import {KeyPointEntryUpdate, SupportedLanguages} from '../../../api-def/api';
 import {DocumentBaseKey} from '../../../api-def/models';
 import {execTransaction} from '../../../utils/mongodb';
-import {UnitTierNote, UnitTierNoteDocument, UnitTierNoteDocumentKey} from '../notes/model';
+import {UnitTierNote, UnitTierNoteDocumentKey} from '../notes/model';
 import {DuplicatedDescriptionsError} from './error';
 import {KeyPointEntry, KeyPointEntryDocument, KeyPointEntryDocumentKey} from './model';
 
@@ -19,7 +19,7 @@ export class KeyPointController {
    * @return {Promise<Array<KeyPointEntry>>} array of key point entries
    */
   static async getAllEntries(mongoClient: MongoClient): Promise<Array<KeyPointEntryDocument>> {
-    return await KeyPointEntry.getCollection(mongoClient).find().toArray() as Array<KeyPointEntryDocument>;
+    return await (await KeyPointEntry.getCollection(mongoClient)).find().toArray();
   }
 
   /**
@@ -56,7 +56,7 @@ export class KeyPointController {
    * @return {Array<number>} unit IDs that shares the requested key point
    */
   static async getEntry(mongoClient: MongoClient, id: string): Promise<KeyPointEntry | null> {
-    const entry = await (KeyPointEntry.getCollection(mongoClient) as unknown as Collection<KeyPointEntryDocument>)
+    const entry = await (await KeyPointEntry.getCollection(mongoClient))
       .findOne({[DocumentBaseKey.id]: new ObjectId(id)});
 
     if (!entry) {
@@ -74,7 +74,7 @@ export class KeyPointController {
    * @return {Array<number>} unit IDs that shares the requested key point
    */
   static async getReferencedUnitIds(mongoClient: MongoClient, id: string): Promise<Array<number>> {
-    return (await UnitTierNote.getCollection(mongoClient) as unknown as Collection<UnitTierNoteDocument>)
+    return await (await UnitTierNote.getCollection(mongoClient))
       .find({[UnitTierNoteDocumentKey.points]: id})
       .map((doc) => doc[UnitTierNoteDocumentKey.unitId])
       .toArray();
@@ -108,7 +108,7 @@ export class KeyPointController {
     await execTransaction(
       mongoClient,
       async (session) => {
-        const collection = KeyPointEntry.getCollection(mongoClient);
+        const collection = await KeyPointEntry.getCollection(mongoClient);
 
         if (!entries.length) {
           // Nothing to add but delete all
@@ -132,7 +132,7 @@ export class KeyPointController {
           );
 
           // Remove unit tier note references
-          await (UnitTierNote.getCollection(mongoClient) as unknown as Collection<UnitTierNoteDocument>).updateMany(
+          await (await UnitTierNote.getCollection(mongoClient)).updateMany(
             {},
             {$pullAll: {[UnitTierNoteDocumentKey.points]: idsToDelete}},
           );

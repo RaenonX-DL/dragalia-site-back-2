@@ -11,12 +11,11 @@ export const handleListMiscPost = async ({
 }: HandlerParams<MiscPostListPayload>): Promise<MiscPostListResponse> => {
   payload = processMiscListPayload(payload);
 
-  return handleListPost(
+  return handleListPost({
     mongoClient,
     payload,
-    MiscPostController.getPostList,
-    (userData, postUnits) => {
-      return new MiscPostListResponse(userData ? userData.isAdmin : false, postUnits);
-    },
-  );
+    fnGetPostList: MiscPostController.getPostList,
+    fnConstructResponse: (options) => new MiscPostListResponse(options),
+    globalSubscriptionKeyName: 'ALL_MISC',
+  });
 };

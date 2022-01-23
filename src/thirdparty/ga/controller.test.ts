@@ -1,10 +1,10 @@
 import {periodicActiveData, periodicCountryData, periodicLangData} from '../../../test/data/thirdparty/ga';
 import {Application, createApp} from '../../app';
-import {CACHE_LIFE_SECS} from '../../utils/cache/const';
-import {getGaData, resetGaData} from './controller';
+import {getGaData} from './controller';
 import * as periodicActive from './data/periodicActive';
 import * as periodicCountry from './data/periodicCountry';
 import * as periodicTotal from './data/periodicTotal';
+import {resetCache} from './dbCache';
 
 
 describe('Google Analytics data cache', () => {
@@ -18,6 +18,8 @@ describe('Google Analytics data cache', () => {
   });
 
   beforeEach(async () => {
+    await app.reset();
+
     fnFetchTotal = jest.spyOn(periodicTotal, 'getPeriodicLanguageUser')
       .mockResolvedValue(periodicLangData);
     fnFetchCountry = jest.spyOn(periodicCountry, 'getPeriodicCountryUser')
@@ -26,45 +28,37 @@ describe('Google Analytics data cache', () => {
       .mockResolvedValue(periodicActiveData);
   });
 
-  afterEach(() => {
-    resetGaData();
-  });
-
   afterAll(async () => {
     await app.close();
   });
 
   it('fetches data on initial request', async () => {
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
     expect(fnFetchActive).toHaveBeenCalledTimes(1);
   });
 
   it('does not re-fetch data twice', async () => {
-    await getGaData();
+    await getGaData(app.mongoClient);
     fnFetchTotal.mockClear();
     fnFetchCountry.mockClear();
     fnFetchActive.mockClear();
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).not.toHaveBeenCalled();
     expect(fnFetchCountry).not.toHaveBeenCalled();
     expect(fnFetchActive).not.toHaveBeenCalled();
   });
 
   it('re-fetches after the cache expires', async () => {
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
     expect(fnFetchActive).toHaveBeenCalledTimes(1);
 
-    // Accelerate time
-    const now = Date.now();
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => now + CACHE_LIFE_SECS * 1000 + 100000);
+    await resetCache(app.mongoClient);
 
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).toHaveBeenCalledTimes(2);
     expect(fnFetchCountry).toHaveBeenCalledTimes(2);
     expect(fnFetchActive).toHaveBeenCalledTimes(2);
@@ -73,18 +67,12 @@ describe('Google Analytics data cache', () => {
   });
 
   it('does not re-fetch before the cache expires', async () => {
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
     expect(fnFetchActive).toHaveBeenCalledTimes(1);
 
-    // Accelerate time
-    const now = Date.now();
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => now + CACHE_LIFE_SECS * 1000 / 2);
-
-    await getGaData();
+    await getGaData(app.mongoClient);
     expect(fnFetchTotal).toHaveBeenCalledTimes(1);
     expect(fnFetchCountry).toHaveBeenCalledTimes(1);
     expect(fnFetchActive).toHaveBeenCalledTimes(1);

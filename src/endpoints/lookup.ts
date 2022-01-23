@@ -4,6 +4,7 @@ import {MongoClient} from 'mongodb';
 import {ApiEndPoints, RequestPayloadBase} from '../api-def/api';
 import {ApiResponse} from '../base/response';
 import {handleMethodNotAllowed} from '../statuses/methodNotAllowed/handler';
+import {handleAdminSendAnnouncement} from './admin/announcement/handler';
 import {handleGetKeyPointData} from './data/keyPoint/handler';
 import {handleDataUnitNameRef} from './data/unitNameRef/get/handler';
 import {handleUnitNameRefManage} from './data/unitNameRef/manage/handler';
@@ -42,6 +43,10 @@ import {handleTierNoteUpdate} from './tier/notes/update/handler';
 import {handleTierPointsGet} from './tier/points/get/handler';
 import {handleTierPointsManage} from './tier/points/manage/handler';
 import {handleTierPointsUpdate} from './tier/points/update/handler';
+import {handleUserConfigGet} from './userControl/config/get/handler';
+import {handleUserConfigUpdate} from './userControl/config/update/handler';
+import {handleSubscriptionAdd} from './userControl/subscriptions/add/handler';
+import {handleSubscriptionRemove} from './userControl/subscriptions/remove/handler';
 
 
 type HttpMethods = 'GET' | 'POST' | 'HEAD';
@@ -97,6 +102,11 @@ export const handlerLookup: {[endpoint: string]: EndpointHandlers} = {
   [ApiEndPoints.MANAGE_TIER_NOTE]: {GET: handleTierNoteEdit, POST: handleTierNoteUpdate},
   [ApiEndPoints.MANAGE_TIER_POINTS]: {GET: handleTierPointsManage, POST: handleTierPointsUpdate},
   [ApiEndPoints.PRESET_ATK_SKILL_INPUT]: {GET: handleGetAtkSkillPreset, POST: handleSetAtkSkillPreset},
+  [ApiEndPoints.USER_CONFIG_UPDATE]: {POST: handleUserConfigUpdate},
+  [ApiEndPoints.USER_CONFIG_GET]: {GET: handleUserConfigGet},
+  [ApiEndPoints.USER_SUBSCRIPTIONS_ADD]: {POST: handleSubscriptionAdd},
+  [ApiEndPoints.USER_SUBSCRIPTIONS_REMOVE]: {POST: handleSubscriptionRemove},
+  [ApiEndPoints.ADMIN_SEND_ANNOUNCEMENT]: {POST: handleAdminSendAnnouncement},
 };
 
 export const handleResponse = async <T extends RequestPayloadBase>(

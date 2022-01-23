@@ -1,12 +1,13 @@
 import * as dotenv from 'dotenv';
+import env from 'env-var';
 import {FastifyInstance} from 'fastify';
 
 
 dotenv.config();
 
+import {isProduction} from './api-def/utils';
 import {createApp} from './app';
 import {initHttp} from './utils/init/http';
-import {isProduction} from './utils/misc';
 
 // Start New Relic APM
 if (isProduction()) {
@@ -15,7 +16,7 @@ if (isProduction()) {
 
 (async () => {
   const app: FastifyInstance = (await createApp({
-    mongoUri: process.env.MONGO_URL || '',
+    mongoUri: env.get('MONGO_URL').default('').required(isProduction()).asString(),
     logger: isProduction() ?
       true :
       {prettyPrint: {translateTime: true}},

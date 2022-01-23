@@ -3,8 +3,11 @@ import {Collection, MongoClient} from 'mongodb';
 import {AnalysisBody, UnitType} from '../../../../api-def/api';
 import {EditableDocumentKey, EditNote} from '../../../../base/model/editable';
 import {MultiLingualDocumentKey} from '../../../../base/model/multiLang';
+import {SequentialDocumentKey} from '../../../../base/model/seq';
+import {getCollection} from '../../../../utils/mongodb';
 import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from '../../base/model';
 import {dbInfo} from './config';
+import {AnalysisDocument} from './type';
 
 
 export enum UnitAnalysisDocumentKey {
@@ -17,7 +20,7 @@ export enum UnitAnalysisDocumentKey {
   videos = 'v',
 }
 
-export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
+export type UnitAnalysisDocumentBase = PostDocumentBaseNoTitle & {
   [UnitAnalysisDocumentKey.type]: UnitType,
   [UnitAnalysisDocumentKey.unitId]: number,
   [UnitAnalysisDocumentKey.summary]: string,
@@ -25,6 +28,8 @@ export type UnitAnalysisDocument = PostDocumentBaseNoTitle & {
   [UnitAnalysisDocumentKey.passives]: string,
   [UnitAnalysisDocumentKey.normalAttacks]: string,
   [UnitAnalysisDocumentKey.videos]: string,
+  // Legacy usage
+  [SequentialDocumentKey.sequenceId]?: number,
 };
 
 export type UnitAnalysisConstructParams = PostConstructParamsNoTitle & {
@@ -85,14 +90,29 @@ export abstract class UnitAnalysis extends PostNoTitle {
   }
 
   /**
+   * @inheritDoc
+   */
+  static async getCollection(mongoClient: MongoClient): Promise<Collection<AnalysisDocument>> {
+    return await getCollection<AnalysisDocument>(mongoClient, dbInfo, async (collection) => {
+      await collection.createIndex(
+        [
+          {[UnitAnalysisDocumentKey.unitId]: 1},
+          {[MultiLingualDocumentKey.language]: 1},
+        ],
+        {unique: true},
+      );
+    });
+  }
+
+  /**
    * Convert `obj` to an instance to an instance of construct params.
    *
-   * @param {UnitAnalysisDocument} obj object to be converted
+   * @param {UnitAnalysisDocumentBase} obj object to be converted
    * @param {UnitType} type type of the unit analysis
    * @return {UnitAnalysisConstructParams} converted construct params
    * @protected
    */
-  protected static fromDocumentToConstructParams<T extends UnitAnalysisDocument>(
+  protected static fromDocumentToConstructParams<T extends AnalysisDocument>(
     obj: T, type: UnitType,
   ): UnitAnalysisConstructParams {
     return {
@@ -111,22 +131,7 @@ export abstract class UnitAnalysis extends PostNoTitle {
   /**
    * @inheritDoc
    */
-  static getCollection(mongoClient: MongoClient): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      collection.createIndex(
-        [
-          {[UnitAnalysisDocumentKey.unitId]: 1},
-          {[MultiLingualDocumentKey.language]: 1},
-        ],
-        {unique: true},
-      );
-    }));
-  }
-
-  /**
-   * @inheritDoc
-   */
-  toObject(): UnitAnalysisDocument {
+  toObject(): UnitAnalysisDocumentBase {
     return {
       ...super.toObject(),
       [UnitAnalysisDocumentKey.type]: this.type,

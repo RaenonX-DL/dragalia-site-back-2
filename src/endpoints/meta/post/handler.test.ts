@@ -43,7 +43,7 @@ describe('Post meta EP', () => {
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 
@@ -83,6 +83,7 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -189,6 +190,7 @@ describe('Post meta EP', () => {
       }],
       tipsBuilds: 'tip1',
       videos: 'video1',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -247,7 +249,7 @@ describe('Post meta EP', () => {
     });
 
     it('returns correct analysis meta using manual unit name reference', async () => {
-      await UnitNameRefEntry.getCollection(app.mongoClient)
+      await (await UnitNameRefEntry.getCollection(app.mongoClient))
         .insertOne(new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}).toObject());
 
       const response = await app.app.inject().get(ApiEndPoints.PAGE_META_POST).query({
@@ -289,9 +291,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await AnalysisController.getAnalysis(
-        app.mongoClient, payloadAnalysis.unitId, SupportedLanguages.EN, false,
-      );
+      const post = await AnalysisController.getAnalysis({
+        mongoClient: app.mongoClient,
+        uid: '',
+        unitIdentifier: payloadAnalysis.unitId,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });
@@ -320,6 +326,7 @@ describe('Post meta EP', () => {
         },
       ],
       addendum: 'addendum',
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -351,7 +358,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await QuestPostController.getQuestPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+      const post = await QuestPostController.getQuestPost({
+        mongoClient: app.mongoClient,
+        uid: '',
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });
@@ -402,6 +415,7 @@ describe('Post meta EP', () => {
           content: 'B1',
         },
       ],
+      sendUpdateEmail: true,
     };
 
     beforeEach(async () => {
@@ -433,7 +447,13 @@ describe('Post meta EP', () => {
       });
       expect(response.statusCode).toBe(200);
 
-      const post = await MiscPostController.getMiscPost(app.mongoClient, 1, SupportedLanguages.EN, false);
+      const post = await MiscPostController.getMiscPost({
+        mongoClient: app.mongoClient,
+        uid: '',
+        seqId: 1,
+        lang: SupportedLanguages.EN,
+        incCount: false,
+      });
 
       expect(post?.post[ViewCountableDocumentKey.viewCount]).toBe(0);
     });

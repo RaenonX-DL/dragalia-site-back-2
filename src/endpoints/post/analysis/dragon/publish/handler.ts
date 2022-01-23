@@ -30,6 +30,6 @@ export const handlePublishDragonAnalysis = async (
     mongoClient,
     payload,
     AnalysisController.publishDragonAnalysis,
-    (seqId) => new DragonAnalysisPublishedResponse(seqId),
+    ({unitId, ...result}) => new DragonAnalysisPublishedResponse(unitId, result),
   );
 };

@@ -28,7 +28,7 @@ describe(`[Server] GET ${ApiEndPoints.PAGE_META_GENERAL} - general page meta`, (
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 

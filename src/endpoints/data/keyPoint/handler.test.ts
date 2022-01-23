@@ -29,8 +29,9 @@ describe('Key point info handler', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 2'}}),
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.CHT]: 'CHT 3'}}),
     ].map((entry) => entry.toObject());
+    const keyPointCol = await KeyPointEntry.getCollection(app.mongoClient);
     pointIds = Object
-      .values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(pointArray)).insertedIds)
+      .values((await keyPointCol.insertMany(pointArray)).insertedIds)
       .map((id) => id.toHexString());
 
     const noteArray = [
@@ -51,7 +52,7 @@ describe('Key point info handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(noteArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(noteArray);
   });
 
   afterAll(async () => {

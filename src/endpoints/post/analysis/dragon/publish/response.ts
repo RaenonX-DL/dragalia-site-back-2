@@ -1,3 +1,4 @@
+import {PostPublishResult} from '../../../../../api-def/api';
 import {AnalysisPublishResponse} from '../../base/response/publish';
 
 
@@ -8,7 +9,7 @@ export class DragonAnalysisPublishedResponse extends AnalysisPublishResponse {
   /**
    * @inheritDoc
    */
-  constructor(seqId: number) {
-    super(seqId);
+  constructor(unitId: number, result: PostPublishResult) {
+    super(unitId, result);
   }
 }

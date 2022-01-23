@@ -1,3 +1,4 @@
+import {PostPublishResult} from '../../../../../api-def/api';
 import {AnalysisPublishResponse} from '../../base/response/publish';
 
 
@@ -8,7 +9,7 @@ export class CharaAnalysisPublishedResponse extends AnalysisPublishResponse {
   /**
    * @inheritDoc
    */
-  constructor(unitId: number) {
-    super(unitId);
+  constructor(unitId: number, result: PostPublishResult) {
+    super(unitId, result);
   }
 }

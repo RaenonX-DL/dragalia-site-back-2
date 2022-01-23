@@ -23,6 +23,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   const uidAdmin = new ObjectId().toHexString();
 
   const questPayload1: QuestPostPublishPayload = {
+    uid: uidNormal,
     lang: SupportedLanguages.CHT,
     title: 'post1',
     general: 'gen1',
@@ -42,10 +43,11 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add1',
-    uid: uidNormal,
+    sendUpdateEmail: true,
   };
 
   const questPayload2: QuestPostPublishPayload = {
+    uid: uidAdmin,
     lang: SupportedLanguages.CHT,
     title: 'post2',
     general: 'gen2',
@@ -59,7 +61,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
       },
     ],
     addendum: 'add2',
-    uid: uidAdmin,
+    sendUpdateEmail: true,
   };
 
   const questPayload3: QuestPostPublishPayload = {
@@ -169,7 +171,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
   test('if the published quest post exists in the database', async () => {
     await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload2);
 
-    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await QuestPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: questPayload2.lang,
     });
@@ -196,7 +198,7 @@ describe(`[Server] POST ${ApiEndPoints.POST_QUEST_PUBLISH} - post publishing end
     // Normal & change title (expect to fail)
     await app.app.inject().post(ApiEndPoints.POST_QUEST_PUBLISH).payload(questPayload6);
 
-    const docQuery = await QuestPost.getCollection(await app.mongoClient).findOne({
+    const docQuery = await (await QuestPost.getCollection(app.mongoClient)).findOne({
       [SequentialDocumentKey.sequenceId]: 1,
       [MultiLingualDocumentKey.language]: questPayload2.lang,
       [PostDocumentKey.title]: questPayload2.title,

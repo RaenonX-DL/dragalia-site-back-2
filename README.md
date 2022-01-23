@@ -48,6 +48,7 @@ This one is using [fastify] (was [express.js][express]) while the previous one i
 |          `GA_DEV`           |     Optional      | Setting this to any truthy value will make any related queries return mock Google Analytics data instead of actually sending the request, reducing the API usage. |
 |        `MAIL_SENDER`        |     Required      | Email address for logging into a SMTP server for email service.                                                                                                   |
 |       `MAIL_PASSWORD`       |     Required      | Password for logging into a SMTP server for email service.                                                                                                        |
+|      `MAIL_LINK_ROOT`       |     Required      | Link root to use in between email links. This should **NOT** end with a slash (`/`).                                                                              |
 |   `NEW_RELIC_LICENSE_KEY`   |     Optional      | New Relic license key for measuring the app performance.                                                                                                          |
 | `NEXT_PUBLIC_RESOURCE_ROOT` |     Required      | Root URL of the exported resources. This should **not** end with a slash (`/`).                                                                                   |
 |  `NEXT_PUBLIC_DEPOT_ROOT`   |     Required      | Root URL of the data depot. This should **not** end with a slash (`/`).                                                                                           |
@@ -72,8 +73,8 @@ the MongoDB instance **MUST** be deployed in the following configuration:
 [back-ci-main-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_build/latest?definitionId=2&branchName=main
 [back-ci-dev]: https://dev.azure.com/RaenonX-DL/DL-Site/_apis/build/status/dragalia-site-back%20(Build)?branchName=dev
 [back-ci-dev-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_build/latest?definitionId=2&branchName=dev
-[back-cd]: https://vsrm.dev.azure.com/RaenonX-DL/_apis/public/Release/badge/0159375c-7a21-49a8-88d5-9af78c5f2150/4/4
-[back-cd-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_release?definitionId=4
+[back-cd]: https://vsrm.dev.azure.com/RaenonX-DL/_apis/public/Release/badge/0159375c-7a21-49a8-88d5-9af78c5f2150/7/7
+[back-cd-link]: https://dev.azure.com/RaenonX-DL/DL-Site/_release?definitionId=7
 [back-time-badge]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2.svg
 [back-time-link]: https://wakatime.com/badge/github/RaenonX-DL/dragalia-site-back-2
 [back-site-status]: https://badgen.net/uptime-robot/status/m787223687-0bc3d1f09f7bf2b07ed95c85?cache=300

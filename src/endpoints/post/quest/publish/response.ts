@@ -1,3 +1,4 @@
+import {PostPublishResult} from '../../../../api-def/api';
 import {SequencedPostPublishResponse} from '../../base/response/post/publish/sequenced';
 
 
@@ -10,7 +11,7 @@ export class QuestPostPublishResponse extends SequencedPostPublishResponse {
   /**
    * @inheritDoc
    */
-  constructor(seqId: number) {
-    super(seqId);
+  constructor(seqId: number, result: PostPublishResult) {
+    super(seqId, result);
   }
 }

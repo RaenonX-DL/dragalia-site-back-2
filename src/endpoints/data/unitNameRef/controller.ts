@@ -24,7 +24,7 @@ export class UnitNameRefController {
     const ret: UnitNameRefData = {};
     const filter = lang ? {[MultiLingualDocumentKey.language]: lang} : {};
 
-    await UnitNameRefEntry.getCollection(mongoClient)
+    await (await UnitNameRefEntry.getCollection(mongoClient))
       .find(filter)
       .forEach((data) => {
         ret[data[UnitNameRefEntryDocumentKey.name]] = data[UnitNameRefEntryDocumentKey.unitId];
@@ -41,7 +41,7 @@ export class UnitNameRefController {
    * @return {Promise<Array<UnitNameRefEntryApi>>} list of unit name references
    */
   static async getEntries(mongoClient: MongoClient, lang: SupportedLanguages): Promise<Array<UnitNameRefEntryApi>> {
-    return await UnitNameRefEntry.getCollection(mongoClient)
+    return await (await UnitNameRefEntry.getCollection(mongoClient))
       .find({[MultiLingualDocumentKey.language]: lang})
       .map((data) => ({
         unitId: data[UnitNameRefEntryDocumentKey.unitId],
@@ -63,36 +63,34 @@ export class UnitNameRefController {
     lang: SupportedLanguages,
     refs: Array<UnitNameRefEntryApi>,
   ): Promise<void> {
-    await execTransaction(
-      mongoClient,
-      async (session) => {
-        const collection = UnitNameRefEntry.getCollection(mongoClient);
+    await execTransaction(mongoClient, async (session) => {
+      const collection = await UnitNameRefEntry.getCollection(mongoClient);
 
-        await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
+      await collection.deleteMany({[MultiLingualDocumentKey.language]: lang}, {session});
 
-        if (!refs.length) {
-          // No references to add
-          return;
+      if (!refs.length) {
+        // No references to add
+        return;
+      }
+
+      try {
+        await collection.insertMany(
+          refs.map((entry) => ({
+            [UnitNameRefEntryDocumentKey.name]: entry.name,
+            [UnitNameRefEntryDocumentKey.unitId]: entry.unitId,
+            [MultiLingualDocumentKey.language]: lang,
+          } as UnitNameRefEntryDocument)),
+          {session},
+        );
+      } catch (e) {
+        if (e instanceof MongoError && e.code === 11000) {
+          // E11000 for duplicated key
+          throw new DuplicatedNamesError(e.errmsg);
+        } else {
+          throw e; // let other type of error bubble up
         }
-
-        try {
-          await collection.insertMany(
-            refs.map((entry) => ({
-              [UnitNameRefEntryDocumentKey.name]: entry.name,
-              [UnitNameRefEntryDocumentKey.unitId]: entry.unitId,
-              [MultiLingualDocumentKey.language]: lang,
-            } as UnitNameRefEntryDocument)),
-            {session},
-          );
-        } catch (e) {
-          if (e instanceof MongoError && e.code === 11000) {
-            // E11000 for duplicated key
-            throw new DuplicatedNamesError(e.errmsg);
-          } else {
-            throw e; // let other type of error bubble up
-          }
-        }
-      },
+      }
+    },
     );
   }
 }

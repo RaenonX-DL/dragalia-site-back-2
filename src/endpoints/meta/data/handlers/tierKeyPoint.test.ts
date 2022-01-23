@@ -24,7 +24,7 @@ describe('Data page meta handler - Tier key point', () => {
   ];
 
   const insertDummyAlerts = async () => {
-    const col = AlertEntry.getCollection(app.mongoClient);
+    const col = await AlertEntry.getCollection(app.mongoClient);
     await col.insertMany(dummyAlerts);
   };
 
@@ -33,8 +33,10 @@ describe('Data page meta handler - Tier key point', () => {
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.EN]: 'EN 1'}}),
       new KeyPointEntry({type: 'strength', description: {[SupportedLanguages.EN]: 'EN 2'}}),
     ].map((entry) => entry.toObject());
-    keyPointIds = Object.values((await KeyPointEntry.getCollection(app.mongoClient).insertMany(dataArray)).insertedIds)
-      .map((id) => id.toHexString());
+
+    const keyPointCol = await KeyPointEntry.getCollection(app.mongoClient);
+
+    keyPointIds = Object.values((await keyPointCol.insertMany(dataArray)).insertedIds).map((id) => id.toHexString());
   };
 
   beforeAll(async () => {

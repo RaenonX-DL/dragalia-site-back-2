@@ -46,7 +46,7 @@ describe('Single unit tier note handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().get(ApiEndPoints.TIER_UNIT).query({
       uid: '',
@@ -74,7 +74,7 @@ describe('Single unit tier note handler', () => {
         lastUpdateEpoch: 0,
       }),
     ].map((entry) => entry.toObject());
-    await UnitTierNote.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitTierNote.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const response = await app.app.inject().get(ApiEndPoints.TIER_UNIT).query({
       uid: '',

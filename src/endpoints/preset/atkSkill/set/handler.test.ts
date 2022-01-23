@@ -1,5 +1,5 @@
 import {ApiEndPoints, ApiResponseCode, FailedResponse, SetAtkSkillPresetResponse} from '../../../../api-def/api';
-import {UserDocumentKey} from '../../../../api-def/models/user';
+import {UserDocumentKey} from '../../../../api-def/models';
 import {Application, createApp} from '../../../../app';
 import {UserController} from '../../../userControl/controller';
 import {User} from '../../../userControl/model';
@@ -27,8 +27,6 @@ describe('Set ATK skill preset handler', () => {
       [UserDocumentKey.email]: 'email',
       [UserDocumentKey.image]: 'image',
       [UserDocumentKey.isAdmin]: false,
-      [UserDocumentKey.createdAt]: new Date(),
-      [UserDocumentKey.updatedAt]: new Date(),
     }));
   };
 

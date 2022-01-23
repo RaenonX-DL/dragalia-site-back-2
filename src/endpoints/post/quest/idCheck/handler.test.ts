@@ -40,6 +40,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
       },
     ],
     addendum: 'addendum',
+    sendUpdateEmail: true,
   };
 
   let newPostSeqId: number;
@@ -52,7 +53,7 @@ describe(`[Server] GET ${ApiEndPoints.POST_QUEST_ID_CHECK} - check ID availabili
     await app.reset();
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidNormal)});
     await insertMockUser(app.mongoClient, {id: new ObjectId(uidAdmin), isAdmin: true});
-    newPostSeqId = await QuestPostController.publishPost(app.mongoClient, payloadPost);
+    newPostSeqId = (await QuestPostController.publishPost(app.mongoClient, payloadPost)).seqId;
   });
 
   afterAll(async () => {

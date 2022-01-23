@@ -17,7 +17,7 @@ export const handleTierNoteUpdate = async ({
     return new ApiFailedResponse(ApiResponseCode.FAILED_INSUFFICIENT_PERMISSION);
   }
 
-  await TierNoteController.updateUnitTierNote(mongoClient, payload.lang, payload.unitId, payload.data);
+  await TierNoteController.updateUnitTierNote(mongoClient, payload);
 
   return new UnitTierNoteUpdateResponse();
 };

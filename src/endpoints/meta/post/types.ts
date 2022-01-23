@@ -5,6 +5,7 @@ import {PostMetaParams, SupportedLanguages} from '../../../api-def/api';
 
 export type ParamGetterOptions = {
   mongoClient: MongoClient,
+  uid: string,
   postIdentifier: number | string,
   lang: SupportedLanguages,
 };

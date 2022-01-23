@@ -1,5 +1,11 @@
-import {HomepageData, HomepageLandingPayload, PostType} from '../../../api-def/api';
+import {
+  HomepageData,
+  HomepageLandingPayload,
+  HomepageLandingResponse as HomepageLandingResponseApi,
+  PostType, subKeysInclude,
+} from '../../../api-def/api';
 import {getGaData} from '../../../thirdparty/ga/controller';
+import {SubscriptionRecordController} from '../../../thirdparty/mail/data/subscription/controller';
 import {HandlerParams} from '../../lookup';
 import {MiscPostController} from '../../post/misc/controller';
 import {QuestPostController} from '../../post/quest/controller';
@@ -12,22 +18,22 @@ export const handleHomepageLanding = async ({
   payload,
   mongoClient,
 }: HandlerParams<HomepageLandingPayload>): Promise<HomepageLandingResponse> => {
-  const gaData = await getGaData();
+  const gaData = await getGaData(mongoClient);
+
+  const {uid, lang} = payload;
+
+  const [questList, analysisList, miscList, subscriptionKeys] = await Promise.all([
+    QuestPostController.getPostList({mongoClient, uid, lang, limit: 5}),
+    UnitInfoLookupController.getRecentlyModifiedAnalyses({mongoClient, uid, lang, maxCount: 5}),
+    MiscPostController.getPostList({mongoClient, uid, lang, limit: 5}),
+    SubscriptionRecordController.getSubscriptionsOfUser(mongoClient, uid),
+  ]);
 
   const data: HomepageData = {
     posts: {
-      [PostType.QUEST]: transformSequencedPostInfo(
-        await QuestPostController.getPostList(mongoClient, payload.lang, 5),
-        PostType.QUEST,
-      ),
-      [PostType.ANALYSIS]: await transformAnalysisInfo(
-        await UnitInfoLookupController.getRecentlyModifiedAnalyses(mongoClient, payload.lang, 5),
-        payload.lang,
-      ),
-      [PostType.MISC]: transformSequencedPostInfo(
-        await MiscPostController.getPostList(mongoClient, payload.lang, 5),
-        PostType.MISC,
-      ),
+      [PostType.QUEST]: transformSequencedPostInfo(questList, PostType.QUEST),
+      [PostType.ANALYSIS]: await transformAnalysisInfo(analysisList, lang),
+      [PostType.MISC]: transformSequencedPostInfo(miscList, PostType.MISC),
     },
     stats: {
       user: gaData.data,
@@ -35,5 +41,14 @@ export const handleHomepageLanding = async ({
     },
   };
 
-  return new HomepageLandingResponse({data});
+  const subscribed: HomepageLandingResponseApi['subscribed'] = {
+    post: {
+      [PostType.QUEST]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_QUEST'}),
+      [PostType.ANALYSIS]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_ANALYSIS'}),
+      [PostType.MISC]: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ALL_MISC'}),
+    },
+    announcement: subKeysInclude(subscriptionKeys, {type: 'const', name: 'ANNOUNCEMENT'}),
+  };
+
+  return new HomepageLandingResponse({data, subscribed});
 };

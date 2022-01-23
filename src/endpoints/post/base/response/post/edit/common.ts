@@ -1,6 +1,7 @@
 import {
-  PostEditResponse as PostEditResponseApi,
   ApiResponseCode,
+  PostEditResponse as PostEditResponseApi,
+  PostEditResult,
 } from '../../../../../../api-def/api';
 import {ApiResponse} from '../../../../../../base/response';
 
@@ -9,19 +10,26 @@ import {ApiResponse} from '../../../../../../base/response';
  * API response class for a post edit.
  */
 export abstract class PostEditResponse extends ApiResponse {
+  result: PostEditResult;
+
   /**
-   * Construct a post editing API response.
+   * Construct a successful post editing API response.
    *
-   * @protected
+   * @param {PostEditResult} result editing result
    */
-  protected constructor() {
+  protected constructor(result: PostEditResult) {
     super(ApiResponseCode.SUCCESS);
+
+    this.result = result;
   }
 
   /**
    * @inheritDoc
    */
   toJson(): PostEditResponseApi {
-    return super.toJson();
+    return {
+      ...super.toJson(),
+      ...this.result,
+    };
   }
 }

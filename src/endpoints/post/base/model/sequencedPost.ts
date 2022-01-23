@@ -9,7 +9,7 @@ import {
   SequentialDocumentConstructParams,
   SequentialDocumentKey,
 } from '../../../../base/model/seq';
-import {IndexInitFunction} from '../../../../utils/mongodb';
+import {getCollection} from '../../../../utils/mongodb';
 import {PostConstructParamsNoTitle, PostDocumentBaseNoTitle, PostNoTitle} from './postNoTitle';
 
 
@@ -63,21 +63,18 @@ export abstract class SequencedPost extends PostNoTitle implements SequentialDoc
   /**
    * @inheritDoc
    */
-  static getCollectionWithInfo(
-    mongoClient: MongoClient, dbInfo: CollectionInfo, indexInitFunc?: IndexInitFunction,
-  ): Collection {
-    return super.getCollectionWithInfo(mongoClient, dbInfo, ((collection) => {
-      if (indexInitFunc) {
-        indexInitFunc(collection);
-      }
-      collection.createIndex(
+  static async getCollectionWithInfo<T extends SequentialDocumentBase>(
+    mongoClient: MongoClient, dbInfo: CollectionInfo,
+  ): Promise<Collection<T>> {
+    return await getCollection(mongoClient, dbInfo, async (collection) => {
+      await collection.createIndex(
         [
           {[SequentialDocumentKey.sequenceId]: -1},
           {[MultiLingualDocumentKey.language]: 1},
         ],
         {unique: true},
       );
-    }));
+    });
   }
 
   /**

@@ -22,6 +22,7 @@ export const handlePostMeta = async ({
   const userData = await UserController.getUserData(mongoClient, payload.uid);
   const params = await ParamGetters[payload.postType]({
     mongoClient,
+    uid: payload.uid,
     postIdentifier: payload.postIdentifier,
     lang: payload.lang,
   });

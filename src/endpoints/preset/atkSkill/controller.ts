@@ -20,7 +20,7 @@ export class AtkSkillPresetController {
    */
   static async getPreset(mongoClient: MongoClient, presetId: string): Promise<InputDataPreset | null> {
     try {
-      const result = await AtkSkillPreset.getCollection(mongoClient)
+      const result = await (await AtkSkillPreset.getCollection(mongoClient))
         .findOneAndUpdate(
           {[DocumentBaseKey.id]: new ObjectId(presetId)},
           {$set: {[AtkSkillPresetDocumentKey.lastUsed]: new Date()}},
@@ -49,7 +49,7 @@ export class AtkSkillPresetController {
   static async makePreset(mongoClient: MongoClient, preset: InputDataPreset): Promise<ObjectId> {
     const obj = new AtkSkillPreset({preset});
 
-    const insertResult = await AtkSkillPreset.getCollection(mongoClient).insertOne(obj.toObject());
+    const insertResult = await (await AtkSkillPreset.getCollection(mongoClient)).insertOne(obj.toObject());
 
     return insertResult.insertedId;
   }

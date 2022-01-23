@@ -5,6 +5,14 @@ import {ViewCountableDocumentKey} from '../../../../base/model/viewCount';
 import {PostDocumentBaseNoTitle} from '../model';
 import {PostGetResponseParam} from '../response/post/get';
 
+
+export type PostGetResultOpts<T extends PostDocumentBaseNoTitle> = {
+  post: T,
+  isAltLang: boolean,
+  otherLangs: Array<SupportedLanguages>,
+  userSubscribed: boolean,
+};
+
 /**
  * Base object of a post getting result.
  * @template T, R
@@ -13,19 +21,19 @@ export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
   post: T;
   isAltLang: boolean;
   otherLangs: Array<SupportedLanguages>;
+  userSubscribed: boolean;
 
   /**
    * Construct a post getting result object.
    *
-   * @param {T} post post document fetched from the database
-   * @param {boolean} isAltLang if the post is returned in an alternative language
-   * @param {Array<string>} otherLangs other languages available, if any
+   * @param {PostGetResultOpts} options options to create a post get result
    * @protected
    */
-  protected constructor(post: T, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) {
+  protected constructor({post, isAltLang, otherLangs, userSubscribed}: PostGetResultOpts<T>) {
     this.post = post;
     this.isAltLang = isAltLang;
     this.otherLangs = otherLangs;
+    this.userSubscribed = userSubscribed;
   }
 
   /**
@@ -47,10 +55,10 @@ export abstract class PostGetResult<T extends PostDocumentBaseNoTitle> {
       }),
       modifiedEpoch: this.post[EditableDocumentKey.dateModifiedEpoch],
       publishedEpoch: this.post[EditableDocumentKey.datePublishedEpoch],
+      userSubscribed: this.userSubscribed,
     };
   }
 }
 
-export type ResultConstructFunction<D extends PostDocumentBaseNoTitle,
-  T extends PostGetResult<D>> =
-  (post: D, isAltLang: boolean, otherLangs: Array<SupportedLanguages>) => T;
+export type ResultConstructFunction< D extends PostDocumentBaseNoTitle, T extends PostGetResult<D>> =
+  (options: PostGetResultOpts<D>) => T;

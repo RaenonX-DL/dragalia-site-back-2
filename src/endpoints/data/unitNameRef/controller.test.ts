@@ -33,7 +33,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10750101}),
       new UnitNameRefEntry({lang: SupportedLanguages.JP, name: 'Unit 3', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await (await UnitNameRefEntry.getCollection(app.mongoClient))).insertMany(dataArray);
 
     const data = await UnitNameRefController.getData(app.mongoClient, SupportedLanguages.EN);
 
@@ -45,7 +45,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const data = await UnitNameRefController.getData(app.mongoClient, SupportedLanguages.JP);
 
@@ -64,7 +64,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10750101}),
       new UnitNameRefEntry({lang: SupportedLanguages.JP, name: 'Unit 3', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const data = await UnitNameRefController.getEntries(app.mongoClient, SupportedLanguages.EN);
 
@@ -76,7 +76,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 2', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const data = await UnitNameRefController.getEntries(app.mongoClient, SupportedLanguages.JP);
 
@@ -103,7 +103,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit A', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit B', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     const fn = async () => {
       await UnitNameRefController.updateRefs(
@@ -119,7 +119,7 @@ describe('Unit name reference data controller', () => {
     await expect(fn).rejects.toThrow(DuplicatedNamesError);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      expect((await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray()).length).toBe(2);
+      expect((await (await UnitNameRefEntry.getCollection(app.mongoClient)).find().toArray()).length).toBe(2);
     });
   });
 
@@ -134,7 +134,7 @@ describe('Unit name reference data controller', () => {
     );
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await UnitNameRefEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data.map((entry) => entry[UnitNameRefEntryDocumentKey.name]).sort()).toStrictEqual(['Unit 1', 'Unit 2']);
     });
   });
@@ -143,7 +143,7 @@ describe('Unit name reference data controller', () => {
     await UnitNameRefController.updateRefs(app.mongoClient, SupportedLanguages.EN, []);
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await UnitNameRefEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data.map((entry) => entry[UnitNameRefEntryDocumentKey.name]).sort()).toStrictEqual([]);
     });
   });
@@ -153,7 +153,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit A', unitId: 10950101}),
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit 1', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     await UnitNameRefController.updateRefs(
       app.mongoClient,
@@ -165,7 +165,7 @@ describe('Unit name reference data controller', () => {
     );
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await UnitNameRefEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data.map((entry) => entry[UnitNameRefEntryDocumentKey.name]).sort()).toStrictEqual(['Unit 1', 'Unit 2']);
     });
   });
@@ -176,7 +176,7 @@ describe('Unit name reference data controller', () => {
       new UnitNameRefEntry({lang: SupportedLanguages.EN, name: 'Unit B', unitId: 10850101}),
       new UnitNameRefEntry({lang: SupportedLanguages.CHT, name: 'Unit 1', unitId: 10850101}),
     ].map((entry) => entry.toObject());
-    await UnitNameRefEntry.getCollection(app.mongoClient).insertMany(dataArray);
+    await (await UnitNameRefEntry.getCollection(app.mongoClient)).insertMany(dataArray);
 
     await UnitNameRefController.updateRefs(
       app.mongoClient,
@@ -188,7 +188,7 @@ describe('Unit name reference data controller', () => {
     );
 
     await mongoExecInTransaction(app.mongoClient, async () => {
-      const data = await UnitNameRefEntry.getCollection(app.mongoClient).find().toArray();
+      const data = await (await UnitNameRefEntry.getCollection(app.mongoClient)).find().toArray();
       expect(data.map((entry) => entry[UnitNameRefEntryDocumentKey.name]).sort()).toStrictEqual(['Unit 1', 'Unit C']);
     });
   });

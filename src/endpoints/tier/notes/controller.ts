@@ -1,8 +1,17 @@
 import {MongoClient} from 'mongodb';
 
-import {DimensionKey, SupportedLanguages, UnitTierData, UnitTierNote as UnitTierNoteApi} from '../../../api-def/api';
-import {DocumentBaseKey} from '../../../api-def/models/base';
+import {
+  DimensionKey,
+  SupportedLanguages,
+  UnitTierData,
+  UnitTierNote as UnitTierNoteApi,
+  UnitTierNoteUpdatePayload,
+} from '../../../api-def/api';
+import {DocumentBaseKey} from '../../../api-def/models';
+import {UnitPath, makeUnitUrl} from '../../../api-def/paths';
+import {sendMailTierUpdated} from '../../../thirdparty/mail/send/tier/edited';
 import {getCurrentEpoch} from '../../../utils/misc';
+import {getUnitInfo} from '../../../utils/resources/loader/unitInfo';
 import {
   TierNote,
   TierNoteEntryDocument,
@@ -26,7 +35,7 @@ export class TierNoteController {
    */
   static async getAllTierNotes(mongoClient: MongoClient, lang: SupportedLanguages): Promise<UnitTierData> {
     return Object.fromEntries(
-      await UnitTierNote.getCollection(mongoClient)
+      await (await UnitTierNote.getCollection(mongoClient))
         .find()
         .map((doc) => [
           doc[UnitTierNoteDocumentKey.unitId],
@@ -47,7 +56,7 @@ export class TierNoteController {
   static async getUnitTierNoteSingle(
     mongoClient: MongoClient, lang: SupportedLanguages, unitId: number,
   ): Promise<UnitTierNoteApi | null> {
-    const tierNoteDoc = await UnitTierNote.getCollection(mongoClient)
+    const tierNoteDoc = await (await UnitTierNote.getCollection(mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId});
 
     if (!tierNoteDoc) {
@@ -61,24 +70,28 @@ export class TierNoteController {
    * Update the tier note of a certain unit.
    *
    * @param {MongoClient} mongoClient mongo client
-   * @param {SupportedLanguages} lang language of the tier note to update
-   * @param {number} unitId unit ID of the tier note to update
-   * @param {Omit<UnitTierNoteApi, 'lastUpdateEpoch'>} tierNote updated tier note
+   * @param {UnitTierNoteUpdatePayload} payload unit tier note update payload
    * @return {Promise<void>}
    */
-  static async updateUnitTierNote(
-    mongoClient: MongoClient,
-    lang: SupportedLanguages,
-    unitId: number,
-    tierNote: Omit<UnitTierNoteApi, 'lastUpdateEpoch'>,
-  ): Promise<void> {
+  static async updateUnitTierNote(mongoClient: MongoClient, payload: UnitTierNoteUpdatePayload): Promise<void> {
+    const {unitId, lang, data: tierNote, sendUpdateEmail} = payload;
+
     // Get the original document
-    const original: UnitTierNoteDocument = await UnitTierNote.getCollection(mongoClient)
+    const original: UnitTierNoteDocument = await (await UnitTierNote.getCollection(mongoClient))
       .findOne({[UnitTierNoteDocumentKey.unitId]: unitId}) as UnitTierNoteDocument;
+
+    if (sendUpdateEmail) {
+      await sendMailTierUpdated({
+        mongoClient,
+        lang,
+        sitePath: makeUnitUrl(UnitPath.UNIT_TIER, {lang, id: unitId}),
+        title: (await getUnitInfo(unitId))?.name[lang] || `#${unitId}`,
+      });
+    }
 
     if (!original) {
       // Original not available - create one and insert it
-      await UnitTierNote.getCollection(mongoClient)
+      await (await UnitTierNote.getCollection(mongoClient))
         .insertOne(UnitTierNote.fromTierNote(unitId, tierNote, lang).toObject());
       return;
     }
@@ -100,7 +113,7 @@ export class TierNoteController {
 
     // Get original tier note entries
     const originalTierNoteEntries = Object.entries(original[UnitTierNoteDocumentKey.tier])
-      // Filter out notes to be removed because it exist in `original` in `lang` but not `tierNote`
+      // Excludes the notes that exist in `original` but not in `tierNote` which is to be overridden
       .filter(([key, originalDoc]) => {
         const dimension = key as DimensionKey;
         const noteLanguages = Object.keys(originalDoc[TierNoteEntryDocumentKey.note]) as Array<SupportedLanguages>;
@@ -148,7 +161,7 @@ export class TierNoteController {
       [UnitTierNoteDocumentKey.lastUpdateEpoch]: lastUpdateEpoch,
     };
 
-    await UnitTierNote.getCollection(mongoClient)
+    await (await UnitTierNote.getCollection(mongoClient))
       .updateOne(
         {[UnitTierNoteDocumentKey.unitId]: unitId},
         {$set: updateDoc},
