@@ -107,8 +107,9 @@ describe(`Homepage landing info endpoint`, () => {
     const json: HomepageLandingResponse = result.json() as HomepageLandingResponse;
     expect(json.code).toBe(ApiResponseCode.SUCCESS);
     expect(json.success).toBe(true);
-    expect(json.userSubscribed[PostType.ANALYSIS]).toBeFalsy();
-    expect(json.userSubscribed[PostType.QUEST]).toBeTruthy();
-    expect(json.userSubscribed[PostType.MISC]).toBeTruthy();
+    expect(json.subscribed.post[PostType.ANALYSIS]).toBeFalsy();
+    expect(json.subscribed.post[PostType.QUEST]).toBeTruthy();
+    expect(json.subscribed.post[PostType.MISC]).toBeTruthy();
+    expect(json.subscribed.announcement).toBeFalsy();
   });
 });
