@@ -76,7 +76,7 @@ export class MiscPostController extends PostController implements SequencedContr
   static async publishPost(
     mongoClient: MongoClient, payload: MiscPostPublishPayload,
   ): Promise<SequencedPublishResult> {
-    const {seqId, lang, sendUpdateEmail} = payload;
+    const {seqId, lang, title, sendUpdateEmail} = payload;
 
     const post: MiscPost = MiscPost.fromPayload({
       ...payload,
@@ -85,7 +85,9 @@ export class MiscPostController extends PostController implements SequencedContr
 
     const [emailResult] = await Promise.all([
       sendUpdateEmail ?
-        SequencedController.sendPostPublishedEmail(mongoClient, lang, PostType.MISC, post.seqId) :
+        SequencedController.sendPostPublishedEmail({
+          mongoClient, lang, title, postType: PostType.MISC, seqId: post.seqId,
+        }) :
         Promise.resolve({accepted: [], rejected: []}),
       (await MiscPost.getCollection(mongoClient)).insertOne(post.toObject()),
     ]);
@@ -101,7 +103,7 @@ export class MiscPostController extends PostController implements SequencedContr
    * @return {Promise<SequencedEditResult>} result of editing a misc post
    */
   static async editMiscPost(mongoClient: MongoClient, editPayload: MiscPostEditPayload): Promise<SequencedEditResult> {
-    const {lang, editNote, sendUpdateEmail} = editPayload;
+    const {lang, title, editNote, sendUpdateEmail} = editPayload;
 
     const post: MiscPost = MiscPost.fromPayload(editPayload);
 
@@ -120,9 +122,9 @@ export class MiscPostController extends PostController implements SequencedContr
       rejected: [],
     };
     if (updated === 'UPDATED' && sendUpdateEmail) {
-      emailResult = await SequencedController.sendPostEditedEmail(
-        mongoClient, lang, PostType.MISC, post.seqId, editNote,
-      );
+      emailResult = await SequencedController.sendPostEditedEmail({
+        mongoClient, lang, postType: PostType.MISC, seqId: post.seqId, title, editNote,
+      });
     }
 
     return {

@@ -5,7 +5,6 @@ import {DocumentBase} from '../../api-def/models';
 import {makePostUrl, toPostPath} from '../../api-def/paths';
 import {sendMailPostEdited} from '../../thirdparty/mail/send/post/edited';
 import {sendMailPostPublished} from '../../thirdparty/mail/send/post/published';
-import {getUnitInfo} from '../../utils/resources/loader/unitInfo';
 import {MultiLingualDocumentBase, MultiLingualDocumentKey} from '../model/multiLang';
 import {SequentialDocumentBase, SequentialDocumentKey} from '../model/seq';
 
@@ -19,6 +18,20 @@ export type NextSeqIdOptions = {
 type FuncGetCollection<T extends DocumentBase> = (mongoClient: MongoClient) => Promise<Collection<T>>;
 
 type FuncGetNextSeqId = (mongoClient: MongoClient, options: NextSeqIdOptions) => Promise<number>;
+
+type SendPostUpdatedEmailOpts = {
+  mongoClient: MongoClient,
+  lang: SupportedLanguages,
+  postType: PostType,
+  seqId: number,
+  title: string,
+};
+
+type SendPostPublishedOpts = SendPostUpdatedEmailOpts;
+
+type SendPostEditedOpts = SendPostUpdatedEmailOpts & {
+  editNote: string,
+};
 
 /**
  * Sequence controller.
@@ -76,53 +89,48 @@ export abstract class SequencedController {
   /**
    * Sends a sequenced post published email.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {SupportedLanguages} lang language of the published sequenced post
-   * @param {PostType} postType type of the sequential post
-   * @param {number} seqId sequential ID of the published sequenced post
+   * @param {SendPostPublishedOpts} options options for sending the post published email
    * @return {Promise<EmailSendResult>} email send result
    * @private
    */
-  static async sendPostPublishedEmail(
-    mongoClient: MongoClient,
-    lang: SupportedLanguages,
-    postType: PostType,
-    seqId: number,
-  ): Promise<EmailSendResult> {
+  static async sendPostPublishedEmail({
+    mongoClient,
+    lang,
+    postType,
+    seqId,
+    title,
+  }: SendPostPublishedOpts): Promise<EmailSendResult> {
     return sendMailPostPublished({
       mongoClient,
       lang,
       postType,
       sitePath: makePostUrl(toPostPath[postType], {lang, pid: seqId}),
-      title: (await getUnitInfo(seqId))?.name[lang] || `#${seqId}`,
+      title,
     });
   }
 
   /**
-   * Sends a sequenced post published email.
+   * Sends a sequenced post edited email.
    *
-   * @param {MongoClient} mongoClient mongo client
-   * @param {SupportedLanguages} lang language of the published sequenced post
-   * @param {PostType} postType type of the sequential post
-   * @param {number} seqId sequential ID of the published sequenced post
-   * @param {string} editNote post edit note
+   * @param {SendPostEditedOpts} options options for sending the post edited email
    * @return {Promise<EmailSendResult>} email send result
    * @private
    */
-  static async sendPostEditedEmail(
-    mongoClient: MongoClient,
-    lang: SupportedLanguages,
-    postType: PostType,
-    seqId: number,
-    editNote: string,
-  ): Promise<EmailSendResult> {
+  static async sendPostEditedEmail({
+    mongoClient,
+    lang,
+    postType,
+    seqId,
+    title,
+    editNote,
+  }: SendPostEditedOpts): Promise<EmailSendResult> {
     return sendMailPostEdited({
       mongoClient,
       lang,
       postType,
       postId: seqId,
       sitePath: makePostUrl(toPostPath[postType], {lang, pid: seqId}),
-      title: (await getUnitInfo(seqId))?.name[lang] || `#${seqId}`,
+      title,
       editNote,
     });
   }
