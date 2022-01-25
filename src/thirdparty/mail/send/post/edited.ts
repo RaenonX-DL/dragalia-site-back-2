@@ -16,7 +16,7 @@ export const sendMailPostEdited = async (opts: SendMailPostEditedProps): Promise
   const {lang, mongoClient, postType, postId: id} = opts;
 
   // Edit note might be an empty string
-  opts.editNote = opts.editNote || '(N/A)';
+  opts.editNote = opts.editNote || 'N/A';
 
   const recipients = await SubscriptionRecordController.getRecipients(
     mongoClient, lang, [{type: 'const', name: PostTypeToSubscriptionKey[postType]}, {type: 'post', postType, id}],
